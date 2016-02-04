@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.metadata.core.PetascopeServer;
 
+@Deprecated
 public class MetadataClientImpl implements MetadataClient {
 
 	// TODO dummy data

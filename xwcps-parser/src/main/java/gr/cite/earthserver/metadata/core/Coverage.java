@@ -1,5 +1,6 @@
 package gr.cite.earthserver.metadata.core;
 
+@Deprecated
 public class Coverage {
 	private String id;
 

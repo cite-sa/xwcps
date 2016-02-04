@@ -10,6 +10,7 @@ import javax.xml.xpath.XPathFactory;
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.metadata.core.PetascopeServer;
 
+@Deprecated
 public interface MetadataClient {
 
 	Map<PetascopeServer, List<Coverage>> listCoverages();
