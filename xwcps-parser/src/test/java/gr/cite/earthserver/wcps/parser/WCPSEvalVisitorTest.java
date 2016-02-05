@@ -19,30 +19,10 @@ public class WCPSEvalVisitorTest {
 
 	@Test
 	public void test() {
-		String query = // "for c in ( AvgLandTemp ) return encode(1, \"csv\")";
-		// "for c in ( AvgLandTemp ) return encode(c[Lat(53.08), Long(8.80),
-		// ansi(\"2014-01\":\"2014-12\")], \"csv\")";
-		// "for c in (NIR, AvgLandTemp) return
-		// describeCoverage(c)//*[local-name()='domainSet']";
-		// "for c in (NIR) return describeCoverage(c)";
-		// "for c in (AvgLandTemp ) return <a><b
-		// atr=describeCoverage(c)//*[local-name()='limits']//text() >
-		// describeCoverage(c)//*[local-name()='domainSet']</b></a>";
-		// "for c in (NIR, AvgLandTemp ) return <a><b >
-		// describeCoverage(c)//*[local-name()='domainSet']</b></a>";
-		// "for c in (NIR, AvgLandTemp ) return <a><b
-		// atr=\"yannis\">describeCoverage(c)//*[local-name()='domainSet']</b></a>";
-		// "for c in (NIR, AvgLandTemp ) return <a><b> min( describeCoverage(c)
-		// //@*[local-name()='srsDimension'] ) </b></a>";
-		// "for c in (AvgLandTemp) return min(c[Lat(53.08), Long(8.80),
-		// ansi(\"2014-01\":\"2014-12\")])";
-		// "for c in (NIR, AvgLandTemp ) return min( describeCoverage(c)
-		// //@*[local-name()='srsDimension'] )";
-		// "for c in (AvgLandTemp) return min(c[Lat(53.08), Long(8.80),
-		// ansi(\"2014-01\":\"2014-12\")])";
+		String query = 
 		// TODO
 //		"for c in (AvgLandTemp) return <a attr=min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>";
-		"for c in /server[./coverage[@active='true']]/coverage/dataset return describeCoverage(c)";
+		"for c in /server[@endpoint='example.com']/coverage[@id='NIR' and @guid='myGUID']//dataset return describeCoverage(c)";
 		// "/server//coverage/@*[local-name()='test']";
 		// "/server";
 

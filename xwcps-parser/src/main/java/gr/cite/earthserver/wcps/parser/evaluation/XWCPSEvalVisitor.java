@@ -19,8 +19,11 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathForClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XqueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsReturnClauseContext;
+import gr.cite.earthserver.wcps.parser.utils.PrintCriteriaQuery;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
+import gr.cite.exmms.manager.core.DataElement;
+import gr.cite.exmms.manager.criteria.CriteriaQuery;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
 
@@ -28,6 +31,8 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	private static final Logger logger = LoggerFactory.getLogger(XWCPSEvalVisitor.class);
 
 	private Stack<String> xmlReturnElements = new Stack<>();
+
+	private CriteriaQuery<DataElement> exmmsQuery = new PrintCriteriaQuery();
 
 	public XWCPSEvalVisitor(String wcsEndpoint) {
 		super(wcsEndpoint);
@@ -56,8 +61,9 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	public Query visitXpathForClause(XpathForClauseContext ctx) {
 		Query q = visit(ctx.coverageVariableName());
 		
-		XpathForClauseEvalVisitor xpathForClauseEvalVisitor = new XpathForClauseEvalVisitor();
+		XpathForClauseEvalVisitor xpathForClauseEvalVisitor = new XpathForClauseEvalVisitor(exmmsQuery);
 		xpathForClauseEvalVisitor.visit(ctx);
+		exmmsQuery.find();
 		
 		return q;
 	}

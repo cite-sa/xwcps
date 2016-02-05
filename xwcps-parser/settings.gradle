@@ -17,3 +17,9 @@ include 'services:webservice'
 */
 
 rootProject.name = 'xwcps-parser'
+
+def exmmsCoreProject = new File(settingsDir, '../../exmms/exmms-core');
+if (exmmsCoreProject.exists()) {
+	include ':exmms-core'
+	project(':exmms-core').projectDir = exmmsCoreProject
+}
