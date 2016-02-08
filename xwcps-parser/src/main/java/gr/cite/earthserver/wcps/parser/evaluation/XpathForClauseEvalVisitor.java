@@ -3,6 +3,8 @@ package gr.cite.earthserver.wcps.parser.evaluation;
 import java.util.Stack;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +14,7 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.EqualityExprContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.MainContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OrExprContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.PredicateContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.RelativeLocationPathContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.StepContext;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
 import gr.cite.exmms.manager.core.DataElement;
@@ -50,7 +53,33 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 	}
 
 	@Override
+	public XpathForClause visitRelativeLocationPath(RelativeLocationPathContext ctx) {
+
+		StepContext simpleXpathContext = null;
+		TerminalNode xpathStartingTerminal = null;
+
+		for (ParseTree parseTree : ctx.children) {
+			if (isSimpleXpath && (parseTree instanceof TerminalNode)) {
+				xpathStartingTerminal = (TerminalNode) parseTree;
+				continue;
+			} else if (isSimpleXpath && (parseTree instanceof StepContext)) {
+				simpleXpathContext = (StepContext) parseTree;
+				break;
+			}
+			visit(parseTree);
+		}
+
+		System.out.println(xpathStartingTerminal.getText() + simpleXpathContext.getText());
+
+		return null;
+	}
+
+	@Override
 	public XpathForClause visitOrExpr(OrExprContext ctx) {
+		if (isSimpleXpath) {
+			return super.visitOrExpr(ctx);
+		}
+
 		if (ctx.andExpr().size() > 1) {
 
 			Where<DataElement> orWhere = query.expressionFactory();
@@ -81,6 +110,10 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 	@Override
 	public XpathForClause visitAndExpr(AndExprContext ctx) {
+		if (isSimpleXpath) {
+			return super.visitAndExpr(ctx);
+		}
+
 		if (ctx.equalityExpr().size() > 1) {
 
 			Where<DataElement> andWhere = query.expressionFactory();
@@ -142,11 +175,11 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 				}
 
 				helper.popWhereStack();
-				WhereBuilder<DataElement> serverWhereBuilder = helper.peekWhereStack().isChildOf(helper.popWhereBuilderStack());
+				WhereBuilder<DataElement> serverWhereBuilder = helper.peekWhereStack()
+						.isChildOf(helper.popWhereBuilderStack());
 				helper.popWhereStack();
 
 				helper.pushWhereStack(serverWhereBuilder.and());
-
 
 				break;
 			default:
@@ -182,11 +215,8 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		metadatum.setKey(key.replaceAll("@", ""));
 		metadatum.setValue(value);
 
-//		if (!helper.isEmptyWhereBuilderStack()) {
-//			helper.popWhereBuilderStack();
-//		}
 		helper.pushWhereBuilderStack(helper.peekWhereStack().expression(metadatum));
-		
+
 		// FIXME
 		return null;
 	}
