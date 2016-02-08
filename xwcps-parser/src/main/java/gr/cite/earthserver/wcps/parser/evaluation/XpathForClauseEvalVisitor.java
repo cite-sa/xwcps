@@ -58,7 +58,6 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 			int i = 0;
 			for (AndExprContext andExprContext : ctx.andExpr()) {
-				System.out.println("or \t" + andExprContext.getText());
 
 				visit(andExprContext);
 
@@ -89,7 +88,6 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 			int i = 0;
 			for (EqualityExprContext equalityExprContext : ctx.equalityExpr()) {
-				System.out.println("and \t" + equalityExprContext.getText());
 
 				visit(equalityExprContext);
 
@@ -124,9 +122,6 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 		if (axisSpecifier.isEmpty()) {
 			// is node
-			logger.debug(" / " + nodeName);
-
-			WhereBuilder<DataElement> whereBuilderRoot;
 
 			switch (nodeName) {
 			case XWCPSReservedWords.COVERAGE:
@@ -203,7 +198,6 @@ class XpathForClauseEvalVisitorHelper {
 	private Stack<Where<DataElement>> whereStack = new Stack<>();
 
 	public void pushWhereBuilderStack(WhereBuilder<DataElement> builder) {
-		System.out.println(" - push " + builder.hashCode());
 		whereBuilderStack.push(builder);
 	}
 
@@ -221,21 +215,15 @@ class XpathForClauseEvalVisitorHelper {
 
 	public WhereBuilder<DataElement> popWhereBuilderStack() {
 		WhereBuilder<DataElement> pop = whereBuilderStack.pop();
-		System.out.println(" -- pop " + pop.hashCode());
-
 		return pop;
 	}
 
 	public void pushWhereStack(Where<DataElement> builder) {
-		System.out.println(" * push " + builder.hashCode());
-
 		whereStack.push(builder);
 	}
 
 	public Where<DataElement> popWhereStack() {
 		Where<DataElement> pop = whereStack.pop();
-
-		System.out.println(" ** pop " + pop.hashCode());
 		return pop;
 	}
 

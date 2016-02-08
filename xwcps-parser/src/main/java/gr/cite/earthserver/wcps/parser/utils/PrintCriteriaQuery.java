@@ -25,19 +25,19 @@ public class PrintCriteriaQuery implements CriteriaQuery<DataElement> {
 
 	@Override
 	public DataElement find(String id) {
-		System.out.println(query);
+		System.out.println("query: " + query);
 		return null;
 	}
 
 	@Override
 	public DataElement find(DataElement t) {
-		System.out.println(query);
+		System.out.println("query: " + query);
 		return null;
 	}
 
 	@Override
 	public List<DataElement> find() {
-		System.out.println(query);
+		System.out.println("query: " + query);
 		return null;
 	}
 
