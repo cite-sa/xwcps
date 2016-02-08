@@ -100,7 +100,7 @@ public class PrintCriteriaQuery implements CriteriaQuery<DataElement> {
 		}
 
 		@Override
-		public <S extends DataElement> WhereBuilder<DataElement> isChildOf(WhereBuilder<DataElement> where) {
+		public <S extends DataElement> WhereBuilder<DataElement> isChildOf(WhereBuilder<S> where) {
 			query.append(" isChildOf(").append(((WhereBuilderPrint) where).getQuery()).append(")");
 			return whereBuilder;
 		}
