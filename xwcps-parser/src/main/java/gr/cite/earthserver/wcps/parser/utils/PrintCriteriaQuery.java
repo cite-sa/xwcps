@@ -1,5 +1,6 @@
 package gr.cite.earthserver.wcps.parser.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import gr.cite.exmms.manager.core.DataElement;
@@ -9,36 +10,36 @@ import gr.cite.exmms.manager.criteria.UnsupportedQueryOperationException;
 import gr.cite.exmms.manager.criteria.Where;
 import gr.cite.exmms.manager.criteria.WhereBuilder;
 
-public class PrintCriteriaQuery implements CriteriaQuery<DataElement> {
+public class PrintCriteriaQuery<T extends DataElement> implements CriteriaQuery<T> {
 
 	StringBuilder query = new StringBuilder();
 
 	@Override
-	public Where<DataElement> whereBuilder() {
+	public Where<T> whereBuilder() {
 		return new WherePrint(this, query);
 	}
 
 	@Override
-	public Where<DataElement> expressionFactory() {
+	public Where<T> expressionFactory() {
 		return new WherePrint(this);
 	}
 
 	@Override
-	public DataElement find(String id) {
+	public T find(String id) {
 		System.out.println("query: " + query);
 		return null;
 	}
 
 	@Override
-	public DataElement find(DataElement t) {
+	public T find(DataElement t) {
 		System.out.println("query: " + query);
 		return null;
 	}
 
 	@Override
-	public List<DataElement> find() {
+	public List<T> find() {
 		System.out.println("query: " + query);
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -46,10 +47,10 @@ public class PrintCriteriaQuery implements CriteriaQuery<DataElement> {
 		return query.toString();
 	}
 	
-	public static class WherePrint implements Where<DataElement> {
+	public static class WherePrint<T> implements Where<T> {
 
 		StringBuilder query;
-		private WhereBuilder<DataElement> whereBuilder;
+		private WhereBuilder<T> whereBuilder;
 
 		public WherePrint(PrintCriteriaQuery printCriteriaQuery, StringBuilder query) {
 			this.query = query;
@@ -62,45 +63,45 @@ public class PrintCriteriaQuery implements CriteriaQuery<DataElement> {
 		}
 
 		@Override
-		public WhereBuilder<DataElement> expression(WhereBuilder<DataElement> expression) {
+		public WhereBuilder<T> expression(WhereBuilder<T> expression) {
 			query.append(" (").append(((WhereBuilderPrint) expression).getQuery()).append(")");
 			return whereBuilder;
 		}
 
 		@Override
-		public <S extends Metadatum> WhereBuilder<DataElement> expression(S metadatum) {
+		public <S extends Metadatum> WhereBuilder<T> expression(S metadatum) {
 			query.append(" " + metadatum.getKey() + " = " + metadatum.getValue());
 			return whereBuilder;
 		}
 
 		@Override
-		public <S extends Metadatum> WhereBuilder<DataElement> exists(S metadatum) {
+		public <S extends Metadatum> WhereBuilder<T> exists(S metadatum) {
 			query.append(" exists " + metadatum.getKey());
 			return whereBuilder;
 		}
 
 		@Override
-		public <S extends Metadatum> WhereBuilder<DataElement> isParentOf(S metadatum)
+		public <S extends Metadatum> WhereBuilder<T> isParentOf(S metadatum)
 				throws UnsupportedQueryOperationException {
 			query.append(" isParentOf " + metadatum.getKey());
 			return whereBuilder;
 		}
 
 		@Override
-		public <S extends DataElement> WhereBuilder<DataElement> isParentOf(S dataElement)
+		public <S extends DataElement> WhereBuilder<T> isParentOf(S dataElement)
 				throws UnsupportedQueryOperationException {
 			query.append(" isParentOf " + dataElement.getId());
 			return whereBuilder;
 		}
 
 		@Override
-		public <S extends DataElement> WhereBuilder<DataElement> isChildOf(S dataElement) {
+		public <S extends DataElement> WhereBuilder<T> isChildOf(S dataElement) {
 			query.append(" isChildOf " + dataElement.getId());
 			return whereBuilder;
 		}
 
 		@Override
-		public <S extends DataElement> WhereBuilder<DataElement> isChildOf(WhereBuilder<S> where) {
+		public <S extends DataElement> WhereBuilder<T> isChildOf(WhereBuilder<S> where) {
 			query.append(" isChildOf(").append(((WhereBuilderPrint) where).getQuery()).append(")");
 			return whereBuilder;
 		}
@@ -112,11 +113,11 @@ public class PrintCriteriaQuery implements CriteriaQuery<DataElement> {
 
 	}
 
-	public static class WhereBuilderPrint implements WhereBuilder<DataElement> {
+	public static class WhereBuilderPrint<T> implements WhereBuilder<T> {
 
 		StringBuilder query;
 		WherePrint where;
-		private CriteriaQuery<DataElement> printCriteriaQuery;
+		private CriteriaQuery<T> printCriteriaQuery;
 
 		public WhereBuilderPrint(PrintCriteriaQuery printCriteriaQuery, WherePrint where, StringBuilder query) {
 			super();
@@ -134,19 +135,19 @@ public class PrintCriteriaQuery implements CriteriaQuery<DataElement> {
 		}
 
 		@Override
-		public Where<DataElement> or() {
+		public Where<T> or() {
 			query.append(" or");
 			return where;
 		}
 
 		@Override
-		public Where<DataElement> and() {
+		public Where<T> and() {
 			query.append(" and");
 			return where;
 		}
 
 		@Override
-		public CriteriaQuery<DataElement> build() {
+		public CriteriaQuery<T> build() {
 			return printCriteriaQuery;
 		}
 		
