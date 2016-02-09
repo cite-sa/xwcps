@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.AttributeContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
@@ -20,6 +21,7 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.XqueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsReturnClauseContext;
 import gr.cite.earthserver.wcps.parser.utils.PrintCriteriaQuery;
+import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
 import gr.cite.exmms.manager.core.DataElement;
@@ -32,14 +34,30 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	private Stack<String> xmlReturnElements = new Stack<>();
 
-	private CriteriaQuery<DataElement> exmmsQuery = new PrintCriteriaQuery();
+	private CriteriaQuery<Coverage> exmmsQuery;
 
-	public XWCPSEvalVisitor(String wcsEndpoint) {
+	private String forClauseDefaultXpath = null;
+
+	/**
+	 * 
+	 * @param wcsEndpoint
+	 *            url on the federated rasdaman
+	 * @param exmmsQuery
+	 *            TODO
+	 */
+	public XWCPSEvalVisitor(String wcsEndpoint, CriteriaQuery<Coverage> exmmsQuery) {
 		super(wcsEndpoint);
+		this.exmmsQuery = exmmsQuery;
 	}
 
-	public XWCPSEvalVisitor(WCSRequestBuilder wcsRequestBuilder) {
+	/**
+	 * 
+	 * @param wcsRequestBuilder
+	 *            wcs request builder with url on the federated rasdaman
+	 */
+	public XWCPSEvalVisitor(WCSRequestBuilder wcsRequestBuilder, CriteriaQuery<Coverage> exmmsQuery) {
 		super(wcsRequestBuilder);
+		this.exmmsQuery = exmmsQuery;
 	}
 
 	@Override
@@ -60,11 +78,16 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	@Override
 	public Query visitXpathForClause(XpathForClauseContext ctx) {
 		Query q = visit(ctx.coverageVariableName());
-		
+
 		XpathForClauseEvalVisitor xpathForClauseEvalVisitor = new XpathForClauseEvalVisitor(exmmsQuery);
-		xpathForClauseEvalVisitor.visit(ctx);
-		exmmsQuery.find();
-		
+		XpathForClause xpathForClause = xpathForClauseEvalVisitor.visit(ctx);
+
+		variables.put(ctx.coverageVariableName().getText(), xpathForClause.getCoverages());
+
+		if (xpathForClause.getXpathQuery() != null) {
+			forClauseDefaultXpath = xpathForClause.getXpathQuery();
+		}
+
 		return q;
 	}
 
@@ -73,12 +96,17 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		Query wcpsQuery = visit(ctx.scalarExpression());
 
-		if (ctx.xquery() == null) {
+		// if there is no xquery in the query
+		if (ctx.xquery() == null && forClauseDefaultXpath == null) {
 
 			if (ctx.scalarExpression().getComponentExpression() != null) {
 				return wcpsQuery;
 			} else {
-				// wcps query with scalar return expression 
+				/*
+				 * evaluate wcps scalar expressions, ie for c in (AvgLandTemp)
+				 * return <a attr=min(c[Lat(53.08), Long(8.80),
+				 * ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>
+				 */
 				try {
 
 					String rewrittedQuery = this.forWhereClauseQuery.getQuery() + " return " + wcpsQuery.getQuery();
@@ -98,8 +126,19 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		}
 
-		Query xpathQuery = visit(ctx.xquery());
+		Query xpathQuery = new Query();
+		if (forClauseDefaultXpath != null) {
+			xpathQuery.setQuery(forClauseDefaultXpath);
+		}
+		if (ctx.xquery() != null) {
+			xpathQuery.aggregate(visit(ctx.xquery()));
+		}
 
+		/* 
+		 * rewrite to support xpath functions, eg
+		 * min(describeCoverage(c)//@someValue) into
+		 * describeCoverage(c) min(//@someValue)
+		 */
 		if (ctx.functionName() != null) {
 			xpathQuery.prependQuery(ctx.functionName().getText() + "(").appendQuery(")");
 		}
@@ -179,4 +218,5 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		return wcpsQuery.aggregate(xpathQuery.setValue(value), true);
 	}
+
 }

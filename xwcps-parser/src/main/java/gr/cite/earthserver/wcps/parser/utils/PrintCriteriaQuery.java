@@ -16,12 +16,12 @@ public class PrintCriteriaQuery<T extends DataElement> implements CriteriaQuery<
 
 	@Override
 	public Where<T> whereBuilder() {
-		return new WherePrint(this, query);
+		return new WherePrint<>(this, query);
 	}
 
 	@Override
 	public Where<T> expressionFactory() {
-		return new WherePrint(this);
+		return new WherePrint<>(this);
 	}
 
 	@Override
@@ -47,24 +47,24 @@ public class PrintCriteriaQuery<T extends DataElement> implements CriteriaQuery<
 		return query.toString();
 	}
 	
-	public static class WherePrint<T> implements Where<T> {
+	public static class WherePrint<T extends DataElement> implements Where<T> {
 
 		StringBuilder query;
 		private WhereBuilder<T> whereBuilder;
 
-		public WherePrint(PrintCriteriaQuery printCriteriaQuery, StringBuilder query) {
+		public WherePrint(PrintCriteriaQuery<T> printCriteriaQuery, StringBuilder query) {
 			this.query = query;
-			this.whereBuilder = new WhereBuilderPrint(printCriteriaQuery, this, query);
+			this.whereBuilder = new WhereBuilderPrint<>(printCriteriaQuery, this, query);
 		}
 		
-		public WherePrint(PrintCriteriaQuery printCriteriaQuery) {
+		public WherePrint(PrintCriteriaQuery<T> printCriteriaQuery) {
 			this.query = new StringBuilder();
-			this.whereBuilder = new WhereBuilderPrint(printCriteriaQuery, this, query);
+			this.whereBuilder = new WhereBuilderPrint<>(printCriteriaQuery, this, query);
 		}
 
 		@Override
 		public WhereBuilder<T> expression(WhereBuilder<T> expression) {
-			query.append(" (").append(((WhereBuilderPrint) expression).getQuery()).append(")");
+			query.append(" (").append(((WhereBuilderPrint<T>) expression).getQuery()).append(")");
 			return whereBuilder;
 		}
 
@@ -100,9 +100,10 @@ public class PrintCriteriaQuery<T extends DataElement> implements CriteriaQuery<
 			return whereBuilder;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public <S extends DataElement> WhereBuilder<T> isChildOf(WhereBuilder<S> where) {
-			query.append(" isChildOf(").append(((WhereBuilderPrint) where).getQuery()).append(")");
+			query.append(" isChildOf(").append(((WhereBuilderPrint<T>) where).getQuery()).append(")");
 			return whereBuilder;
 		}
 		
@@ -113,13 +114,13 @@ public class PrintCriteriaQuery<T extends DataElement> implements CriteriaQuery<
 
 	}
 
-	public static class WhereBuilderPrint<T> implements WhereBuilder<T> {
+	public static class WhereBuilderPrint<T extends DataElement> implements WhereBuilder<T> {
 
 		StringBuilder query;
-		WherePrint where;
+		WherePrint<T> where;
 		private CriteriaQuery<T> printCriteriaQuery;
 
-		public WhereBuilderPrint(PrintCriteriaQuery printCriteriaQuery, WherePrint where, StringBuilder query) {
+		public WhereBuilderPrint(PrintCriteriaQuery<T> printCriteriaQuery, WherePrint<T> where, StringBuilder query) {
 			super();
 			this.query = query;
 			this.where = where;

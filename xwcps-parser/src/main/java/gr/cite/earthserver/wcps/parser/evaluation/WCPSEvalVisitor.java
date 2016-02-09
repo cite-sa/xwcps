@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.DescribeCoverageExpressionLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ForClauseLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.IdentifierContext;
@@ -21,16 +22,27 @@ import gr.cite.earthserver.wcs.client.WCSRequestException;
 public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	private static final Logger logger = LoggerFactory.getLogger(WCPSEvalVisitor.class);
 
+	/**
+	 * expecting a link on the federated rasdaman
+	 */
 	WCSRequestBuilder wcsRequestBuilder;
 
-	Map<String, List<String>> variables = new HashMap<>();
+	Map<String, List<Coverage>> variables = new HashMap<>();
 
 	Query forWhereClauseQuery;
 
+	/**
+	 * 
+	 * @param wcsEndpoint url on the federated rasdaman
+	 */
 	public WCPSEvalVisitor(String wcsEndpoint) {
 		this.wcsRequestBuilder = WCSRequest.newBuilder().endpoint(wcsEndpoint);
 	}
 
+	/**
+	 * 
+	 * @param wcsRequestBuilder wcs request builder with url on the federated rasdaman
+	 */
 	public WCPSEvalVisitor(WCSRequestBuilder wcsRequestBuilder) {
 		this.wcsRequestBuilder = wcsRequestBuilder;
 	}
@@ -38,8 +50,11 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	@Override
 	public Query visitForClauseLabel(ForClauseLabelContext ctx) {
 
-		variables.put(ctx.coverageVariableName().getText(),
-				ctx.identifier().stream().map(IdentifierContext::getText).collect(Collectors.toList()));
+		variables.put(ctx.coverageVariableName().getText(), ctx.identifier().stream().map(identifier -> {
+			Coverage c = new Coverage();
+			c.setLocalId(identifier.getText());
+			return c;
+		}).collect(Collectors.toList()));
 
 		return super.visitForClauseLabel(ctx);
 	}
@@ -51,7 +66,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		String variable = ctx.coverageVariableName().getText();
 		List<String> describeCoverages = variables.get(variable).stream().map(coverage -> {
 			try {
-				String describeCoverage = wcsRequestBuilder.describeCoverage().coverageId(coverage).build().get();
+				String describeCoverage = wcsRequestBuilder.describeCoverage().coverageId(coverage.getLocalId()).build().get();
 
 				return "<coverage id='" + coverage + "'>"
 						+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>";

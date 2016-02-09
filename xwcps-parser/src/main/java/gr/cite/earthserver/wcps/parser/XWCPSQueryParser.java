@@ -40,7 +40,7 @@ public class XWCPSQueryParser {
 //		System.out.println(tokenStream.getTokens());
 //		System.out.println(tree.toStringTree(parser));
 
-		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(WCS_ENDPOINT);
+		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(WCS_ENDPOINT, null);
 		Query result = visitor.visit(tree);
 
 		return result;

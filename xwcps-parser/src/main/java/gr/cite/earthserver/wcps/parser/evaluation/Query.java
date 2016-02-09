@@ -73,7 +73,7 @@ public class Query {
 	public Query aggregate(Query nextResult, boolean overrideValue) {
 		// FIXME aggregations
 
-		query = query + " " + nextResult.getQuery();
+		query = (query == null ? nextResult.getQuery() : query + " " + nextResult.getQuery());
 
 		if (value == null || overrideValue) {
 			value = nextResult.getValue();
