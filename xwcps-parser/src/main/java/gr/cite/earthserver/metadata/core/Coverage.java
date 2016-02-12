@@ -1,9 +1,9 @@
 package gr.cite.earthserver.metadata.core;
 
 import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
-import gr.cite.exmms.manager.core.Collection;
-import gr.cite.exmms.manager.core.DataElement;
-import gr.cite.exmms.manager.core.DataElementMetadatum;
+import gr.cite.exmms.core.Collection;
+import gr.cite.exmms.core.DataElement;
+import gr.cite.exmms.core.DataElementMetadatum;
 
 public class Coverage extends DataElement {
 
@@ -22,8 +22,8 @@ public class Coverage extends DataElement {
 		if (petascopeServer == null) {
 			Collection server = getCollections().get(0);
 
-			DataElementMetadatum endpointMetadatum = server.getMatadata().stream()
-					.filter(metadatum -> metadatum.getKey().equals(XWCPSReservedWords.ENDPOINT)).findFirst().get();
+			DataElementMetadatum endpointMetadatum = server.getMetadata().stream()
+					.filter(metadatum -> metadatum.getName().equals(XWCPSReservedWords.ENDPOINT)).findFirst().get();
 
 			this.petascopeServer = new PetascopeServer(endpointMetadatum.getValue());
 		}
@@ -35,8 +35,8 @@ public class Coverage extends DataElement {
 	public String getLocalId() {
 		if (localId == null) {
 
-			DataElementMetadatum endpointMetadatum = getMatadata().stream()
-					.filter(metadatum -> metadatum.getKey().equals(XWCPSReservedWords.ID)).findFirst().get();
+			DataElementMetadatum endpointMetadatum = getMetadata().stream()
+					.filter(metadatum -> metadatum.getName().equals(XWCPSReservedWords.ID)).findFirst().get();
 
 			this.localId = endpointMetadatum.getValue();
 		}

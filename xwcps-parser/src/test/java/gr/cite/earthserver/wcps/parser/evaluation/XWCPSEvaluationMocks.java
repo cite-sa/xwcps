@@ -15,12 +15,12 @@ import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder.DescribeCoverage;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder.ProcessCoverages;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
-import gr.cite.exmms.manager.core.DataElement;
-import gr.cite.exmms.manager.core.Metadatum;
-import gr.cite.exmms.manager.criteria.CriteriaQuery;
-import gr.cite.exmms.manager.criteria.UnsupportedQueryOperationException;
-import gr.cite.exmms.manager.criteria.Where;
-import gr.cite.exmms.manager.criteria.WhereBuilder;
+import gr.cite.exmms.core.DataElement;
+import gr.cite.exmms.core.Metadatum;
+import gr.cite.exmms.criteria.CriteriaQuery;
+import gr.cite.exmms.criteria.UnsupportedQueryOperationException;
+import gr.cite.exmms.criteria.Where;
+import gr.cite.exmms.criteria.WhereBuilder;
 
 public class XWCPSEvaluationMocks {
 	public static WCSRequestBuilder mockWCSRequestBuilder() {

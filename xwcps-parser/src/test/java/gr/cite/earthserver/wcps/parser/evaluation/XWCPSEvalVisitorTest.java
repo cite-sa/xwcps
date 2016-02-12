@@ -16,10 +16,10 @@ import gr.cite.earthserver.wcs.client.WCSRequest;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder.DescribeCoverage;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder.ProcessCoverages;
+import gr.cite.exmms.criteria.CriteriaQuery;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import jersey.repackaged.com.google.common.collect.Lists;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
-import gr.cite.exmms.manager.criteria.CriteriaQuery;
 
 public class XWCPSEvalVisitorTest {
 
@@ -164,6 +164,29 @@ public class XWCPSEvalVisitorTest {
 	@Test
 	public void query11() {
 		String query = "for c in //coverage return describeCoverage(c)";
+
+		Query result = executeQuery(query, XWCPSEvaluationMocks.mockDescribeCoverage(),
+				XWCPSEvaluationMocks.mockCriteriaQuery(Lists.newArrayList(new Coverage() {
+					{
+						setLocalId("AvgLandTemp");
+					}
+				}, new Coverage() {
+					{
+						setLocalId("NIR");
+					}
+				})));
+		String formattedActualResult = XMLConverter.nodeToString(XMLConverter.stringToNode(result.getValue(), true),
+				true);
+
+		String formattedExpectedResult = XMLConverter.nodeToString(
+				XMLConverter.stringToNode(XWCPSQueryMockedResponses.DOUBLE_DESCRIBE_COVERAGE_RESULT, true), true);
+
+		assertEquals(formattedExpectedResult, formattedActualResult);
+	}
+
+	@Test
+	public void query12() {
+		String query = "for c in /server[@endpoint='abc']/coverage return describeCoverage(c)";
 
 		Query result = executeQuery(query, XWCPSEvaluationMocks.mockDescribeCoverage(),
 				XWCPSEvaluationMocks.mockCriteriaQuery(Lists.newArrayList(new Coverage() {

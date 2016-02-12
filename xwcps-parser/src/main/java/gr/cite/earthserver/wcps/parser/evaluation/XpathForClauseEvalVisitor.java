@@ -20,11 +20,11 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.RelativeLocationPathContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.StepContext;
 import gr.cite.earthserver.wcps.parser.utils.PrintVisitor;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
-import gr.cite.exmms.manager.core.DataElementMetadatum;
-import gr.cite.exmms.manager.core.Metadatum;
-import gr.cite.exmms.manager.criteria.CriteriaQuery;
-import gr.cite.exmms.manager.criteria.Where;
-import gr.cite.exmms.manager.criteria.WhereBuilder;
+import gr.cite.exmms.core.DataElementMetadatum;
+import gr.cite.exmms.core.Metadatum;
+import gr.cite.exmms.criteria.CriteriaQuery;
+import gr.cite.exmms.criteria.Where;
+import gr.cite.exmms.criteria.WhereBuilder;
 
 public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> {
 	private static final Logger logger = LoggerFactory.getLogger(XpathForClauseEvalVisitor.class);
@@ -233,7 +233,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		String value = ctx.relationalExpr(1).getText();
 
 		Metadatum metadatum = new DataElementMetadatum();
-		metadatum.setKey(key.replaceAll("@", ""));
+		metadatum.setName(key.replaceAll("@", ""));
 		metadatum.setValue(value);
 
 		stack.pushWhereBuilderStack(stack.peekWhereStack().expression(metadatum));

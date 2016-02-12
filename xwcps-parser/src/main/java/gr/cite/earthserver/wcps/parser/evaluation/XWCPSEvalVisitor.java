@@ -20,12 +20,10 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathForClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XqueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsReturnClauseContext;
-import gr.cite.earthserver.wcps.parser.utils.PrintCriteriaQuery;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
-import gr.cite.exmms.manager.core.DataElement;
-import gr.cite.exmms.manager.criteria.CriteriaQuery;
+import gr.cite.exmms.criteria.CriteriaQuery;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
 
