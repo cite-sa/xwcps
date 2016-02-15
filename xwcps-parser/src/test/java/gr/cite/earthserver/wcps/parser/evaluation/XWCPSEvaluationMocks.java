@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.mockito.Matchers;
 
+import com.google.common.collect.Lists;
+
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcs.client.WCSRequest;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
@@ -92,7 +94,7 @@ public class XWCPSEvaluationMocks {
 		Where<Coverage> where = mock(Where.class);
 		WhereBuilder<Coverage> whereBuilder = mock(WhereBuilder.class);
 
-		when(query.<Coverage>expressionFactory()).thenReturn(where);
+		when(query.<Coverage> expressionFactory()).thenReturn(where);
 		when(query.whereBuilder()).thenReturn(where);
 
 		when(where.exists(any())).thenReturn(whereBuilder);
@@ -114,6 +116,7 @@ public class XWCPSEvaluationMocks {
 
 		when(query.find(anyString())).thenReturn(returnedCoverage);
 		when(query.find(Matchers.<Coverage> any())).thenReturn(returnedCoverage);
+		when(query.find()).thenReturn(Lists.newArrayList(returnedCoverage));
 
 		return query;
 	}
