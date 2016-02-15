@@ -92,7 +92,7 @@ public class XWCPSEvaluationMocks {
 		Where<Coverage> where = mock(Where.class);
 		WhereBuilder<Coverage> whereBuilder = mock(WhereBuilder.class);
 
-		when(query.expressionFactory()).thenReturn(where);
+		when(query.<Coverage>expressionFactory()).thenReturn(where);
 		when(query.whereBuilder()).thenReturn(where);
 
 		when(where.exists(any())).thenReturn(whereBuilder);
