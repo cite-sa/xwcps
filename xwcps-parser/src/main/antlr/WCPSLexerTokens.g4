@@ -135,7 +135,6 @@ XPATH_LITERAL  :  '"' ~'"'* '"'
 //NCName  :  NCNameStartChar NCNameChar*; 
 NCName  :  START_CHARS [a-zA-Z0-9_\-.]*;
 
-
 fragment NUMBERS: [0-9];
 
 fragment START_CHARS: [a-zA-Z_];

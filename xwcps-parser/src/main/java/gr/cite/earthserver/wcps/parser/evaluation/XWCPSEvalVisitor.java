@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.xml.xpath.XPathFactoryConfigurationException;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,7 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlWithCloseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ProcessingExpressionContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.QuatedContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlReturnClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathForClauseContext;
@@ -194,7 +196,16 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	@Override
 	public Query visitXmlReturnClause(XmlReturnClauseContext ctx) {
-		Query q = super.visitXmlReturnClause(ctx);
+		Query q = new Query();
+		for (ParseTree parseTree : ctx.children) {
+			Query parseTreeQuery = visit(parseTree);
+			if (parseTree instanceof QuatedContext) {
+				// remove quates 
+				parseTreeQuery.setValue(parseTree.getText().replaceAll("'|\"", ""));
+			}
+			q.aggregate(parseTreeQuery);
+		}
+		
 		return q;
 	}
 

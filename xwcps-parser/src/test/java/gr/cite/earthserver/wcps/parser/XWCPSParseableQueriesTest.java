@@ -117,7 +117,8 @@ public class XWCPSParseableQueriesTest {
 
 	@Test
 	public void query20() {
-		parseQuery("for c in (AvgLandTemp) return <b> <c attr='test' /> <c>come text</c> <a> 1 </a></b>");
+		parseQuery(
+				"for c in (AvgLandTemp) return <b> <c attr='test' /> \"some text1\" <c>'some text2'</c> <a> min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) </a></b>");
 	}
 
 	public static void parseQuery(String query) {
