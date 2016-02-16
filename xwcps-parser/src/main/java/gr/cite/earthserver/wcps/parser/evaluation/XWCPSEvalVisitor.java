@@ -14,7 +14,9 @@ import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.AttributeContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlWithCloseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ProcessingExpressionContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlReturnClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathForClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XqueryContext;
@@ -132,10 +134,10 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 			xpathQuery.aggregate(visit(ctx.xquery()));
 		}
 
-		/* 
+		/*
 		 * rewrite to support xpath functions, eg
-		 * min(describeCoverage(c)//@someValue) into
-		 * describeCoverage(c) min(//@someValue)
+		 * min(describeCoverage(c)//@someValue) into describeCoverage(c)
+		 * min(//@someValue)
 		 */
 		if (ctx.functionName() != null) {
 			xpathQuery.prependQuery(ctx.functionName().getText() + "(").appendQuery(")");
@@ -151,7 +153,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	}
 
 	@Override
-	public Query visitOpenXmlElement(OpenXmlElementContext ctx) {
+	public Query visitXmlElement(XmlElementContext ctx) {
 		String xmlElement = ctx.qName().getText();
 		xmlReturnElements.push(xmlElement);
 
@@ -164,7 +166,23 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 			query.aggregate(visit(attributeContext));
 		}
 
+		return query;
+	}
+
+	@Override
+	public Query visitOpenXmlElement(OpenXmlElementContext ctx) {
+		Query query = visit(ctx.xmlElement());
+
 		query.aggregate(visit(ctx.GREATER_THAN()).setValue(ctx.GREATER_THAN().getText()));
+
+		return query;
+	}
+
+	@Override
+	public Query visitOpenXmlWithClose(OpenXmlWithCloseContext ctx) {
+		Query query = visit(ctx.xmlElement());
+
+		query.aggregate(visit(ctx.GREATER_THAN_SLASH()).setValue(ctx.GREATER_THAN_SLASH().getText()));
 
 		return query;
 	}

@@ -33,7 +33,11 @@ public class WCPSEvalVisitorTest {
 		// (@foo='1' and @bar='1' or (@koo='2' and @boo='2'))]//dataSet[@id='5'
 		// or @loo='abc'] return describeCoverage(c)";
 
-		"for c in //coverage[id='AvgLandTemp'] return min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")])";
+//		"for c in //coverage[id='AvgLandTemp'] return min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")])";
+//		"for c in //coverage return wrap-result(<a> describeCoverage(c) </a>, < global_wrapper attr=min(describeCoverage(c)//@something) >, )";
+
+//		"for c in (AvgLandTemp) return <b> <c attr='test' /> <c>come text</c> <a> min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) </a></b>";
+		"for c in (AvgLandTemp) return <b> <c attr='test' /> <c></c> <a> min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) </a></b>";
 
 		// "/server//coverage/@*[local-name()='test']";
 		// "/server";

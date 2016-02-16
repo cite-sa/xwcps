@@ -55,7 +55,7 @@ dependencies {
     		// @maven.local.cite.gr
     		'gr.cite.scarabaeus:xml-utils:1.1.1',
     		
-			'gr.cite.exmms:exmms-commons:0.1-SNAPSHOT'
+			'gr.cite.exmms:exmms-commons:0.0.1-SNAPSHOT'
     		
 
     runtime 'ch.qos.logback:logback-classic:1.1.3'
