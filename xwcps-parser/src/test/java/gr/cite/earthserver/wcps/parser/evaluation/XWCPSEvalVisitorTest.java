@@ -228,6 +228,22 @@ public class XWCPSEvalVisitorTest {
 	public void query14() {
 		String query = "for c in //coverage[id='AvgLandTemp'] return min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")])";
 
+		Query result = executeQuery(query, XWCPSEvaluationMocks.mockProcessCoverages(
+						"for c in ( AvgLandTemp ) return min ( c [ Lat ( 53.08 ) , Long ( 8.80 ) , ansi ( \"2014-01\" : \"2014-12\" ) ] )",
+						"2.2834647"),
+				XWCPSEvaluationMocks.mockCriteriaQuery(Lists.newArrayList(new Coverage() {
+					{
+						setLocalId("AvgLandTemp");
+					}
+				})));
+
+		assertEquals("2.2834647", result.getValue());
+	}
+
+	@Test
+	public void query15() {
+		String query = "for c in //coverage return wrap-result(describeCoverage(c), < p attr=min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) > <a>'text'</a> )";
+
 		Query result = executeQuery(query,
 				XWCPSEvaluationMocks.mockDescribeCoverage(XWCPSEvaluationMocks.mockProcessCoverages(
 						"for c in ( AvgLandTemp ) return min ( c [ Lat ( 53.08 ) , Long ( 8.80 ) , ansi ( \"2014-01\" : \"2014-12\" ) ] )",
@@ -238,7 +254,13 @@ public class XWCPSEvalVisitorTest {
 					}
 				})));
 
-		assertEquals("2.2834647", result.getValue());
+		String formattedActualResult = XMLConverter.nodeToString(XMLConverter.stringToNode(result.getValue(), true),
+				true);
+
+		String formattedExpectedResult = XMLConverter
+				.nodeToString(XMLConverter.stringToNode(XWCPSQueryMockedResponses.QUERY_15_RESPONSE, true), true);
+
+		assertEquals(formattedExpectedResult, formattedActualResult);
 	}
 
 	static Query executeQuery(String query, WCSRequestBuilder builder, CriteriaQuery<Coverage> exmmsQuery) {

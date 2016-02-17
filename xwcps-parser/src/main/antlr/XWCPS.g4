@@ -40,6 +40,10 @@ closeXmlElement: LOWER_THAN_SLASH qName GREATER_THAN;
 xwcpsReturnClause: scalarExpression (xquery)?
 				| functionName LEFT_PARANTHESIS scalarExpression xquery RIGHT_PARANTHESIS;
 
+wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
+					processingExpression COMMA  openXmlElement ( openXmlElement | xmlReturnClause )*
+					RIGHT_PARANTHESIS;
+					
 xpathForClause:  coverageVariableName IN xwcpsCoveragesClause;
 
 xwcpsCoveragesClause: xquery;
@@ -47,8 +51,11 @@ xwcpsCoveragesClause: xquery;
 /*
  * overrided wcps rules
  */
+ 
+// on return
 processingExpression: xmlReturnClause
 					| xwcpsReturnClause
+					| wrapResultClause
                     | encodedCoverageExpression;
 
 forClauseList: FOR (xwcpsforClause) (COMMA xwcpsforClause)*;

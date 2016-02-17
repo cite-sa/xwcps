@@ -27,9 +27,9 @@ public class WCPSEvalVisitorTest {
 		// "for c in (AvgLandTemp) return <a attr=min(c[Lat(53.08), Long(8.80),
 		// ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>";
 
-//		"for c in //coverage return wrap-result(<a> describeCoverage(c) </a>, < global_wrapper attr=min(describeCoverage(c)//@something) >, )";
+		"for c in //coverage return wrap-result(describeCoverage(c), < p attr=min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) > <a>'text'</a> )";
 
-		"for c in //coverage[id='AvgLandTemp'] return min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")])";
+//		"for c in //coverage[id='AvgLandTemp'] return min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")])";
 //		"for c in (AvgLandTemp) return <b> <c attr='test' /> \"some text\" <c>'some text'</c> <a> min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) </a></b>";
 
 		// "/server//coverage/@*[local-name()='test']";

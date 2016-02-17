@@ -113,6 +113,7 @@ USING: ('u'|'U')('s'|'S')('i'|'I')('n'|'N')('g'|'G');
 VALUE:('v'|'V')('a'|'A')('l'|'L')('u'|'U')('e'|'E');
 VALUES:('v'|'V')('a'|'A')('l'|'L')('u'|'U')('e'|'E')('s'|'S');
 WHERE: ('w'|'W')('h'|'H')('e'|'E')('r'|'R')('e'|'E');
+WRAP_RESULT: ('w'|'W')('r'|'R')('a'|'A')('p'|'P')'-'('r'|'R')('e'|'E')('s'|'S')('u'|'U')('l'|'L')('t'|'T');
 XOR: ('x'|'X')('o'|'O')('r'|'R');
 REAL_NUMBER_CONSTANT:'-'?NUMBERS+('.'NUMBERS*)?;
 
