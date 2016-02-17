@@ -107,6 +107,8 @@ public class XWCPSEvaluationMocks {
 			when(where.isParentOf(Matchers.<DataElement> any())).thenReturn(whereBuilder);
 		} catch (UnsupportedQueryOperationException e) {
 		}
+		
+		when(whereBuilder.build()).thenReturn(query);
 
 		return query;
 	}

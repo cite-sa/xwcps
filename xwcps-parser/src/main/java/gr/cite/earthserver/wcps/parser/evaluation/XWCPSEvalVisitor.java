@@ -2,6 +2,7 @@ package gr.cite.earthserver.wcps.parser.evaluation;
 
 import java.util.List;
 import java.util.Stack;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import javax.xml.xpath.XPathFactoryConfigurationException;
@@ -86,11 +87,14 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		variables.put(ctx.coverageVariableName().getText(), xpathForClause.getCoverages());
 
+		String coverages = xpathForClause.getCoverages().stream().map(Coverage::getLocalId)
+				.collect(Collectors.joining(", ", "( ", " )"));
+		
 		if (xpathForClause.getXpathQuery() != null) {
 			forClauseDefaultXpath = xpathForClause.getXpathQuery();
 		}
 
-		return q;
+		return q.appendQuery(" in " + coverages);
 	}
 
 	@Override
@@ -111,7 +115,8 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 				 */
 				try {
 
-					String rewrittedQuery = this.forWhereClauseQuery.getQuery() + " return " + wcpsQuery.getQuery();
+					String rewrittedQuery = this.forWhereClauseQuery.getQuery() + " return "
+							+ wcpsQuery.getQuery();
 
 					if (ctx.getParent() instanceof ProcessingExpressionContext) {
 						wcpsQuery.simpleWCPS();

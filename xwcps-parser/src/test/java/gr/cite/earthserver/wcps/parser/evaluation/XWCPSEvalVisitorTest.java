@@ -228,7 +228,10 @@ public class XWCPSEvalVisitorTest {
 	public void query14() {
 		String query = "for c in //coverage[id='AvgLandTemp'] return min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")])";
 
-		Query result = executeQuery(query, XWCPSEvaluationMocks.mockProcessCoverages("2.2834647"),
+		Query result = executeQuery(query,
+				XWCPSEvaluationMocks.mockDescribeCoverage(XWCPSEvaluationMocks.mockProcessCoverages(
+						"for c in ( AvgLandTemp ) return min ( c [ Lat ( 53.08 ) , Long ( 8.80 ) , ansi ( \"2014-01\" : \"2014-12\" ) ] )",
+						"2.2834647")),
 				XWCPSEvaluationMocks.mockCriteriaQuery(Lists.newArrayList(new Coverage() {
 					{
 						setLocalId("AvgLandTemp");
