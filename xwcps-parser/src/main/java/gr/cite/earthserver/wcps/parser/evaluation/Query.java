@@ -1,5 +1,10 @@
 package gr.cite.earthserver.wcps.parser.evaluation;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import gr.cite.earthserver.metadata.core.Coverage;
+
 public class Query {
 	private String query;
 
@@ -10,6 +15,8 @@ public class Query {
 	private String error; // TODO list??
 
 	private boolean isSimpleWCPS;
+
+	private Map<Coverage, String> coverageValueMap;
 
 	public Query setQuery(String wcpsQuery) {
 		this.query = wcpsQuery;
@@ -42,12 +49,12 @@ public class Query {
 		this.value = value;
 		return this;
 	}
-	
+
 	public Query prependValue(String prependValue) {
 		this.value = prependValue + this.value;
 		return this;
 	}
-	
+
 	public Query appendValue(String prependValue) {
 		this.value += prependValue;
 		return this;
@@ -90,7 +97,7 @@ public class Query {
 		}
 		return this;
 	}
-	
+
 	public Query aggregate(Query nextResult) {
 		return aggregate(nextResult, false);
 	}
@@ -109,9 +116,17 @@ public class Query {
 		this.isSimpleWCPS = true;
 		return this;
 	}
-	
+
 	public boolean isSimpleWCPS() {
 		return isSimpleWCPS;
 	}
-	
+
+	public Map<Coverage, String> getCoverageValueMap() {
+		return coverageValueMap;
+	}
+
+	public Query setCoverageValueMap(Map<Coverage, String> coverageValueMap) {
+		this.coverageValueMap = coverageValueMap;
+		return this;
+	}
 }

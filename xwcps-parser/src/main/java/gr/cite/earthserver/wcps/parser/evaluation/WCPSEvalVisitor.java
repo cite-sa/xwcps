@@ -1,8 +1,11 @@
 package gr.cite.earthserver.wcps.parser.evaluation;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -64,21 +67,24 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		Query query = super.visitDescribeCoverageExpressionLabel(ctx);
 
 		String variable = ctx.coverageVariableName().getText();
-		List<String> describeCoverages = variables.get(variable).stream().map(coverage -> {
+		Map<Coverage, String> describeCoverages = variables.get(variable).stream().map(coverage -> {
 			try {
-				String describeCoverage = wcsRequestBuilder.describeCoverage().coverageId(coverage.getLocalId()).build().get();
+				String describeCoverage = wcsRequestBuilder.describeCoverage().coverageId(coverage.getLocalId()).build()
+						.get();
 
-				return "<coverage id='" + coverage + "'>"
-						+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>";
+				Entry<Coverage, String> entry = new SimpleImmutableEntry<>(coverage, "<coverage id='" + coverage + "'>"
+						+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
+
+				return entry;
 			} catch (WCSRequestException e) {
 				logger.error(e.getMessage(), e);
 
 				throw new ParseCancellationException(e);
 			}
-		}).collect(Collectors.toList());
+		}).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
 
-		return query.evaluated()
-				.setValue("<coverages>" + describeCoverages.stream().collect(Collectors.joining()) + "</coverages>");
+		return query.evaluated().setCoverageValueMap(describeCoverages);
+				//.setValue("<coverages>" + describeCoverages.stream().collect(Collectors.joining()) + "</coverages>");
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package gr.cite.earthserver.wcps.parser.evaluation;
 
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -143,8 +144,8 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		/*
 		 * rewrite to support xpath functions, eg
-		 * min(describeCoverage(c)//@someValue) into describeCoverage(c)
-		 * min(//@someValue)
+		 * min(describeCoverage(c)//@someValue) into
+		 * describeCoverage(c)min(//@someValue)
 		 */
 		if (ctx.functionName() != null) {
 			xpathQuery.prependQuery(ctx.functionName().getText() + "(").appendQuery(")");
@@ -202,13 +203,29 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	@Override
 	public Query visitXmlReturnClause(XmlReturnClauseContext ctx) {
 		Query q = new Query();
-		for (ParseTree parseTree : ctx.children) {
-			Query parseTreeQuery = visit(parseTree);
-			if (parseTree instanceof QuatedContext) {
-				// remove quates
-				parseTreeQuery.setValue(parseTree.getText().replaceAll("'|\"", ""));
+
+		if (ctx.xwcpsReturnClause() != null) {
+			Query openXmlElementQuery = visit(ctx.openXmlElement());
+			Query xwcpsReturnClauseQuery = visit(ctx.xwcpsReturnClause());
+			Query closeXmlElementQuery = visit(ctx.closeXmlElement());
+
+			for (Entry<Coverage, String> entry : xwcpsReturnClauseQuery.getCoverageValueMap().entrySet()) {
+				String xmlPayload = entry.getValue();
+				Query localQuery = new Query();
+				localQuery.setValue(xmlPayload).prependValue(openXmlElementQuery.getValue())
+						.appendValue(closeXmlElementQuery.getValue());
+
+				q.aggregate(localQuery);
 			}
-			q.aggregate(parseTreeQuery);
+		} else {
+			for (ParseTree parseTree : ctx.children) {
+				Query parseTreeQuery = visit(parseTree);
+				if (parseTree instanceof QuatedContext) {
+					// remove quates
+					parseTreeQuery.setValue(parseTree.getText().replaceAll("'|\"", ""));
+				}
+				q.aggregate(parseTreeQuery);
+			}
 		}
 
 		return q;
@@ -232,13 +249,14 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	@Override
 	public Query visitProcessingExpression(ProcessingExpressionContext ctx) {
-		if (ctx.xwcpsReturnClause() != null) {
-			Query xwcpsQuery = visit(ctx.xwcpsReturnClause());
-
-			return xwcpsQuery.isSimpleWCPS() ? xwcpsQuery : XWCPSEvalUtils.wrapDefaultXmlReturnElement(xwcpsQuery);
+		if (ctx.encodedCoverageExpression() != null || ctx.wrapResultClause() != null) {
+			return super.visitProcessingExpression(ctx);
 		}
 
-		return super.visitProcessingExpression(ctx);
+		Query xwcpsQuery = super.visitProcessingExpression(ctx);
+
+		return xwcpsQuery.isSimpleWCPS() ? xwcpsQuery : XWCPSEvalUtils.wrapDefaultXmlReturnElement(xwcpsQuery);
+
 	}
 
 	@Override
@@ -269,13 +287,24 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	}
 
 	private static Query evaluateXpath(Query wcpsQuery, Query xpathQuery) throws XPathFactoryConfigurationException {
-		XPathEvaluator xPathEvaluator = new XPathEvaluator(XMLConverter.stringToNode(wcpsQuery.getValue(), true));
+		if (wcpsQuery.getValue() != null) {
+			String value = evaluateXpath(wcpsQuery.getValue(), xpathQuery.getQuery());
+			wcpsQuery.aggregate(xpathQuery.setValue(value), true);
+		} else {
+			for (Entry<Coverage, String> entry : wcpsQuery.getCoverageValueMap().entrySet()) {
+				entry.setValue(evaluateXpath(entry.getValue(), xpathQuery.getQuery()));
+			}
+		}
 
-		List<String> xpathResults = xPathEvaluator.evaluate(xpathQuery.getQuery());
+		return wcpsQuery;
+	}
 
-		String value = xpathResults.stream().collect(Collectors.joining(" "));
+	private static String evaluateXpath(String node, String xpath) throws XPathFactoryConfigurationException {
+		XPathEvaluator xPathEvaluator = new XPathEvaluator(XMLConverter.stringToNode(node, true));
 
-		return wcpsQuery.aggregate(xpathQuery.setValue(value), true);
+		List<String> xpathResults = xPathEvaluator.evaluate(xpath);
+
+		return xpathResults.stream().collect(Collectors.joining(" "));
 	}
 
 }
