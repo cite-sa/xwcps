@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+            crossorigin="anonymous"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/vkbeautify/vkbeautify.0.99.00.beta.js"></script>
+
+    <link rel="stylesheet" href="css/query.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="query-form">
+        <div class="row">
+            <div class="col-xs-12">
+                <form>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="queryInput" placeholder="Query">
+                        <span class="input-group-btn"><input class="btn btn-default" type="submit"/></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="query-result">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $(".query-form form").submit(function (e) {
+            e.preventDefault();
+
+            var query = $("#queryInput").val();
+
+            $.ajax({
+                url: "http://localhost:9292/parser/queryP",
+                type: "GET",
+                dataType: "jsonp",
+                data: {
+                    q : query
+                },
+                success: function (result) {
+                    $(".query-result pre").remove();
+                    $(".query-result").append($("<pre>").text(vkbeautify.xml(result.value)));
+                }
+            });
+        });
+
+    });
+</script>
+
+</body>
+</html>

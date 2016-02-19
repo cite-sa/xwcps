@@ -234,7 +234,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 		Metadatum metadatum = new DataElementMetadatum();
 		metadatum.setName(key.replaceAll("@", ""));
-		metadatum.setValue(value);
+		metadatum.setValue(value.replaceAll("'|\"", ""));
 
 		stack.pushWhereBuilderStack(stack.peekWhereStack().expression(metadatum));
 
