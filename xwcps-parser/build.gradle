@@ -30,7 +30,7 @@ compileJava {
 }
 
 repositories {
-	//mavenLocal()
+	mavenLocal()
     mavenCentral()
     maven {
     	url "http://maven.local.cite.gr:8080/repository/snapshots/"
@@ -55,7 +55,7 @@ dependencies {
     		// @maven.local.cite.gr
     		'gr.cite.scarabaeus:xml-utils:1.1.1',
     		
-			new File(projectDir, '../../exmms/exmms-core').exists() ? project(':exmms-core') : 'gr.cite.exmms:exmms-core:0.1-SNAPSHOT'
+			'gr.cite.exmms:exmms-commons:0.0.1-SNAPSHOT'
     		
 
     runtime 'ch.qos.logback:logback-classic:1.1.3'

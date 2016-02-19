@@ -8,23 +8,32 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
+import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSLexer;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.XWCPSEvalVisitor;
+import gr.cite.earthserver.wcps.parser.evaluation.XWCPSEvaluationMocks;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 public class WCPSEvalVisitorTest {
 	private static final String WCS_ENDPOINT = "http://flanche.com:9090/rasdaman/ows";
 
 	@Test
 	public void test() {
-		String query = 
+		String query =
 		// TODO
-//		"for c in (AvgLandTemp) return <a attr=min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>";
-//		"for c in /server[@endpoint='example.com' and @id = '1']/coverage[@id='NIR' and @guid='myGUID' and @foo='1']//dataset return describeCoverage(c)";
-		"for c in /server[@endpoint='example.com']/coverage[@id='NIR' or (@foo='1' and @bar='1' or (@koo='2' and @boo='2'))] return describeCoverage(c)";
-		
+		// "for c in (AvgLandTemp) return <a attr=min(c[Lat(53.08), Long(8.80),
+		// ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>";
+//				"for c in (AvgLandTemp , NIR) return describeCoverage(c)";
+				"for c in (AvgLandTemp ) "
+				+ "return <a><b atr=describeCoverage(c)//*[local-name()='limits']//text() > "
+				+ "describeCoverage(c)//*[local-name()='domainSet'] </b></a>";
+
+//		"for c in //coverage[id='AvgLandTemp'] return min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")])";
+//		"for c in (AvgLandTemp) return <b> <c attr='test' /> \"some text\" <c>'some text'</c> <a> min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) </a></b>";
+
 		// "/server//coverage/@*[local-name()='test']";
 		// "/server";
 
@@ -53,7 +62,17 @@ public class WCPSEvalVisitorTest {
 		System.out.println(tokenStream.getTokens());
 		System.out.println(tree.toStringTree(parser));
 
-		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(WCS_ENDPOINT);
+		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(WCS_ENDPOINT,
+				XWCPSEvaluationMocks.mockCriteriaQuery(Lists.newArrayList(/*new Coverage() {
+					{
+						setLocalId("NIR");
+					}
+				},*/ new Coverage() {
+					{
+						setLocalId("AvgLandTemp");
+					}
+				}))
+				);
 		Query result = visitor.visit(tree);
 
 		System.out.println(result.getQuery());

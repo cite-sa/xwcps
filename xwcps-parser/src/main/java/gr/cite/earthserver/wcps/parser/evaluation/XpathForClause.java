@@ -9,8 +9,6 @@ import gr.cite.earthserver.metadata.core.PetascopeServer;
 public class XpathForClause {
 	private List<Coverage> coverages = new ArrayList<>();
 
-	private List<PetascopeServer> servers = new ArrayList<>();
-
 	private String xpathQuery;
 
 	public List<Coverage> getCoverages() {
@@ -22,21 +20,24 @@ public class XpathForClause {
 		return this;
 	}
 
-	public List<PetascopeServer> getServers() {
-		return servers;
-	}
-
-	public XpathForClause setServers(List<PetascopeServer> servers) {
-		this.servers = servers;
-		return this;
-	}
-
 	public String getXpathQuery() {
 		return xpathQuery;
 	}
 
 	public XpathForClause setXpathQuery(String xpathQuery) {
 		this.xpathQuery = xpathQuery;
+		return this;
+	}
+
+	public XpathForClause aggregate(XpathForClause aggregate) {
+		if (xpathQuery == null) {
+			xpathQuery = aggregate.getXpathQuery();
+		} else if (aggregate.getXpathQuery() != null) {
+			xpathQuery += aggregate.getXpathQuery();
+		}
+		
+		coverages.addAll(aggregate.getCoverages());
+		
 		return this;
 	}
 

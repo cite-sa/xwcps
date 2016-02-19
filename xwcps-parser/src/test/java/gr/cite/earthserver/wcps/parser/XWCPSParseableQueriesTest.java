@@ -100,8 +100,25 @@ public class XWCPSParseableQueriesTest {
 
 	@Test
 	public void query17() {
+		parseQuery("for c in (AvgLandTemp) return "
+				+ "<a attr=min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>");
+	}
+
+	@Test
+	public void query18() {
+		parseQuery("for c in (AvgLandTemp) return <b> <c attr='test' /> <c></c> <a> 1 </a></b>");
+	}
+
+	@Test
+	public void query19() {
+		parseQuery("for c in (AvgLandTemp) return <b> <c attr='test' /> <c></c> "
+				+ "<a> min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) </a></b>");
+	}
+
+	@Test
+	public void query20() {
 		parseQuery(
-				"for c in (AvgLandTemp) return <a attr=min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>");
+				"for c in (AvgLandTemp) return <b> <c attr='test' /> \"some text1\" <c>'some text2'</c> <a> min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) </a></b>");
 	}
 
 	public static void parseQuery(String query) {

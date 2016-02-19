@@ -1,6 +1,5 @@
 package gr.cite.earthserver.metadata.core;
 
-@Deprecated
 public class PetascopeServer {
 	String endpoint;
 

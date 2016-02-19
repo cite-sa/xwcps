@@ -1,29 +1,36 @@
 package gr.cite.earthserver.wcps.parser.evaluation;
 
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Stack;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import javax.xml.xpath.XPathFactoryConfigurationException;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.AttributeContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlWithCloseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ProcessingExpressionContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.QuatedContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.WrapResultClauseContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlReturnClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathForClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XqueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsReturnClauseContext;
-import gr.cite.earthserver.wcps.parser.utils.PrintCriteriaQuery;
+import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
-import gr.cite.exmms.manager.core.DataElement;
-import gr.cite.exmms.manager.criteria.CriteriaQuery;
+import gr.cite.exmms.criteria.CriteriaQuery;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
 
@@ -32,14 +39,30 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	private Stack<String> xmlReturnElements = new Stack<>();
 
-	private CriteriaQuery<DataElement> exmmsQuery = new PrintCriteriaQuery();
+	private CriteriaQuery<Coverage> exmmsQuery;
 
-	public XWCPSEvalVisitor(String wcsEndpoint) {
+	private String forClauseDefaultXpath = null;
+
+	/**
+	 * 
+	 * @param wcsEndpoint
+	 *            url on the federated rasdaman
+	 * @param exmmsQuery
+	 *            TODO
+	 */
+	public XWCPSEvalVisitor(String wcsEndpoint, CriteriaQuery<Coverage> exmmsQuery) {
 		super(wcsEndpoint);
+		this.exmmsQuery = exmmsQuery;
 	}
 
-	public XWCPSEvalVisitor(WCSRequestBuilder wcsRequestBuilder) {
+	/**
+	 * 
+	 * @param wcsRequestBuilder
+	 *            wcs request builder with url on the federated rasdaman
+	 */
+	public XWCPSEvalVisitor(WCSRequestBuilder wcsRequestBuilder, CriteriaQuery<Coverage> exmmsQuery) {
 		super(wcsRequestBuilder);
+		this.exmmsQuery = exmmsQuery;
 	}
 
 	@Override
@@ -60,12 +83,20 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	@Override
 	public Query visitXpathForClause(XpathForClauseContext ctx) {
 		Query q = visit(ctx.coverageVariableName());
-		
+
 		XpathForClauseEvalVisitor xpathForClauseEvalVisitor = new XpathForClauseEvalVisitor(exmmsQuery);
-		xpathForClauseEvalVisitor.visit(ctx);
-		exmmsQuery.find();
-		
-		return q;
+		XpathForClause xpathForClause = xpathForClauseEvalVisitor.visit(ctx);
+
+		variables.put(ctx.coverageVariableName().getText(), xpathForClause.getCoverages());
+
+		String coverages = xpathForClause.getCoverages().stream().map(Coverage::getLocalId)
+				.collect(Collectors.joining(", ", "( ", " )"));
+
+		if (xpathForClause.getXpathQuery() != null) {
+			forClauseDefaultXpath = xpathForClause.getXpathQuery();
+		}
+
+		return q.appendQuery(" in " + coverages);
 	}
 
 	@Override
@@ -73,12 +104,17 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		Query wcpsQuery = visit(ctx.scalarExpression());
 
-		if (ctx.xquery() == null) {
+		// if there is no xquery in the query
+		if (ctx.xquery() == null && forClauseDefaultXpath == null) {
 
 			if (ctx.scalarExpression().getComponentExpression() != null) {
 				return wcpsQuery;
 			} else {
-				// wcps query with scalar return expression 
+				/*
+				 * evaluate wcps scalar expressions, ie for c in (AvgLandTemp)
+				 * return <a attr=min(c[Lat(53.08), Long(8.80),
+				 * ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>
+				 */
 				try {
 
 					String rewrittedQuery = this.forWhereClauseQuery.getQuery() + " return " + wcpsQuery.getQuery();
@@ -98,9 +134,25 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		}
 
-		Query xpathQuery = visit(ctx.xquery());
+		Query xpathQuery = new Query();
+		if (forClauseDefaultXpath != null) {
+			xpathQuery.setQuery(forClauseDefaultXpath);
+		}
+		if (ctx.xquery() != null) {
+			xpathQuery.aggregate(visit(ctx.xquery()));
+		}
 
+		/*
+		 * rewrite to support xpath functions, eg
+		 * min(describeCoverage(c)//@someValue) into
+		 * describeCoverage(c)min(//@someValue)
+		 */
 		if (ctx.functionName() != null) {
+			
+			wcpsQuery.setValue(wcpsQuery.serializeValue());
+			wcpsQuery.setCoverageValueMap(null);
+			XWCPSEvalUtils.wrapDefaultXmlReturnElement(wcpsQuery);
+			
 			xpathQuery.prependQuery(ctx.functionName().getText() + "(").appendQuery(")");
 		}
 
@@ -114,7 +166,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	}
 
 	@Override
-	public Query visitOpenXmlElement(OpenXmlElementContext ctx) {
+	public Query visitXmlElement(XmlElementContext ctx) {
 		String xmlElement = ctx.qName().getText();
 		xmlReturnElements.push(xmlElement);
 
@@ -127,7 +179,23 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 			query.aggregate(visit(attributeContext));
 		}
 
+		return query;
+	}
+
+	@Override
+	public Query visitOpenXmlElement(OpenXmlElementContext ctx) {
+		Query query = visit(ctx.xmlElement());
+
 		query.aggregate(visit(ctx.GREATER_THAN()).setValue(ctx.GREATER_THAN().getText()));
+
+		return query;
+	}
+
+	@Override
+	public Query visitOpenXmlWithClose(OpenXmlWithCloseContext ctx) {
+		Query query = visit(ctx.xmlElement());
+
+		query.aggregate(visit(ctx.GREATER_THAN_SLASH()).setValue(ctx.GREATER_THAN_SLASH().getText()));
 
 		return query;
 	}
@@ -139,7 +207,40 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	@Override
 	public Query visitXmlReturnClause(XmlReturnClauseContext ctx) {
-		Query q = super.visitXmlReturnClause(ctx);
+		Query q = new Query();
+
+		if (ctx.xwcpsReturnClause() != null) {
+			Query openXmlElementQuery = visit(ctx.openXmlElement());
+			Query xwcpsReturnClauseQuery = visit(ctx.xwcpsReturnClause());
+			Query closeXmlElementQuery = visit(ctx.closeXmlElement());
+
+			if (xwcpsReturnClauseQuery.getCoverageValueMap() != null) {
+				for (Entry<Coverage, String> entry : xwcpsReturnClauseQuery.getCoverageValueMap().entrySet()) {
+					String xmlPayload = entry.getValue();
+					Query localQuery = new Query().evaluated();
+					localQuery.setValue(xmlPayload).prependValue(openXmlElementQuery.getValue())
+							.appendValue(closeXmlElementQuery.getValue());
+
+					q.aggregate(localQuery);
+				}
+			} else {
+				xwcpsReturnClauseQuery.prependValue(openXmlElementQuery.getValue())
+						.appendValue(closeXmlElementQuery.getValue());
+
+				q.aggregate(xwcpsReturnClauseQuery);
+			}
+
+		} else {
+			for (ParseTree parseTree : ctx.children) {
+				Query parseTreeQuery = visit(parseTree);
+				if (parseTree instanceof QuatedContext) {
+					// remove quates
+					parseTreeQuery.setValue(parseTree.getText().replaceAll("'|\"", ""));
+				}
+				q.aggregate(parseTreeQuery);
+			}
+		}
+
 		return q;
 	}
 
@@ -161,22 +262,64 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	@Override
 	public Query visitProcessingExpression(ProcessingExpressionContext ctx) {
-		if (ctx.xwcpsReturnClause() != null) {
-			Query xwcpsQuery = visit(ctx.xwcpsReturnClause());
-
-			return xwcpsQuery.isSimpleWCPS() ? xwcpsQuery : XWCPSEvalUtils.wrapDefaultXmlReturnElement(xwcpsQuery);
+		if (ctx.encodedCoverageExpression() != null || ctx.wrapResultClause() != null
+				|| ctx.getParent() instanceof WrapResultClauseContext) {
+			return super.visitProcessingExpression(ctx);
 		}
 
-		return super.visitProcessingExpression(ctx);
+		Query xwcpsQuery = super.visitProcessingExpression(ctx);
+		xwcpsQuery.setValue(xwcpsQuery.serializeValue());
+		
+		return xwcpsQuery.isSimpleWCPS() ? xwcpsQuery : XWCPSEvalUtils.wrapDefaultXmlReturnElement(xwcpsQuery);
+
+	}
+
+	@Override
+	public Query visitWrapResultClause(WrapResultClauseContext ctx) {
+		Query wrappedValue = visit(ctx.processingExpression());
+
+		Stack<String> openXmlElementNames = new Stack<>();
+
+		Query wrapper = new Query();
+		for (ParseTree parseTreeChild : ctx.children) {
+			if (parseTreeChild instanceof ProcessingExpressionContext) {
+				continue;
+			}
+
+			if (parseTreeChild instanceof OpenXmlElementContext) {
+				String xmlElementName = ((OpenXmlElementContext) parseTreeChild).xmlElement().qName().getText();
+				openXmlElementNames.push(xmlElementName);
+			}
+			wrapper.aggregate(visit(parseTreeChild));
+		}
+
+		Query aggregatedQuery = wrapper.aggregate(wrappedValue);
+		do {
+			aggregatedQuery.appendValue("</" + openXmlElementNames.pop() + ">");
+		} while (!openXmlElementNames.isEmpty());
+
+		return aggregatedQuery;
 	}
 
 	private static Query evaluateXpath(Query wcpsQuery, Query xpathQuery) throws XPathFactoryConfigurationException {
-		XPathEvaluator xPathEvaluator = new XPathEvaluator(XMLConverter.stringToNode(wcpsQuery.getValue(), true));
+		if (wcpsQuery.getCoverageValueMap() != null) {
+			for (Entry<Coverage, String> entry : wcpsQuery.getCoverageValueMap().entrySet()) {
+				entry.setValue(evaluateXpath(entry.getValue(), xpathQuery.getQuery()));
+			}
+		} else {
+			String value = evaluateXpath(wcpsQuery.getValue(), xpathQuery.getQuery());
+			wcpsQuery.aggregate(xpathQuery.setValue(value), true);
+		}
 
-		List<String> xpathResults = xPathEvaluator.evaluate(xpathQuery.getQuery());
-
-		String value = xpathResults.stream().collect(Collectors.joining(" "));
-
-		return wcpsQuery.aggregate(xpathQuery.setValue(value), true);
+		return wcpsQuery;
 	}
+
+	private static String evaluateXpath(String node, String xpath) throws XPathFactoryConfigurationException {
+		XPathEvaluator xPathEvaluator = new XPathEvaluator(XMLConverter.stringToNode(node, true));
+
+		List<String> xpathResults = xPathEvaluator.evaluate(xpath);
+
+		return xpathResults.stream().collect(Collectors.joining(" "));
+	}
+
 }

@@ -1,32 +1,59 @@
 package gr.cite.earthserver.metadata.core;
 
-@Deprecated
-public class Coverage {
-	private String id;
+import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
+import gr.cite.exmms.core.Collection;
+import gr.cite.exmms.core.DataElement;
+import gr.cite.exmms.core.DataElementMetadatum;
 
-	private PetascopeServer server;
+public class Coverage extends DataElement {
+
+	private PetascopeServer petascopeServer = null;
+
+	private String localId = null;
 
 	public Coverage(String id) {
-		this.id = id;
+		setId(id);
 	}
 
 	public Coverage() {
 	}
 
-	public String getId() {
-		return id;
+	public synchronized PetascopeServer getPetascopeServer() {
+		if (petascopeServer == null) {
+			Collection server = getCollections().get(0);
+
+			DataElementMetadatum endpointMetadatum = server.getMetadata().stream()
+					.filter(metadatum -> metadatum.getName().equals(XWCPSReservedWords.ENDPOINT)).findFirst().get();
+
+			this.petascopeServer = new PetascopeServer(endpointMetadatum.getValue());
+		}
+
+		return petascopeServer;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	// TODO localId as a metadata value?
+	public String getLocalId() {
+		if (localId == null) {
+
+			DataElementMetadatum endpointMetadatum = getMetadata().stream()
+					.filter(metadatum -> metadatum.getName().equals(XWCPSReservedWords.ID)).findFirst().get();
+
+			this.localId = endpointMetadatum.getValue();
+		}
+
+		return localId;
+	}
+	
+	public void setLocalId(String localId) {
+		this.localId = localId;
+	}
+	
+	public void setPetascopeServer(PetascopeServer petascopeServer) {
+		this.petascopeServer = petascopeServer;
 	}
 
-	public PetascopeServer getServer() {
-		return server;
+	@Override
+	public String toString() {
+		return getLocalId();
 	}
-
-	public void setServer(PetascopeServer server) {
-		this.server = server;
-	}
-
 }
