@@ -2,6 +2,7 @@ package gr.cite.earthserver.wcps.parser.evaluation;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import gr.cite.earthserver.metadata.core.Coverage;
 
@@ -83,9 +84,9 @@ public class Query {
 		query = (query == null ? nextResult.getQuery() : query + " " + nextResult.getQuery());
 
 		if (value == null || overrideValue) {
-			value = nextResult.getValue();
+			value = nextResult.serializeValue();
 		} else {
-			value = (value == null ? "" : value) + (nextResult.getValue() == null ? "" : nextResult.getValue());
+			value = serializeValue() + nextResult.serializeValue();
 		}
 
 		if (error == null) {
@@ -96,6 +97,16 @@ public class Query {
 			evaluated = nextResult.isEvaluated();
 		}
 		return this;
+	}
+
+	public String serializeValue() {
+		if (coverageValueMap != null) {
+			return coverageValueMap.values().stream().collect(Collectors.joining());
+		} else if (value != null) {
+			return value;
+		} else {
+			return "";
+		}
 	}
 
 	public Query aggregate(Query nextResult) {

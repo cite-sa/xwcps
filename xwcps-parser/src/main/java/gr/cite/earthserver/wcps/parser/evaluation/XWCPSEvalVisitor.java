@@ -249,12 +249,14 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	@Override
 	public Query visitProcessingExpression(ProcessingExpressionContext ctx) {
-		if (ctx.encodedCoverageExpression() != null || ctx.wrapResultClause() != null) {
+		if (ctx.encodedCoverageExpression() != null || ctx.wrapResultClause() != null
+				|| ctx.getParent() instanceof WrapResultClauseContext) {
 			return super.visitProcessingExpression(ctx);
 		}
 
 		Query xwcpsQuery = super.visitProcessingExpression(ctx);
-
+		xwcpsQuery.setValue(xwcpsQuery.serializeValue());
+		
 		return xwcpsQuery.isSimpleWCPS() ? xwcpsQuery : XWCPSEvalUtils.wrapDefaultXmlReturnElement(xwcpsQuery);
 
 	}
@@ -287,13 +289,13 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	}
 
 	private static Query evaluateXpath(Query wcpsQuery, Query xpathQuery) throws XPathFactoryConfigurationException {
-		if (wcpsQuery.getValue() != null) {
-			String value = evaluateXpath(wcpsQuery.getValue(), xpathQuery.getQuery());
-			wcpsQuery.aggregate(xpathQuery.setValue(value), true);
-		} else {
+		if (wcpsQuery.getCoverageValueMap() != null) {
 			for (Entry<Coverage, String> entry : wcpsQuery.getCoverageValueMap().entrySet()) {
 				entry.setValue(evaluateXpath(entry.getValue(), xpathQuery.getQuery()));
 			}
+		} else {
+			String value = evaluateXpath(wcpsQuery.getValue(), xpathQuery.getQuery());
+			wcpsQuery.aggregate(xpathQuery.setValue(value), true);
 		}
 
 		return wcpsQuery;
