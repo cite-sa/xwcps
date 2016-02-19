@@ -44,7 +44,6 @@ public class WCSRequestBuilder {
 		return ClientBuilder.newClient().target(endpoint).queryParam("service", "WCS").queryParam("version", version);
 	}
 	
-
 	public static class ProcessCoverages {
 
 		private WebTarget webTarget;
