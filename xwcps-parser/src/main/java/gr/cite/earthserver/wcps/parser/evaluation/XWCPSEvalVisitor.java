@@ -1,13 +1,15 @@
 package gr.cite.earthserver.wcps.parser.evaluation;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import javax.xml.xpath.XPathFactoryConfigurationException;
 
+import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
@@ -19,10 +21,10 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlWithCloseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ProcessingExpressionContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.QuatedContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WrapResultClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlReturnClauseContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlReturnClauseWithQuateContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathForClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XqueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
@@ -37,7 +39,7 @@ import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
 public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	private static final Logger logger = LoggerFactory.getLogger(XWCPSEvalVisitor.class);
 
-	private Stack<String> xmlReturnElements = new Stack<>();
+	private Stack<Pair<Query, Query>> xmlReturnElementsStack = new Stack<>();
 
 	private CriteriaQuery<Coverage> exmmsQuery;
 
@@ -148,11 +150,11 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		 * describeCoverage(c)min(//@someValue)
 		 */
 		if (ctx.functionName() != null) {
-			
+
 			wcpsQuery.setValue(wcpsQuery.serializeValue());
 			wcpsQuery.setCoverageValueMap(null);
 			XWCPSEvalUtils.wrapDefaultXmlReturnElement(wcpsQuery);
-			
+
 			xpathQuery.prependQuery(ctx.functionName().getText() + "(").appendQuery(")");
 		}
 
@@ -167,16 +169,34 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	@Override
 	public Query visitXmlElement(XmlElementContext ctx) {
-		String xmlElement = ctx.qName().getText();
-		xmlReturnElements.push(xmlElement);
-
 		Query query = visit(ctx.LOWER_THAN()).setValue(ctx.LOWER_THAN().getText());
 
 		query.aggregate(visit(ctx.qName()).setValue(ctx.qName().getText()));
 
+		Query attributes = new Query();
 		for (AttributeContext attributeContext : ctx.attribute()) {
-			query.setValue(query.getValue() + " ");
-			query.aggregate(visit(attributeContext));
+			Query attributeQuery = visit(attributeContext);
+			attributes.aggregate(attributeQuery);
+		}
+
+		if (attributes.getCoverageValueMap() != null) {
+
+			String xmlElementString = query.getValue() + " ";
+
+			for (Entry<Coverage, String> entry : attributes.getCoverageValueMap().entrySet()) {
+				String xmlPayload = entry.getValue();
+				Query localQuery = new Query().evaluated();
+
+				Map<Coverage, String> localCoverageValueMap = new HashMap<>();
+				localCoverageValueMap.put(entry.getKey(), xmlElementString + xmlPayload);
+				localQuery.setCoverageValueMap(localCoverageValueMap);
+
+				query.aggregate(localQuery);
+			}
+		} else {
+			if (attributes.getValue() != null) {
+				query.appendValue(" ").aggregate(attributes);
+			}
 		}
 
 		return query;
@@ -207,38 +227,46 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	@Override
 	public Query visitXmlReturnClause(XmlReturnClauseContext ctx) {
-		Query q = new Query();
 
+		if (!ctx.openXmlWithClose().isEmpty()) {
+			return super.visitXmlReturnClause(ctx);
+		}
+
+		Query openXmlElementQuery = visit(ctx.openXmlElement());
+		Query closeXmlElementQuery = visit(ctx.closeXmlElement());
+
+		Query payload = new Query();
 		if (ctx.xwcpsReturnClause() != null) {
-			Query openXmlElementQuery = visit(ctx.openXmlElement());
-			Query xwcpsReturnClauseQuery = visit(ctx.xwcpsReturnClause());
-			Query closeXmlElementQuery = visit(ctx.closeXmlElement());
 
-			if (xwcpsReturnClauseQuery.getCoverageValueMap() != null) {
-				for (Entry<Coverage, String> entry : xwcpsReturnClauseQuery.getCoverageValueMap().entrySet()) {
-					String xmlPayload = entry.getValue();
-					Query localQuery = new Query().evaluated();
-					localQuery.setValue(xmlPayload).prependValue(openXmlElementQuery.getValue())
-							.appendValue(closeXmlElementQuery.getValue());
-
-					q.aggregate(localQuery);
-				}
-			} else {
-				xwcpsReturnClauseQuery.prependValue(openXmlElementQuery.getValue())
-						.appendValue(closeXmlElementQuery.getValue());
-
-				q.aggregate(xwcpsReturnClauseQuery);
-			}
+			payload.aggregate(visit(ctx.xwcpsReturnClause()));
 
 		} else {
-			for (ParseTree parseTree : ctx.children) {
-				Query parseTreeQuery = visit(parseTree);
-				if (parseTree instanceof QuatedContext) {
-					// remove quates
-					parseTreeQuery.setValue(parseTree.getText().replaceAll("'|\"", ""));
-				}
-				q.aggregate(parseTreeQuery);
+
+			if (ctx.quated() != null) {
+				payload.aggregate(visit(ctx.quated()));
 			}
+
+			for (XmlReturnClauseWithQuateContext context : ctx.xmlReturnClauseWithQuate()) {
+				payload.aggregate(visit(context));
+			}
+		}
+
+		Query q = new Query();
+
+		if (payload.getCoverageValueMap() != null) {
+			for (Entry<Coverage, String> entry : payload.getCoverageValueMap().entrySet()) {
+				String xmlPayload = entry.getValue();
+				Query localQuery = new Query().evaluated();
+				Map<Coverage, String> localCoverageValueMap = new HashMap<>();
+				localCoverageValueMap.put(entry.getKey(),
+						openXmlElementQuery.getValue() + xmlPayload + closeXmlElementQuery.getValue());
+				localQuery.setCoverageValueMap(localCoverageValueMap);
+				q.aggregate(localQuery);
+			}
+		} else {
+			payload.prependValue(openXmlElementQuery.getValue()).appendValue(closeXmlElementQuery.getValue());
+
+			q.aggregate(payload);
 		}
 
 		return q;
@@ -246,15 +274,32 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	@Override
 	public Query visitAttribute(AttributeContext ctx) {
-		Query q = visit(ctx.qName()).setValue(ctx.qName().getText());
-		q.aggregate(visit(ctx.EQUAL()).setValue(ctx.EQUAL().getText()));
+		Query attribute = visit(ctx.qName()).setValue(ctx.qName().getText());
+		attribute.aggregate(visit(ctx.EQUAL()).setValue(ctx.EQUAL().getText()));
+
+		Query q = new Query();
 
 		if (ctx.quated() != null) {
-			q.aggregate(visit(ctx.quated()).setValue(ctx.quated().getText()));
+			q.aggregate(attribute).aggregate(visit(ctx.quated()).setValue(ctx.quated().getText()));
 		} else {
-			q.setValue(q.getValue() + "\"");
-			q.aggregate(visit(ctx.xwcpsReturnClause()));
-			q.setValue(q.getValue() + "\"");
+
+			Query payload = visit(ctx.xwcpsReturnClause());
+			if (payload.getCoverageValueMap() != null) {
+				for (Entry<Coverage, String> entry : payload.getCoverageValueMap().entrySet()) {
+					String xmlPayload = entry.getValue();
+					Query localQuery = new Query().evaluated();
+
+					Map<Coverage, String> localCoverageValueMap = new HashMap<>();
+					localCoverageValueMap.put(entry.getKey(), attribute.getValue() + "\"" + xmlPayload + "\"");
+					localQuery.setCoverageValueMap(localCoverageValueMap);
+
+					q.aggregate(localQuery);
+				}
+			} else {
+				q.setValue(attribute.getValue() + "\"");
+				q.aggregate(payload);
+				q.setValue(q.getValue() + "\"");
+			}
 		}
 
 		return q;
@@ -269,7 +314,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		Query xwcpsQuery = super.visitProcessingExpression(ctx);
 		xwcpsQuery.setValue(xwcpsQuery.serializeValue());
-		
+
 		return xwcpsQuery.isSimpleWCPS() ? xwcpsQuery : XWCPSEvalUtils.wrapDefaultXmlReturnElement(xwcpsQuery);
 
 	}

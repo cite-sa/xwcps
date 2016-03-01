@@ -28,11 +28,15 @@ public class WCPSEvalVisitorTest {
 		// "for c in (AvgLandTemp) return <a attr=min(c[Lat(53.08), Long(8.80),
 		// ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>";
 //				"for c in (AvgLandTemp , NIR) return describeCoverage(c)";
-//				"for c in (AvgLandTemp ) "
-//				+ "return <a><b atr=describeCoverage(c)//*[local-name()='limits']//text() > "
-//				+ "describeCoverage(c)//*[local-name()='domainSet'] </b></a>";
+				"for c in (AvgLandTemp) "
+				+ "return <a>'text1'<b "
+//				+ ">"
+				+ "attr='yannis' >"
+//				+ "atr=describeCoverage(c)//*[local-name()='limits']//text() > "
+				+ "describeCoverage(c)//*[local-name()='domainSet'] </b>"
+				+ "'text2'</a>";
 
-		"for c in //coverage[id='AvgLandTemp'] return min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")])";
+//		"for c in  return min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")])";
 //		"for c in (AvgLandTemp) return <b> <c attr='test' /> \"some text\" <c>'some text'</c> <a> min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) </a></b>";
 
 		// "/server//coverage/@*[local-name()='test']";

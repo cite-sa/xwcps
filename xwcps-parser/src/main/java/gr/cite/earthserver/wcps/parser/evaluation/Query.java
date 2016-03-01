@@ -89,6 +89,12 @@ public class Query {
 			value = serializeValue() + nextResult.serializeValue();
 		}
 
+		if (coverageValueMap != null && nextResult.getCoverageValueMap() != null) {
+			coverageValueMap.putAll(nextResult.getCoverageValueMap());
+		} else if (nextResult.getCoverageValueMap() != null) {
+			coverageValueMap = nextResult.getCoverageValueMap();
+		}
+
 		if (error == null) {
 			error = nextResult.getError();
 		}

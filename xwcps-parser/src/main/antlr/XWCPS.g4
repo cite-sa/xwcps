@@ -14,9 +14,11 @@ xquery: main;
  * for c in ( AvgLandTemp ) return <a>describeCoverage(c)//*[local-name()='domainSet']</a>
  */
 xmlReturnClause: openXmlElement xwcpsReturnClause closeXmlElement
-				| openXmlElement (quated)? (xmlReturnClause (quated)?) * closeXmlElement 
+				| openXmlElement (quated)? (xmlReturnClauseWithQuate) * closeXmlElement 
 				| (openXmlWithClose) + 
 				;
+
+xmlReturnClauseWithQuate: xmlReturnClause (quated)?;
 
 openXmlElement: xmlElement GREATER_THAN; 
 

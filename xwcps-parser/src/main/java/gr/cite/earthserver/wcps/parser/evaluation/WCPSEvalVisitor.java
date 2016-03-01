@@ -1,6 +1,5 @@
 package gr.cite.earthserver.wcps.parser.evaluation;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.DescribeCoverageExpressionLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ForClauseLabelContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.IdentifierContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WcpsQueryLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
 import gr.cite.earthserver.wcs.client.WCSRequest;
