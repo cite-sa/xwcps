@@ -4,6 +4,7 @@ import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
 import gr.cite.exmms.core.Collection;
 import gr.cite.exmms.core.DataElement;
 import gr.cite.exmms.core.DataElementMetadatum;
+import gr.cite.exmms.core.Metadatum;
 
 public class Coverage extends DataElement {
 
@@ -22,7 +23,7 @@ public class Coverage extends DataElement {
 		if (petascopeServer == null) {
 			Collection server = getCollections().get(0);
 
-			DataElementMetadatum endpointMetadatum = server.getMetadata().stream()
+			Metadatum endpointMetadatum = server.getMetadata().stream()
 					.filter(metadatum -> metadatum.getName().equals(XWCPSReservedWords.ENDPOINT)).findFirst().get();
 
 			this.petascopeServer = new PetascopeServer(endpointMetadatum.getValue());
@@ -35,7 +36,7 @@ public class Coverage extends DataElement {
 	public String getLocalId() {
 		if (localId == null) {
 
-			DataElementMetadatum endpointMetadatum = getMetadata().stream()
+			Metadatum endpointMetadatum = getMetadata().stream()
 					.filter(metadatum -> metadatum.getName().equals(XWCPSReservedWords.ID)).findFirst().get();
 
 			this.localId = endpointMetadatum.getValue();
@@ -43,11 +44,11 @@ public class Coverage extends DataElement {
 
 		return localId;
 	}
-	
+
 	public void setLocalId(String localId) {
 		this.localId = localId;
 	}
-	
+
 	public void setPetascopeServer(PetascopeServer petascopeServer) {
 		this.petascopeServer = petascopeServer;
 	}
@@ -56,4 +57,36 @@ public class Coverage extends DataElement {
 	public String toString() {
 		return getLocalId();
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((localId == null) ? 0 : localId.hashCode());
+		result = prime * result + ((petascopeServer == null) ? 0 : petascopeServer.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Coverage other = (Coverage) obj;
+		if (localId == null) {
+			if (other.localId != null)
+				return false;
+		} else if (!localId.equals(other.localId))
+			return false;
+		if (petascopeServer == null) {
+			if (other.petascopeServer != null)
+				return false;
+		} else if (!petascopeServer.equals(other.petascopeServer))
+			return false;
+		return true;
+	}
+
 }

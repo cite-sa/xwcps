@@ -43,9 +43,11 @@ xwcpsReturnClause: scalarExpression (xquery)?
 				| functionName LEFT_PARANTHESIS scalarExpression xquery RIGHT_PARANTHESIS;
 
 wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
-					processingExpression COMMA  openXmlElement ( openXmlElement | xmlReturnClause )*
+					processingExpression COMMA  openXmlElement ( wrapResultSubElement )*
 					RIGHT_PARANTHESIS;
 					
+wrapResultSubElement: openXmlElement | xmlReturnClause ;
+
 xpathForClause:  coverageVariableName IN xwcpsCoveragesClause;
 
 xwcpsCoveragesClause: xquery;

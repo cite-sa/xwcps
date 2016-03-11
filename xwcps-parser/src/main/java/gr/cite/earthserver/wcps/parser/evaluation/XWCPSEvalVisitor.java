@@ -21,7 +21,9 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlWithCloseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ProcessingExpressionContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.QuatedContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WrapResultClauseContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.WrapResultSubElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlReturnClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlReturnClauseWithQuateContext;
@@ -226,6 +228,11 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	}
 
 	@Override
+	public Query visitQuated(QuatedContext ctx) {
+		return super.visitQuated(ctx).setValue(XWCPSEvalUtils.removeQuates(ctx.getText()));
+	}
+
+	@Override
 	public Query visitXmlReturnClause(XmlReturnClauseContext ctx) {
 
 		if (!ctx.openXmlWithClose().isEmpty()) {
@@ -321,29 +328,36 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	@Override
 	public Query visitWrapResultClause(WrapResultClauseContext ctx) {
-		Query wrappedValue = visit(ctx.processingExpression());
 
 		Stack<String> openXmlElementNames = new Stack<>();
 
 		Query wrapper = new Query();
-		for (ParseTree parseTreeChild : ctx.children) {
-			if (parseTreeChild instanceof ProcessingExpressionContext) {
-				continue;
+
+		Query openXmlelement = visit(ctx.openXmlElement());
+		openXmlElementNames.push(XWCPSEvalUtils.getElementName(ctx.openXmlElement()));
+
+		wrapper.aggregate(openXmlelement);
+
+		for (WrapResultSubElementContext subElementCtx : ctx.wrapResultSubElement()) {
+			if (subElementCtx.getChild(0) instanceof OpenXmlElementContext) {
+				openXmlElementNames.push(XWCPSEvalUtils.getElementName(subElementCtx.openXmlElement()));
 			}
 
-			if (parseTreeChild instanceof OpenXmlElementContext) {
-				String xmlElementName = ((OpenXmlElementContext) parseTreeChild).xmlElement().qName().getText();
-				openXmlElementNames.push(xmlElementName);
-			}
-			wrapper.aggregate(visit(parseTreeChild));
+			Query subElement = visit(subElementCtx);
+
+			wrapper.aggregate(subElement);
 		}
 
-		Query aggregatedQuery = wrapper.aggregate(wrappedValue);
+		Query wrappedValue = visit(ctx.processingExpression());
+
+		wrapper.aggregate(wrappedValue);
+
 		do {
-			aggregatedQuery.appendValue("</" + openXmlElementNames.pop() + ">");
+			wrapper.appendValue("</" + openXmlElementNames.pop() + ">");
 		} while (!openXmlElementNames.isEmpty());
 
-		return aggregatedQuery;
+		wrapper.setCoverageValueMap(null);
+		return wrapper;
 	}
 
 	private static Query evaluateXpath(Query wcpsQuery, Query xpathQuery) throws XPathFactoryConfigurationException {

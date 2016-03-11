@@ -19,6 +19,7 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.PredicateContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.RelativeLocationPathContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.StepContext;
 import gr.cite.earthserver.wcps.parser.utils.PrintVisitor;
+import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
 import gr.cite.exmms.core.DataElementMetadatum;
 import gr.cite.exmms.core.Metadatum;
@@ -234,7 +235,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 		Metadatum metadatum = new DataElementMetadatum();
 		metadatum.setName(key.replaceAll("@", ""));
-		metadatum.setValue(value.replaceAll("'|\"", ""));
+		metadatum.setValue(XWCPSEvalUtils.removeQuates(value));
 
 		stack.pushWhereBuilderStack(stack.peekWhereStack().expression(metadatum));
 

@@ -3,6 +3,8 @@ package gr.cite.earthserver.wcps.parser.evaluation;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -166,15 +168,7 @@ public class XWCPSEvalVisitorTest {
 		String query = "for c in //coverage return describeCoverage(c)";
 
 		Query result = executeQuery(query, XWCPSEvaluationMocks.mockDescribeCoverage(),
-				XWCPSEvaluationMocks.mockCriteriaQuery(Lists.newArrayList(new Coverage() {
-					{
-						setLocalId("NIR");
-					}
-				}, new Coverage() {
-					{
-						setLocalId("AvgLandTemp");
-					}
-				})));
+				XWCPSEvaluationMocks.mockCriteriaQuery(dummyCoverages()));
 		String formattedActualResult = XMLConverter.nodeToString(XMLConverter.stringToNode(result.getValue(), true),
 				true);
 
@@ -189,15 +183,7 @@ public class XWCPSEvalVisitorTest {
 		String query = "for c in /server[@endpoint='abc']/coverage return describeCoverage(c)";
 
 		Query result = executeQuery(query, XWCPSEvaluationMocks.mockDescribeCoverage(),
-				XWCPSEvaluationMocks.mockCriteriaQuery(Lists.newArrayList(new Coverage() {
-					{
-						setLocalId("AvgLandTemp");
-					}
-				}, new Coverage() {
-					{
-						setLocalId("NIR");
-					}
-				})));
+				XWCPSEvaluationMocks.mockCriteriaQuery(dummyCoverages()));
 		String formattedActualResult = XMLConverter.nodeToString(XMLConverter.stringToNode(result.getValue(), true),
 				true);
 
@@ -205,6 +191,18 @@ public class XWCPSEvalVisitorTest {
 				XMLConverter.stringToNode(XWCPSQueryMockedResponses.DOUBLE_DESCRIBE_COVERAGE_RESULT, true), true);
 
 		assertEquals(formattedExpectedResult, formattedActualResult);
+	}
+
+	private static ArrayList<Coverage> dummyCoverages() {
+		return Lists.newArrayList(new Coverage() {
+			{
+				setLocalId("AvgLandTemp");
+			}
+		}, new Coverage() {
+			{
+				setLocalId("NIR");
+			}
+		});
 	}
 
 	@Test
@@ -254,6 +252,8 @@ public class XWCPSEvalVisitorTest {
 						setLocalId("AvgLandTemp");
 					}
 				})));
+
+		// System.out.println(result.getValue());
 
 		String formattedActualResult = XMLConverter.nodeToString(XMLConverter.stringToNode(result.getValue(), true),
 				true);
