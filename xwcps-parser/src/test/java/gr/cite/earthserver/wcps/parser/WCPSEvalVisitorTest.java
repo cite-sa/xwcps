@@ -24,17 +24,18 @@ public class WCPSEvalVisitorTest {
 	@Test
 	public void test() {
 		String query =
+"let d := 10 for c in (NIR) return <r> <b>d</b> <a> describeCoverage(c)</a> </r>";
 		// TODO
 		// "for c in (AvgLandTemp) return <a attr=min(c[Lat(53.08), Long(8.80),
 		// ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>";
 //				"for c in (AvgLandTemp , NIR) return describeCoverage(c)";
-				"for c in (AvgLandTemp) "
-				+ "return <a>'text1'<b "
-//				+ ">"
-				+ "attr='yannis' >"
-//				+ "atr=describeCoverage(c)//*[local-name()='limits']//text() > "
-				+ "describeCoverage(c)//*[local-name()='domainSet'] </b>"
-				+ "'text2'</a>";
+//				"for c in (AvgLandTemp) "
+//				+ "return <a>'text1'<b "
+////				+ ">"
+//				+ "attr='yannis' >"
+////				+ "atr=describeCoverage(c)//*[local-name()='limits']//text() > "
+//				+ "describeCoverage(c)//*[local-name()='domainSet'] </b>"
+//				+ "'text2'</a>";
 
 //		"for c in  return min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")])";
 //		"for c in (AvgLandTemp) return <b> <c attr='test' /> \"some text\" <c>'some text'</c> <a> min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) </a></b>";

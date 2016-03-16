@@ -2,12 +2,13 @@ grammar XWCPS;
 
 import WCPS, WCPSLexerTokens;
 
-xwcps : wcpsQuery
+xwcps : (letClause)* wcpsQuery
 	| xquery
 	; 
 	
 xquery: main;
 
+letClause: LET identifier ':=' processingExpression; 
 
 /**
  * Example: 
@@ -40,6 +41,7 @@ closeXmlElement: LOWER_THAN_SLASH qName GREATER_THAN;
  * for c in ( AvgLandTemp ) return min(describeCoverage(c)//*[local-name()='domainSet']//@anyattr)
  */
 xwcpsReturnClause: scalarExpression (xquery)?
+				| identifier
 				| functionName LEFT_PARANTHESIS scalarExpression xquery RIGHT_PARANTHESIS;
 
 wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
@@ -55,7 +57,7 @@ xwcpsCoveragesClause: xquery;
 /*
  * overrided wcps rules
  */
- 
+
 // on return
 processingExpression: xmlReturnClause
 					| xwcpsReturnClause

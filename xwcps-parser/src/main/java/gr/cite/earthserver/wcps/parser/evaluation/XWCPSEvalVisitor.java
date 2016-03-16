@@ -16,8 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gr.cite.earthserver.metadata.core.Coverage;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.AbbreviatedStepContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.AttributeContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.IdentifierContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.LetClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlWithCloseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ProcessingExpressionContext;
@@ -47,6 +50,8 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	private String forClauseDefaultXpath = null;
 
+	private Stack<Scope> scopes = new Stack<>();
+
 	/**
 	 * 
 	 * @param wcsEndpoint
@@ -71,10 +76,10 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 	@Override
 	public Query visitXwcps(XwcpsContext ctx) {
-		if (ctx.wcpsQuery() != null) {
-			return visit(ctx.wcpsQuery());
-		}
-		return visit(ctx.xquery());
+
+		scopes.push(Scope.newRootScope());
+
+		return visitChildren(ctx);
 	}
 
 	@Override
@@ -106,6 +111,10 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	@Override
 	public Query visitXwcpsReturnClause(XwcpsReturnClauseContext ctx) {
 
+		if (ctx.identifier() != null) {
+			return visit(ctx.identifier());
+		}
+
 		Query wcpsQuery = visit(ctx.scalarExpression());
 
 		// if there is no xquery in the query
@@ -121,7 +130,12 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 				 */
 				try {
 
-					String rewrittedQuery = this.forWhereClauseQuery.getQuery() + " return " + wcpsQuery.getQuery();
+					String defaultForWhereClauseQuery = "for c in (NIR) return ";
+					if (this.forWhereClauseQuery != null) {
+						defaultForWhereClauseQuery = this.forWhereClauseQuery.getQuery() + " return ";
+					}
+
+					String rewrittedQuery = defaultForWhereClauseQuery + wcpsQuery.getQuery();
 
 					if (ctx.getParent() instanceof ProcessingExpressionContext) {
 						wcpsQuery.simpleWCPS();
@@ -136,37 +150,50 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 				}
 			}
 
+		} else {
+
+			Query xpathQuery = new Query();
+			if (forClauseDefaultXpath != null) {
+				xpathQuery.setQuery(forClauseDefaultXpath);
+			}
+			if (ctx.xquery() != null) {
+				xpathQuery.aggregate(visit(ctx.xquery()));
+			}
+
+			/*
+			 * rewrite to support xpath functions, eg
+			 * min(describeCoverage(c)//@someValue) into
+			 * describeCoverage(c)min(//@someValue)
+			 */
+			if (ctx.functionName() != null) {
+
+				wcpsQuery.setValue(wcpsQuery.serializeValue());
+				wcpsQuery.setCoverageValueMap(null);
+				XWCPSEvalUtils.wrapDefaultXmlReturnElement(wcpsQuery);
+
+				xpathQuery.prependQuery(ctx.functionName().getText() + "(").appendQuery(")");
+			}
+
+			try {
+				return evaluateXpath(wcpsQuery, xpathQuery);
+			} catch (XPathFactoryConfigurationException e) {
+				logger.error(e.getMessage(), e);
+
+				throw new ParseCancellationException(e);
+			}
 		}
+	}
 
-		Query xpathQuery = new Query();
-		if (forClauseDefaultXpath != null) {
-			xpathQuery.setQuery(forClauseDefaultXpath);
-		}
-		if (ctx.xquery() != null) {
-			xpathQuery.aggregate(visit(ctx.xquery()));
-		}
+	@Override
+	public Query visitLetClause(LetClauseContext ctx) {
+		Query letClause = super.visitLetClause(ctx);
 
-		/*
-		 * rewrite to support xpath functions, eg
-		 * min(describeCoverage(c)//@someValue) into
-		 * describeCoverage(c)min(//@someValue)
-		 */
-		if (ctx.functionName() != null) {
+		String variable = ctx.identifier().getText();
+		String value = letClause.serializeValue();
 
-			wcpsQuery.setValue(wcpsQuery.serializeValue());
-			wcpsQuery.setCoverageValueMap(null);
-			XWCPSEvalUtils.wrapDefaultXmlReturnElement(wcpsQuery);
+		scopes.peek().setVariable(variable, value);
 
-			xpathQuery.prependQuery(ctx.functionName().getText() + "(").appendQuery(")");
-		}
-
-		try {
-			return evaluateXpath(wcpsQuery, xpathQuery);
-		} catch (XPathFactoryConfigurationException e) {
-			logger.error(e.getMessage(), e);
-
-			throw new ParseCancellationException(e);
-		}
+		return letClause;
 	}
 
 	@Override
@@ -352,12 +379,28 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		wrapper.aggregate(wrappedValue);
 
+		// close all open elements
 		do {
 			wrapper.appendValue("</" + openXmlElementNames.pop() + ">");
 		} while (!openXmlElementNames.isEmpty());
 
 		wrapper.setCoverageValueMap(null);
 		return wrapper;
+	}
+
+	@Override
+	public Query visitIdentifier(IdentifierContext ctx) {
+
+		String value = scopes.peek().getVariableValue(ctx.getText());
+
+		Query identifier = super.visitIdentifier(ctx);
+
+		if (value != null) {
+			logger.info("variable " + ctx.getText() + " was already evaluated: " + ctx.getText() + " = " + value);
+			identifier.setValue(value);
+		}
+
+		return identifier;
 	}
 
 	private static Query evaluateXpath(Query wcpsQuery, Query xpathQuery) throws XPathFactoryConfigurationException {

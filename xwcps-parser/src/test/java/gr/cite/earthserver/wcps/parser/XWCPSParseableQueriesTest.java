@@ -120,6 +120,11 @@ public class XWCPSParseableQueriesTest {
 		parseQuery(
 				"for c in (AvgLandTemp) return <b> <c attr='test' /> \"some text1\" <c>'some text2'</c> <a> min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) </a></b>");
 	}
+	
+	@Test
+	public void query21() {
+		parseQuery("let d:= 10 for c in /server/coverage return describeCoverage(c)");
+	}
 
 	public static void parseQuery(String query) {
 		CharStream stream = new ANTLRInputStream(query);

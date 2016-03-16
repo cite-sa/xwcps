@@ -74,6 +74,7 @@ IN:	('i'|'I')('n'|'N');
 LEFT_BRACE: '{';
 LEFT_BRACKET: '[';
 LEFT_PARANTHESIS: '(';
+LET: ('l'|'L')('e' | 'E')('t'|'T');
 LN: ('l'|'L')('n'|'N');
 LIST: ('l'|'L')('i'|'I')('s'|'S')('t'|'T');
 LOG: ('l'|'L')('o'|'O')('g'|'G');

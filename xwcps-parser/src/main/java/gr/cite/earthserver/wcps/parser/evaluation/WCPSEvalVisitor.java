@@ -26,6 +26,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	/**
 	 * expecting a link on the federated rasdaman
 	 */
+	@Deprecated
 	WCSRequestBuilder wcsRequestBuilder;
 
 	Map<String, List<Coverage>> variables = new HashMap<>();
