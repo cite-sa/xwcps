@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.DescribeCoverageExpressionLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ForClauseLabelContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.WcpsQueryLabelContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.WcpsQueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
 import gr.cite.earthserver.wcs.client.WCSRequest;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
@@ -87,7 +87,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	}
 
 	@Override
-	public Query visitWcpsQueryLabel(WcpsQueryLabelContext ctx) {
+	public Query visitWcpsQuery(WcpsQueryContext ctx) {
 		this.forWhereClauseQuery = visit(ctx.forClauseList());
 		if (ctx.whereClause() != null) {
 			this.forWhereClauseQuery.aggregate(visit(ctx.whereClause()));

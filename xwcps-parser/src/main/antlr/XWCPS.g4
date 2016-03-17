@@ -64,6 +64,8 @@ processingExpression: xmlReturnClause
 					| wrapResultClause
                     | encodedCoverageExpression;
 
+wcpsQuery : (forClauseList) (letClause)* (whereClause)? (returnClause) ;
+
 forClauseList: FOR (xwcpsforClause) (COMMA xwcpsforClause)*;
 
 xwcpsforClause: forClause

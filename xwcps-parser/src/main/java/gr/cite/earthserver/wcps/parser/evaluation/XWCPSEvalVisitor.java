@@ -130,7 +130,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 				 */
 				try {
 
-					String defaultForWhereClauseQuery = "for c in (NIR) return ";
+					String defaultForWhereClauseQuery = "for c in (NIR) return "; // FIXME
 					if (this.forWhereClauseQuery != null) {
 						defaultForWhereClauseQuery = this.forWhereClauseQuery.getQuery() + " return ";
 					}
