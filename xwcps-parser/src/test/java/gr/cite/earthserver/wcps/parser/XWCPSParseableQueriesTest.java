@@ -185,6 +185,20 @@ public class XWCPSParseableQueriesTest {
 				
 				+ "return <r> v4 + 5 </r>");
 	}
+	
+	
+	@Test
+	public void letQuery8() {
+		parseQuery("let v1 := 1 "
+
+				+ "for c in /server/coverage "
+
+				+ "let v3 := v1 + describeCoverage(c)/somePath/@someValue" 
+				
+				+ "let v4 := <e> v3 </e> "
+				
+				+ "return <r> v4 + describeCoverage(c)/somePath/@someValue </r>");
+	}
 
 	public static void parseQuery(String query) {
 		CharStream stream = new ANTLRInputStream(query);
