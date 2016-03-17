@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import gr.cite.earthserver.wcps.grammar.XWCPSBaseVisitor;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.CoverageVariableNameLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WcpsQueryContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlReturnClauseContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlClauseContext;
 import gr.cite.earthserver.wcps.parser.errors.SemanticError;
 
 public class XWCPSSemanticCheckVisitor extends XWCPSBaseVisitor<Aggregator> {
@@ -54,11 +54,11 @@ public class XWCPSSemanticCheckVisitor extends XWCPSBaseVisitor<Aggregator> {
 	}
 	
 	@Override
-	public Aggregator visitXmlReturnClause(XmlReturnClauseContext ctx) {
+	public Aggregator visitXmlClause(XmlClauseContext ctx) {
 		if (!getTagName(ctx.openXmlElement().getText()).equals(getTagName(ctx.closeXmlElement().getText()))) {
 			checkResults.addError(SemanticError.XML_ELEMENTS);
 		}
-		return super.visitXmlReturnClause(ctx);
+		return super.visitXmlClause(ctx);
 	}
 	
 	private String getTagName(String tag) {

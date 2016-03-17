@@ -3,23 +3,25 @@ grammar XWCPS;
 import WCPS, WCPSLexerTokens;
 
 xwcps : (letClause)* wcpsQuery
-	| xquery
+	| xpath
 	; 
 	
-xquery: main;
+xpath: main;
 
-letClause: LET identifier ':=' processingExpression; 
+letClause: LET identifier ':=' letClauseExpression; 
+
+letClauseExpression : coverageExpression | processingExpression;
 
 /**
  * Example: 
  * for c in ( AvgLandTemp ) return <a>describeCoverage(c)//*[local-name()='domainSet']</a>
  */
-xmlReturnClause: openXmlElement xwcpsReturnClause closeXmlElement
-				| openXmlElement (quated)? (xmlReturnClauseWithQuate) * closeXmlElement 
+xmlClause: openXmlElement xpathClause closeXmlElement
+				| openXmlElement (quated)? (xmlClauseWithQuate) * closeXmlElement 
 				| (openXmlWithClose) + 
 				;
 
-xmlReturnClauseWithQuate: xmlReturnClause (quated)?;
+xmlClauseWithQuate: xmlClause (quated)?;
 
 openXmlElement: xmlElement GREATER_THAN; 
 
@@ -28,7 +30,7 @@ openXmlWithClose: xmlElement GREATER_THAN_SLASH;
 xmlElement: LOWER_THAN (qName) (attribute)*;
 
 attribute: qName EQUAL quated 
-		 | qName EQUAL xwcpsReturnClause
+		 | qName EQUAL xpathClause
 		 ;
 
 quated: ( XPATH_LITERAL | STRING_LITERAL);
@@ -40,27 +42,27 @@ closeXmlElement: LOWER_THAN_SLASH qName GREATER_THAN;
  * for c in ( AvgLandTemp ) return describeCoverage(c)//*[local-name()='domainSet']
  * for c in ( AvgLandTemp ) return min(describeCoverage(c)//*[local-name()='domainSet']//@anyattr)
  */
-xwcpsReturnClause: scalarExpression (xquery)?
-				| identifier
-				| functionName LEFT_PARANTHESIS scalarExpression xquery RIGHT_PARANTHESIS;
+xpathClause: scalarExpression (xpath)?
+				| identifier // TODO remove from this rule
+				| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
 
 wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
 					processingExpression COMMA  openXmlElement ( wrapResultSubElement )*
 					RIGHT_PARANTHESIS;
 					
-wrapResultSubElement: openXmlElement | xmlReturnClause ;
+wrapResultSubElement: openXmlElement | xmlClause ;
 
 xpathForClause:  coverageVariableName IN xwcpsCoveragesClause;
 
-xwcpsCoveragesClause: xquery;
+xwcpsCoveragesClause: xpath;
 
 /*
  * overrided wcps rules
  */
 
 // on return
-processingExpression: xmlReturnClause
-					| xwcpsReturnClause
+processingExpression: xmlClause
+					| xpathClause
 					| wrapResultClause
                     | encodedCoverageExpression;
 

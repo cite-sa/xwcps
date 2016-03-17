@@ -1,21 +1,15 @@
 package gr.cite.earthserver.wcps.parser;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.atn.ATNConfigSet;
-import org.antlr.v4.runtime.dfa.DFA;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -135,24 +129,61 @@ public class XWCPSParseableQueriesTest {
 	}
 
 	@Test
-	public void query21() {
+	public void letQuery1() {
 		parseQuery("let d:= 10 for c in /server/coverage return describeCoverage(c)");
 	}
 
 	@Test
-	public void query22() {
+	public void letQuery2() {
 		parseQuery("let d:= 10 for c in /server/coverage return <r> <b>d</b> <a> describeCoverage(c)</a> </r>");
 	}
 
 	@Test
-	public void query23() {
+	public void letQuery3() {
 		parseQuery("let v1:= 1 " + "let v2:= 2 " + "for c in /server/coverage return <r> <b> v1 </b> <a> v2 </a> </r>");
 	}
 
 	@Test
-	public void query24() {
+	public void letQuery4() {
 		parseQuery("let v1:= 1 " + "for c in /server/coverage " + "let v3:= 3 " + "return <r> " + "<b> v1 </b> "
 				+ "<a> v3 </a> " + "</r>");
+	}
+
+	@Test
+	public void letQuery5() {
+		parseQuery("let v1:= 1 "
+
+				+ "for c in /server/coverage "
+
+				+ "let v3:= 3 + v1 " 
+				
+				+ "return <r> " + "<b> v1 </b> " + "<a> v3 </a> " + "</r>");
+	}
+	
+	@Test
+	public void letQuery6() {
+		parseQuery("let v1 := 1 "
+
+				+ "for c in /server/coverage "
+
+				+ "let v3 := 3 + v1 " 
+				
+				+ "let v4 := <e> v3 </e> "
+				
+				+ "return <r> v4 </r>");
+	}
+	
+	@Test
+	public void letQuery7() {
+		parseQuery("let v1 := 1 "
+
+				+ "for c in /server/coverage "
+
+				+ "let v3 := v1 + describeCoverage(c)/somePath/@someValue" 
+				
+				+ "let v4 := <e> v3 </e> "
+				
+				+ "return <r> v4 + 5 </r>");
 	}
 
 	public static void parseQuery(String query) {

@@ -11,12 +11,10 @@ import javax.xml.xpath.XPathFactoryConfigurationException;
 
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gr.cite.earthserver.metadata.core.Coverage;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.AbbreviatedStepContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.AttributeContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.IdentifierContext;
@@ -27,13 +25,13 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.ProcessingExpressionContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.QuatedContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WrapResultClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WrapResultSubElementContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlClauseContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlClauseWithQuateContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlElementContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlReturnClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlReturnClauseWithQuateContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathClauseContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathForClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XqueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsReturnClauseContext;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
@@ -83,8 +81,8 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	}
 
 	@Override
-	public Query visitXquery(XqueryContext ctx) {
-		Query query = super.visitXquery(ctx);
+	public Query visitXpath(XpathContext ctx) {
+		Query query = super.visitXpath(ctx);
 
 		return query;
 	}
@@ -109,7 +107,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	}
 
 	@Override
-	public Query visitXwcpsReturnClause(XwcpsReturnClauseContext ctx) {
+	public Query visitXpathClause(XpathClauseContext ctx) {
 
 		if (ctx.identifier() != null) {
 			return visit(ctx.identifier());
@@ -118,7 +116,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		Query wcpsQuery = visit(ctx.scalarExpression());
 
 		// if there is no xquery in the query
-		if (ctx.xquery() == null && forClauseDefaultXpath == null) {
+		if (ctx.xpath() == null && forClauseDefaultXpath == null) {
 
 			if (ctx.scalarExpression().getComponentExpression() != null) {
 				return wcpsQuery;
@@ -156,8 +154,8 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 			if (forClauseDefaultXpath != null) {
 				xpathQuery.setQuery(forClauseDefaultXpath);
 			}
-			if (ctx.xquery() != null) {
-				xpathQuery.aggregate(visit(ctx.xquery()));
+			if (ctx.xpath() != null) {
+				xpathQuery.aggregate(visit(ctx.xpath()));
 			}
 
 			/*
@@ -260,19 +258,19 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	}
 
 	@Override
-	public Query visitXmlReturnClause(XmlReturnClauseContext ctx) {
+	public Query visitXmlClause(XmlClauseContext ctx) {
 
 		if (!ctx.openXmlWithClose().isEmpty()) {
-			return super.visitXmlReturnClause(ctx);
+			return super.visitXmlClause(ctx);
 		}
 
 		Query openXmlElementQuery = visit(ctx.openXmlElement());
 		Query closeXmlElementQuery = visit(ctx.closeXmlElement());
 
 		Query payload = new Query();
-		if (ctx.xwcpsReturnClause() != null) {
+		if (ctx.xpathClause() != null) {
 
-			payload.aggregate(visit(ctx.xwcpsReturnClause()));
+			payload.aggregate(visit(ctx.xpathClause()));
 
 		} else {
 
@@ -280,7 +278,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 				payload.aggregate(visit(ctx.quated()));
 			}
 
-			for (XmlReturnClauseWithQuateContext context : ctx.xmlReturnClauseWithQuate()) {
+			for (XmlClauseWithQuateContext context : ctx.xmlClauseWithQuate()) {
 				payload.aggregate(visit(context));
 			}
 		}
@@ -317,7 +315,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 			q.aggregate(attribute).aggregate(visit(ctx.quated()).setValue(ctx.quated().getText()));
 		} else {
 
-			Query payload = visit(ctx.xwcpsReturnClause());
+			Query payload = visit(ctx.xpathClause());
 			if (payload.getCoverageValueMap() != null) {
 				for (Entry<Coverage, String> entry : payload.getCoverageValueMap().entrySet()) {
 					String xmlPayload = entry.getValue();
