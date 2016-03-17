@@ -16,10 +16,14 @@ letClauseExpression : coverageExpression | processingExpression;
  * Example: 
  * for c in ( AvgLandTemp ) return <a>describeCoverage(c)//*[local-name()='domainSet']</a>
  */
-xmlClause: openXmlElement xpathClause closeXmlElement
+xmlClause: openXmlElement xmlPayload closeXmlElement
 				| openXmlElement (quated)? (xmlClauseWithQuate)* closeXmlElement 
 				| (openXmlWithClose) + 
 				;
+xmlPayload: 
+		  xpathClause
+		| coverageExpression
+		;
 
 xmlClauseWithQuate: xmlClause (quated)?;
 

@@ -268,9 +268,9 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		Query closeXmlElementQuery = visit(ctx.closeXmlElement());
 
 		Query payload = new Query();
-		if (ctx.xpathClause() != null) {
+		if (ctx.xmlPayload() != null) {
 
-			payload.aggregate(visit(ctx.xpathClause()));
+			payload.aggregate(visit(ctx.xmlPayload()));
 
 		} else {
 

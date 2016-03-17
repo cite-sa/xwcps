@@ -170,7 +170,7 @@ public class XWCPSParseableQueriesTest {
 				
 				+ "let v4 := <e> v3 </e> "
 				
-				+ "return <r> v4 </r>");
+				+ "return <r> v4 + 1 </r>");
 	}
 	
 	@Test
