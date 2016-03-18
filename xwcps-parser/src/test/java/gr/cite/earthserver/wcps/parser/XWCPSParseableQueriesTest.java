@@ -179,7 +179,7 @@ public class XWCPSParseableQueriesTest {
 
 				+ "for c in /server/coverage "
 
-				+ "let v3 := v1 + describeCoverage(c)/somePath/@someValue" 
+				+ "let v3 := v1 + describeCoverage(c)/somePath/@someValue " 
 				
 				+ "let v4 := <e> v3 </e> "
 				
@@ -193,7 +193,7 @@ public class XWCPSParseableQueriesTest {
 
 				+ "for c in /server/coverage "
 
-				+ "let v3 := v1 + describeCoverage(c)/somePath/@someValue" 
+				+ "let v3 := v1 + describeCoverage(c)/somePath/@someValue " 
 				
 				+ "let v4 := <e> v3 </e> "
 				

@@ -10,7 +10,9 @@ xpath: main;
 
 letClause: LET identifier ':=' letClauseExpression; 
 
-letClauseExpression : coverageExpression | processingExpression;
+letClauseExpression : arithmeticExpression 
+					| processingExpression // TODO can I remove this from here?
+					;
 
 /**
  * Example: 
@@ -20,10 +22,19 @@ xmlClause: openXmlElement xmlPayload closeXmlElement
 				| openXmlElement (quated)? (xmlClauseWithQuate)* closeXmlElement 
 				| (openXmlWithClose) + 
 				;
+
 xmlPayload: 
-		  xpathClause
-		| coverageExpression
+		  arithmeticExpression
 		;
+
+arithmeticExpression :  
+				  arithmeticExpression booleanOperator arithmeticExpression
+				| arithmeticExpression coverageArithmeticOperator arithmeticExpression
+				| arithmeticExpression numericalComparissonOperator arithmeticExpression
+				| LEFT_PARANTHESIS arithmeticExpression RIGHT_PARANTHESIS 
+				| xpathClause
+				| coverageExpression
+				;
 
 xmlClauseWithQuate: xmlClause (quated)?;
 
@@ -47,8 +58,7 @@ closeXmlElement: LOWER_THAN_SLASH qName GREATER_THAN;
  * for c in ( AvgLandTemp ) return min(describeCoverage(c)//*[local-name()='domainSet']//@anyattr)
  */
 xpathClause: scalarExpression (xpath)?
-				| identifier // TODO remove from this rule
-				| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
+			| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
 
 wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
 					processingExpression COMMA  openXmlElement ( wrapResultSubElement )*

@@ -109,10 +109,6 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	@Override
 	public Query visitXpathClause(XpathClauseContext ctx) {
 
-		if (ctx.identifier() != null) {
-			return visit(ctx.identifier());
-		}
-
 		Query wcpsQuery = visit(ctx.scalarExpression());
 
 		// if there is no xquery in the query
