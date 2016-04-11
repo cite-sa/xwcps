@@ -49,7 +49,11 @@ public class XWCPSEvaluationMocks {
 		when(describeCoverage.build()).thenReturn(wcsRequest);
 
 		try {
-			when(wcsRequest.get()).thenReturn(XWCPSQueryMockedResponses.AVGLANDTEMP_DESCRIBE_COVERAGE);
+			when(wcsRequest.get()).thenReturn(new XwcpsQueryResult() {
+				{
+					setAggregatedValue(XWCPSQueryMockedResponses.AVGLANDTEMP_DESCRIBE_COVERAGE);
+				}
+			});
 		} catch (WCSRequestException e) {
 		}
 
@@ -66,7 +70,11 @@ public class XWCPSEvaluationMocks {
 		when(processCoverages.build()).thenReturn(wcsRequest);
 
 		try {
-			when(wcsRequest.get()).thenReturn(wcpsQueryResponse);
+			when(wcsRequest.get()).thenReturn(new XwcpsQueryResult() {
+				{
+					setAggregatedValue(wcpsQueryResponse);
+				}
+			});
 		} catch (WCSRequestException e) {
 		}
 
@@ -83,7 +91,11 @@ public class XWCPSEvaluationMocks {
 		when(processCoverages.build()).thenReturn(wcsRequest);
 
 		try {
-			when(wcsRequest.get()).thenReturn(wcpsQueryResponse);
+			when(wcsRequest.get()).thenReturn(new XwcpsQueryResult() {
+				{
+					setAggregatedValue(wcpsQueryResponse);
+				}
+			});
 		} catch (WCSRequestException e) {
 		}
 
@@ -108,7 +120,7 @@ public class XWCPSEvaluationMocks {
 			when(where.isParentOf(Matchers.<DataElement> any())).thenReturn(whereBuilder);
 		} catch (UnsupportedQueryOperationException e) {
 		}
-		
+
 		when(whereBuilder.build()).thenReturn(query);
 
 		return query;

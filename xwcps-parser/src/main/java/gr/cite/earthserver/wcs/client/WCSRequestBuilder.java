@@ -3,6 +3,9 @@ package gr.cite.earthserver.wcs.client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 
+import org.glassfish.jersey.uri.UriComponent;
+import org.glassfish.jersey.uri.UriComponent.Type;
+
 public class WCSRequestBuilder {
 	private String endpoint;
 
@@ -43,7 +46,7 @@ public class WCSRequestBuilder {
 	private WebTarget build() {
 		return ClientBuilder.newClient().target(endpoint).queryParam("service", "WCS").queryParam("version", version);
 	}
-	
+
 	public static class ProcessCoverages {
 
 		private WebTarget webTarget;
@@ -67,7 +70,7 @@ public class WCSRequestBuilder {
 
 		public WCSRequest build() {
 			return new WCSRequest(this.webTarget.queryParam("wcpsVersion", wcpsVersion).queryParam("query",
-					query.replaceAll(" ", "%20")));
+					UriComponent.encode(query, Type.QUERY_PARAM_SPACE_ENCODED)));
 		}
 
 	}

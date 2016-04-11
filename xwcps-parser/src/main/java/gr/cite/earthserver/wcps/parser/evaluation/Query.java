@@ -1,23 +1,26 @@
 package gr.cite.earthserver.wcps.parser.evaluation;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import gr.cite.earthserver.metadata.core.Coverage;
 
-public class Query {
+public class Query extends XwcpsQueryResult {
 	private String query;
 
 	private boolean evaluated = false;
 
-	private String value;
-
-	private String error; // TODO list??
-
 	private boolean isSimpleWCPS;
 
 	private Map<Coverage, String> coverageValueMap;
+
+	public Query() {
+		setMixedValues(new HashSet<>());
+		setErrors(new ArrayList<>());
+	}
 
 	public Query setQuery(String wcpsQuery) {
 		this.query = wcpsQuery;
@@ -47,35 +50,40 @@ public class Query {
 	}
 
 	public Query setValue(String value) {
-		this.value = value;
+		this.aggregatedValue = value;
 		return this;
 	}
 
 	public Query prependValue(String prependValue) {
-		this.value = prependValue + this.value;
+		this.aggregatedValue = prependValue + this.aggregatedValue;
+		return this;
+	}
+
+	public Query addMixedValue(MixedValue mixedValue) {
+		getMixedValues().add(mixedValue);
 		return this;
 	}
 
 	public Query appendValue(String prependValue) {
-		this.value += prependValue;
+		this.aggregatedValue += prependValue;
 		return this;
 	}
 
 	public String getValue() {
-		return value;
-	}
-
-	public String getError() {
-		return error;
+		return aggregatedValue;
 	}
 
 	public Query setError(String error) {
-		this.error = error;
+		getErrors().add(new Error() {
+			{
+				setMessage(error);
+			}
+		});
 		return this;
 	}
 
 	public boolean hasError() {
-		return this.error != null;
+		return getErrors().size() > 0;
 	}
 
 	public Query aggregate(Query nextResult, boolean overrideValue) {
@@ -83,10 +91,10 @@ public class Query {
 
 		query = (query == null ? nextResult.getQuery() : query + " " + nextResult.getQuery());
 
-		if (value == null || overrideValue) {
-			value = nextResult.serializeValue();
+		if (aggregatedValue == null || overrideValue) {
+			aggregatedValue = nextResult.serializeValue();
 		} else {
-			value = serializeValue() + nextResult.serializeValue();
+			aggregatedValue = serializeValue() + nextResult.serializeValue();
 		}
 
 		if (coverageValueMap != null && nextResult.getCoverageValueMap() != null) {
@@ -95,9 +103,9 @@ public class Query {
 			coverageValueMap = nextResult.getCoverageValueMap();
 		}
 
-		if (error == null) {
-			error = nextResult.getError();
-		}
+		getMixedValues().addAll(nextResult.getMixedValues());
+
+		getErrors().addAll(nextResult.getErrors());
 
 		if (!evaluated) {
 			evaluated = nextResult.isEvaluated();
@@ -108,8 +116,8 @@ public class Query {
 	public String serializeValue() {
 		if (coverageValueMap != null) {
 			return coverageValueMap.values().stream().collect(Collectors.joining());
-		} else if (value != null) {
-			return value;
+		} else if (aggregatedValue != null) {
+			return aggregatedValue;
 		} else {
 			return "";
 		}

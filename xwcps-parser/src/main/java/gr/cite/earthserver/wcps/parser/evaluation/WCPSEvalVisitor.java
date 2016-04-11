@@ -35,7 +35,8 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 
 	/**
 	 * 
-	 * @param wcsEndpoint url on the federated rasdaman
+	 * @param wcsEndpoint
+	 *            url on the federated rasdaman
 	 */
 	public WCPSEvalVisitor(String wcsEndpoint) {
 		this.wcsRequestBuilder = WCSRequest.newBuilder().endpoint(wcsEndpoint);
@@ -43,7 +44,8 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 
 	/**
 	 * 
-	 * @param wcsRequestBuilder wcs request builder with url on the federated rasdaman
+	 * @param wcsRequestBuilder
+	 *            wcs request builder with url on the federated rasdaman
 	 */
 	public WCPSEvalVisitor(WCSRequestBuilder wcsRequestBuilder) {
 		this.wcsRequestBuilder = wcsRequestBuilder;
@@ -69,7 +71,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		Map<Coverage, String> describeCoverages = variables.get(variable).stream().map(coverage -> {
 			try {
 				String describeCoverage = wcsRequestBuilder.describeCoverage().coverageId(coverage.getLocalId()).build()
-						.get();
+						.get().getAggregatedValue();
 
 				Entry<Coverage, String> entry = new SimpleImmutableEntry<>(coverage, "<coverage id='" + coverage + "'>"
 						+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
@@ -83,7 +85,9 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		}).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
 
 		return query.evaluated().setCoverageValueMap(describeCoverages);
-				//.setValue("<coverages>" + describeCoverages.stream().collect(Collectors.joining()) + "</coverages>");
+		// .setValue("<coverages>" +
+		// describeCoverages.stream().collect(Collectors.joining()) +
+		// "</coverages>");
 	}
 
 	@Override
@@ -96,12 +100,17 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		Query query = this.forWhereClauseQuery;
 
 		Query returnClauseQuery = visit(ctx.returnClause());
-		
+
 		query.aggregate(returnClauseQuery);
 
 		try {
 			if (!query.isEvaluated()) {
-				return query.setValue(wcsRequestBuilder.processCoverages().query(query.getQuery()).build().get());
+				XwcpsQueryResult xwcpsQueryResult = wcsRequestBuilder.processCoverages().query(query.getQuery()).build()
+						.get();
+
+				query.getMixedValues().addAll(xwcpsQueryResult.getMixedValues());
+
+				return query.setValue(xwcpsQueryResult.getAggregatedValue());
 			} else {
 				return query;
 			}

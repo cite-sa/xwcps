@@ -136,7 +136,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 					}
 
 					return wcpsQuery.evaluated()
-							.setValue(wcsRequestBuilder.processCoverages().query(rewrittedQuery).build().get());
+							.setValue(wcsRequestBuilder.processCoverages().query(rewrittedQuery).build().get().getAggregatedValue());
 				} catch (WCSRequestException e) {
 					logger.error(e.getMessage(), e);
 

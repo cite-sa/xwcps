@@ -12,12 +12,15 @@ import gr.cite.earthserver.wcps.grammar.XWCPSLexer;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.XWCPSEvalVisitor;
+import gr.cite.earthserver.wcps.parser.evaluation.XwcpsQueryResult;
 import gr.cite.exmms.criteria.CriteriaQuery;
 
 public class XWCPSQueryParser {
 
-	private static final String WCS_ENDPOINT = "http://flanche.com:9090/rasdaman/ows";
+//	private static final String WCS_ENDPOINT = "http://flanche.com:9090/rasdaman/ows";
 
+	private static final String WCS_ENDPOINT = "http://access.planetserver.eu:8080/rasdaman/ows";
+	
 	private CriteriaQuery<Coverage> criteriaQuery;
 
 	@Inject
@@ -25,7 +28,7 @@ public class XWCPSQueryParser {
 		this.criteriaQuery = criteriaQuery;
 	}
 
-	public Query parse(String query) {
+	public XwcpsQueryResult parse(String query) {
 		CharStream stream = new ANTLRInputStream(query);
 		XWCPSLexer lexer = new XWCPSLexer(stream);
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
