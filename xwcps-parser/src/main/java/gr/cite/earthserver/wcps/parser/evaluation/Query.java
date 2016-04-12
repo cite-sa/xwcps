@@ -40,7 +40,7 @@ public class Query extends XwcpsQueryResult {
 		return evaluated;
 	}
 
-	protected Query evaluated() {
+	public Query evaluated() {
 		setEvaluated(true);
 		return this;
 	}

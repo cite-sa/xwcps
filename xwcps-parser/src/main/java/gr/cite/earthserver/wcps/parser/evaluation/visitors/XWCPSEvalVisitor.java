@@ -1,4 +1,4 @@
-package gr.cite.earthserver.wcps.parser.evaluation;
+package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +32,9 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathForClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
+import gr.cite.earthserver.wcps.parser.evaluation.Query;
+import gr.cite.earthserver.wcps.parser.evaluation.Scope;
+import gr.cite.earthserver.wcps.parser.evaluation.XpathForClause;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestException;

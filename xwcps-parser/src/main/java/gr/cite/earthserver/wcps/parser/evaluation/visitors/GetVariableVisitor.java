@@ -1,4 +1,4 @@
-package gr.cite.earthserver.wcps.parser.evaluation;
+package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.util.HashSet;
 import java.util.Set;

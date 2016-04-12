@@ -1,4 +1,4 @@
-package gr.cite.earthserver.wcps.parser.evaluation;
+package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.util.List;
 import java.util.Stack;
@@ -18,6 +18,7 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.OrExprContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.PredicateContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.RelativeLocationPathContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.StepContext;
+import gr.cite.earthserver.wcps.parser.evaluation.XpathForClause;
 import gr.cite.earthserver.wcps.parser.utils.PrintVisitor;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;

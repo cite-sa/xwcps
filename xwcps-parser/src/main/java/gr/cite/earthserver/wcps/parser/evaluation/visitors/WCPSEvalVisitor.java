@@ -1,4 +1,4 @@
-package gr.cite.earthserver.wcps.parser.evaluation;
+package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.HashMap;
@@ -13,9 +13,12 @@ import org.slf4j.LoggerFactory;
 
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.DescribeCoverageExpressionLabelContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.EncodedCoverageExpressionLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ForClauseLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WcpsQueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
+import gr.cite.earthserver.wcps.parser.evaluation.Query;
+import gr.cite.earthserver.wcps.parser.evaluation.XwcpsQueryResult;
 import gr.cite.earthserver.wcs.client.WCSRequest;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
@@ -101,6 +104,8 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 
 		Query returnClauseQuery = visit(ctx.returnClause());
 
+		// TODO rewrite encode query -- for c in (C1, C2) return encode.... 
+		
 		query.aggregate(returnClauseQuery);
 
 		try {
@@ -108,7 +113,9 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 				XwcpsQueryResult xwcpsQueryResult = wcsRequestBuilder.processCoverages().query(query.getQuery()).build()
 						.get();
 
-				query.getMixedValues().addAll(xwcpsQueryResult.getMixedValues());
+				if (xwcpsQueryResult.getMixedValues() != null) {
+					query.getMixedValues().addAll(xwcpsQueryResult.getMixedValues());
+				}
 
 				return query.setValue(xwcpsQueryResult.getAggregatedValue());
 			} else {
@@ -118,6 +125,15 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 			logger.error(e.getMessage());
 			return query.setError(e.getError());
 		}
+	}
+	
+	@Override
+	public Query visitEncodedCoverageExpressionLabel(EncodedCoverageExpressionLabelContext ctx) {
+		Query encodedCoverageExpressionLabel = super.visitEncodedCoverageExpressionLabel(ctx);
+		
+		
+		
+		return encodedCoverageExpressionLabel;
 	}
 
 	@Override
