@@ -1,18 +1,11 @@
 package gr.cite.earthserver.wcps.parser.application;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.mockito.Matchers;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.mockito.verification.VerificationMode;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import com.google.common.collect.Lists;
 
@@ -20,7 +13,6 @@ import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.parser.XWCPSQueryParser;
 import gr.cite.earthserver.wcps.parser.application.config.XWCPSParserConfiguration;
 import gr.cite.earthserver.wcps.parser.application.resource.ParserResource;
-import gr.cite.exmms.core.DataElement;
 import gr.cite.exmms.core.Element;
 import gr.cite.exmms.core.Metadatum;
 import gr.cite.exmms.criteria.CriteriaQuery;
@@ -37,10 +29,31 @@ public class XWCPSParserApplication extends Application<XWCPSParserConfiguration
 
 		CriteriaQuery<Coverage> criteriaQuery = mock();
 
+		environment.jersey().register(MultiPartFeature.class);
+
 		environment.jersey().register(new ParserResource(new XWCPSQueryParser(criteriaQuery)));
 	}
 
 	private CriteriaQuery<Coverage> mock() {
+
+		List<String> coverages = Lists.newArrayList(
+				"hrs0000908b_07_if176l_trr3",
+				"frt00007b8f_07_if164l_trr3",
+				"frt00009392_07_if166l_trr3",
+				"hrl0000c067_07_if185l_trr3",
+				"frt00003590_07_if164l_trr3",
+				"frt0000b1bd_07_if166l_trr3"
+				);
+
+		for (String coverage : coverages) {
+			MyCriteriaQuery.COVERAGE_MAPS.put(coverage, new Coverage() {
+				{
+					setLocalId(coverage);
+					setId(coverage);
+					setName(coverage);
+				}
+			});
+		}
 
 		return new MyCriteriaQuery();
 	}
@@ -53,19 +66,7 @@ public class XWCPSParserApplication extends Application<XWCPSParserConfiguration
 
 class MyCriteriaQuery implements CriteriaQuery<Coverage> {
 
-	public static Coverage AvgLandTemp = new Coverage() {
-		{
-			setId("AvgLandTemp");
-			setLocalId("AvgLandTemp");
-		}
-	};
-
-	public static Coverage NIR = new Coverage() {
-		{
-			setId("NIR");
-			setLocalId("NIR");
-		}
-	};
+	public static Map<String, Coverage> COVERAGE_MAPS = new HashMap<>();
 
 	List<Coverage> coverages = new ArrayList<>();
 
@@ -83,14 +84,13 @@ class MyCriteriaQuery implements CriteriaQuery<Coverage> {
 
 	@Override
 	public Coverage find(String id) {
-		return AvgLandTemp;
+		return COVERAGE_MAPS.get(id);
 	}
 
 	@Override
 	public List<Coverage> find() {
 		if (getCoverages().isEmpty()) {
-			getCoverages().add(MyCriteriaQuery.AvgLandTemp);
-			getCoverages().add(MyCriteriaQuery.NIR);
+			coverages.addAll(COVERAGE_MAPS.values());
 		}
 		return coverages;
 	}
@@ -123,8 +123,7 @@ class MyWhereBuilder implements WhereBuilder<Coverage> {
 	@Override
 	public CriteriaQuery<Coverage> build() {
 		if (query.getCoverages().isEmpty()) {
-			query.getCoverages().add(MyCriteriaQuery.AvgLandTemp);
-			query.getCoverages().add(MyCriteriaQuery.NIR);
+			query.getCoverages().addAll(MyCriteriaQuery.COVERAGE_MAPS.values());
 		}
 
 		return query;
@@ -181,12 +180,11 @@ class MyWhere implements Where<Coverage> {
 
 	@Override
 	public <S extends Metadatum> WhereBuilder<Coverage> expression(S metadatum) {
-
-		if (metadatum.getValue().equals("NIR")) {
-			builder.getQuery().getCoverages().add(MyCriteriaQuery.NIR);
-		} else {
-			builder.getQuery().getCoverages().add(MyCriteriaQuery.AvgLandTemp);
+		if (metadatum.getName().equals("endpoint")) {
+			return builder;
 		}
+
+		builder.getQuery().getCoverages().add(MyCriteriaQuery.COVERAGE_MAPS.get(metadatum));
 
 		return builder;
 

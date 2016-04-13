@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import gr.cite.earthserver.metadata.core.Coverage;
@@ -14,7 +15,7 @@ import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 public class Query extends XwcpsQueryResult {
 	private String query;
 
-	private List<String> splittedQuery = new ArrayList<>();
+	private List<Query> splittedQuery = new ArrayList<>();
 
 	private boolean evaluated = false;
 
@@ -91,11 +92,11 @@ public class Query extends XwcpsQueryResult {
 		return getErrors().size() > 0;
 	}
 
-	public List<String> getSplittedQuery() {
+	public List<Query> getSplittedQuery() {
 		return splittedQuery;
 	}
 
-	public Query setSplittedQuery(List<String> splittedQuery) {
+	public Query setSplittedQuery(List<Query> splittedQuery) {
 		this.splittedQuery = splittedQuery;
 		return this;
 	}
@@ -104,8 +105,8 @@ public class Query extends XwcpsQueryResult {
 
 		query = aggreagateQuery(query, nextResult);
 
-		for (String splitted : splittedQuery) {
-			aggreagateQuery(splitted, nextResult);
+		for (Query splitted : splittedQuery) {
+			splitted.setAggregatedValue(aggreagateQuery(splitted.getAggregatedValue(), nextResult));
 		}
 		if (splittedQuery.isEmpty() && !nextResult.getSplittedQuery().isEmpty()) {
 			// for (String splitted : nextResult.getSplittedQuery()) {
@@ -124,7 +125,11 @@ public class Query extends XwcpsQueryResult {
 		}
 
 		if (coverageValueMap != null && nextResult.getCoverageValueMap() != null) {
-			coverageValueMap.putAll(nextResult.getCoverageValueMap());
+			for (Entry<Coverage, String> coverageEntry : nextResult.getCoverageValueMap().entrySet()) {
+				if (coverageEntry.getValue() != null) {
+					coverageValueMap.put(coverageEntry.getKey(), coverageEntry.getValue());
+				}
+			}
 		} else if (nextResult.getCoverageValueMap() != null) {
 			coverageValueMap = nextResult.getCoverageValueMap();
 		}
@@ -145,7 +150,7 @@ public class Query extends XwcpsQueryResult {
 
 	public String serializeValue() {
 		if (coverageValueMap != null) {
-			return coverageValueMap.values().stream().collect(Collectors.joining());
+			return coverageValueMap.values().stream().filter(v -> v != null).collect(Collectors.joining());
 		} else if (aggregatedValue != null) {
 			return aggregatedValue;
 		} else {

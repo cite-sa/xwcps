@@ -1,3 +1,15 @@
 .query-form .row {
     margin-top: 1em;
 }
+
+.mixedValue img {
+    max-width: 100%;
+    padding: 1em;
+}
+
+.mixedValue .panel-heading {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+

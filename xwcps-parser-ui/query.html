@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="xWCPSParserApp">
 <head lang="en">
     <meta charset="UTF-8">
     <title></title>
@@ -21,53 +21,93 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
     <script src="https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/vkbeautify/vkbeautify.0.99.00.beta.js"></script>
 
+    <script src="./libs/angular.js"></script>
+    <script src="./libs/angular-resource.js"></script>
+
+    <script src="./app/xwcps-parser-app.js"></script>
+
     <link rel="stylesheet" href="css/query.css">
+    <link rel="stylesheet" href="css/spinner.css">
+
 </head>
 <body>
 
 <div class="container">
-    <div class="query-form">
+    <div class="query-form" ng-controller="xWCPSExecutorController">
         <div class="row">
             <div class="col-xs-12">
-                <form>
+                <form ng-submit="execute()">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="queryInput" placeholder="Query">
+                        <input type="text" class="form-control" value="{{query}}" id="queryInput" placeholder="Query"
+                               ng-model="query">
                         <span class="input-group-btn"><input class="btn btn-default" type="submit"/></span>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="row">
+
+        <div class="spinner" ng-hide="loader || result">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+        </div>
+
+        <div class="row" ng-show="result.aggregatedValue">
             <div class="col-xs-12">
                 <div class="query-result">
+                    <pre>
+                        {{prettifyXml(result.aggregatedValue)}}
+                    </pre>
                 </div>
             </div>
         </div>
+
+        <div class="row mixedValue" ng-repeat="mixedValue in result.mixedValues">
+            <div class="panel panel-info">
+
+                <div class="panel-heading">{{mixedValue.subQuery}}</div>
+
+                <div class="panel-body">
+                    <div class="col-xs-12">
+                        <img ng-show="mixedValue.wcpsValue" ng-src="{{'data:image/png;base64,' + mixedValue.wcpsValue}}">
+                    </div>
+                    <div class="col-xs-12" ng-show="mixedValue.xwcpsValue">
+                        <div class="query-result">
+                    <pre>
+                        {{prettifyXml(mixedValue.xwcpsValue)}}
+                    </pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </div>
 </div>
 
 <script>
-    $(function () {
-        $(".query-form form").submit(function (e) {
-            e.preventDefault();
-
-            var query = $("#queryInput").val();
-
-            $.ajax({
-                url: "http://localhost:9292/parser/queryP",
-                type: "GET",
-                dataType: "jsonp",
-                data: {
-                    q : query
-                },
-                success: function (result) {
-                    $(".query-result pre").remove();
-                    $(".query-result").append($("<pre>").text(vkbeautify.xml(result.value)));
-                }
-            });
-        });
-
-    });
+    //    $(function () {
+    //        $(".query-form form").submit(function (e) {
+    //            e.preventDefault();
+    //
+    //            var query = $("#queryInput").val();
+    //
+    //            $.ajax({
+    //                url: "http://localhost:9292/parser/queryP",
+    //                type: "GET",
+    //                dataType: "jsonp",
+    //                data: {
+    //                    q: query
+    //                },
+    //                success: function (result) {
+    //                    $(".query-result pre").remove();
+    //                    $(".query-result").append($("<pre>").text(vkbeautify.xml(result.value)));
+    //                }
+    //            });
+    //        });
+    //
+    //    });
 </script>
 
 </body>

@@ -1,6 +1,8 @@
 package gr.cite.earthserver.wcps.parser.utils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import gr.cite.earthserver.metadata.core.Coverage;
@@ -19,13 +21,21 @@ public class XWCPSEvalUtils {
 	public static String getElementName(OpenXmlElementContext ctx) {
 		return ctx.xmlElement().qName().getText();
 	}
-	
+
 	public static String removeQuates(String str) {
 		return str.replaceAll("'|\"", "");
 	}
-	
-	public static List<String> constructForQueries(String variable, List<Coverage> coverages) {
-		return coverages.stream().map(c -> "for " + variable + " in ( " + c.getLocalId() + " ) ")
-				.collect(Collectors.toList());
+
+	public static List<Query> constructForQueries(String variable, List<Coverage> coverages) {
+		return coverages.stream().map(c -> {
+
+			Map<Coverage, String> coverageMap = new HashMap<>();
+			coverageMap.put(c, null);
+
+			Query q = new Query().setQuery("for " + variable + " in ( " + c.getLocalId() + " ) ")
+					.setCoverageValueMap(coverageMap);
+
+			return q;
+		}).collect(Collectors.toList());
 	}
 }

@@ -1,10 +1,13 @@
 package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.xpath.XPathFactoryConfigurationException;
@@ -13,9 +16,13 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
+
+import com.google.common.base.CharMatcher;
 
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.AttributeContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.BooleanXpathClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.IdentifierContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.LetClauseContext;
@@ -23,6 +30,7 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlWithCloseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ProcessingExpressionContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.QuatedContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.WhereClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WrapResultClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WrapResultSubElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlClauseContext;
@@ -39,6 +47,7 @@ import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
 import gr.cite.exmms.criteria.CriteriaQuery;
+import gr.cite.scarabaeus.utils.xml.UniversalNamespaceCache;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
 
@@ -417,11 +426,55 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	}
 
 	private static String evaluateXpath(String node, String xpath) throws XPathFactoryConfigurationException {
-		XPathEvaluator xPathEvaluator = new XPathEvaluator(XMLConverter.stringToNode(node, true));
+		/*
+		 * remove whitespaces between namespace and localname eg: // mynamespace
+		 * : mylocalname [@ mynamespace2 : myattr = 1]
+		 */
 
+		Pattern pattern = Pattern.compile("[\\/\\@]\\s*\\w*(\\s)*:(\\s)*");
+		Matcher matcher = pattern.matcher(xpath);
+		while (matcher.find()) {
+			String match = matcher.group();
+
+			String replacement = match.replaceAll("\\s+", "");
+			xpath = xpath.substring(0, matcher.start()) + replacement + xpath.substring(matcher.end());
+		}
+
+		XPathEvaluator xPathEvaluator = new XPathEvaluator(XMLConverter.stringToNode(node, true), true, false);
 		List<String> xpathResults = xPathEvaluator.evaluate(xpath);
 
 		return xpathResults == null ? "" : xpathResults.stream().collect(Collectors.joining(" "));
+	}
+
+	@Override
+	public Query visitBooleanXpathClause(BooleanXpathClauseContext ctx) {
+		Query xpathQuery = visit(ctx.xpathClause());
+
+		xpathQuery.setCoverageValueMap(xpathQuery.getCoverageValueMap().entrySet().stream()
+				.filter(e -> !e.getValue().isEmpty()).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+
+		xpathQuery.setEvaluated(false);
+
+		xpathQuery.setQuery("");
+
+		return xpathQuery;
+	}
+
+	@Override
+	public Query visitWhereClause(WhereClauseContext ctx) {
+		Query whereClause = super.visitWhereClause(ctx);
+
+		if (whereClause.getQuery().trim().endsWith(ctx.WHERE().getText())) {
+			whereClause.setQuery("");
+			whereClause.setAggregatedValue("");
+		}
+		
+		// clear coverage values
+		for (Entry<Coverage, String> coverageEntry : whereClause.getCoverageValueMap().entrySet()) {
+			coverageEntry.setValue(null);
+		}
+		
+		return whereClause;
 	}
 
 }

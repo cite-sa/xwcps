@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class MixedValue {
-
 	@JsonSerialize(using = InputStreamBase64Serializer.class)
 	private InputStream wcpsValue;
 
@@ -102,10 +101,9 @@ class InputStreamBase64Serializer extends JsonSerializer<InputStream> {
 	public void serialize(InputStream inputStream, JsonGenerator jsonGenerator, SerializerProvider provider)
 			throws IOException, JsonProcessingException {
 
-		try (InputStream is = inputStream) {
-			jsonGenerator.writeString(Base64.getEncoder().encodeToString(IOUtils.toByteArray(inputStream)));
-		}
+		jsonGenerator.writeString(Base64.getEncoder().encodeToString(IOUtils.toByteArray(inputStream)));
 
+		inputStream.close();
 	}
 
 }

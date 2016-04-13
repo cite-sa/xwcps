@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
 
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.DescribeCoverageExpressionLabelContext;
@@ -140,12 +143,19 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		final Query encodedCoverageExpressionLabel = super.visitEncodedCoverageExpressionLabel(ctx);
 
 		if (!forWhereClauseQuery.getSplittedQuery().isEmpty()) {
+			Stream<Query> stream = forWhereClauseQuery.getSplittedQuery().stream();
+
+			stream = forWhereClauseQuery.getCoverageValueMap() != null
+					? stream.filter(splitted -> !(Sets.intersection(splitted.getCoverageValueMap().keySet(),
+							forWhereClauseQuery.getCoverageValueMap().keySet()).isEmpty()))
+					: stream;
+
 			encodedCoverageExpressionLabel.setMixedValues(
 
-					forWhereClauseQuery.getSplittedQuery().stream().map(forWhereClauseQuery -> {
+					stream.map(forWhereClauseQuery -> {
 						MixedValue mixedValue = null;
 
-						String rewrittenQuery = forWhereClauseQuery + " return "
+						String rewrittenQuery = forWhereClauseQuery.getQuery() + " return "
 								+ encodedCoverageExpressionLabel.getQuery();
 
 						try {
