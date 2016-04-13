@@ -1,4 +1,4 @@
-package gr.cite.earthserver.wcps.parser.evaluation;
+package gr.cite.earthserver.wcps.parser.core;
 
 import java.util.List;
 import java.util.Set;
@@ -11,13 +11,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class XwcpsQueryResult {
 
 	@JsonProperty
-	List<Error> errors;
+	protected List<Error> errors;
 
 	@JsonProperty
-	Set<MixedValue> mixedValues;
+	protected Set<MixedValue> mixedValues;
 
 	@JsonProperty
-	String aggregatedValue;
+	protected String aggregatedValue;
 
 	public Set<MixedValue> getMixedValues() {
 		return mixedValues;

@@ -97,14 +97,17 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		XpathForClauseEvalVisitor xpathForClauseEvalVisitor = new XpathForClauseEvalVisitor(exmmsQuery);
 		XpathForClause xpathForClause = xpathForClauseEvalVisitor.visit(ctx);
 
-		variables.put(ctx.coverageVariableName().getText(), xpathForClause.getCoverages());
+		List<Coverage> coverageList = xpathForClause.getCoverages();
+		variables.put(ctx.coverageVariableName().getText(), coverageList);
 
-		String coverages = xpathForClause.getCoverages().stream().map(Coverage::getLocalId)
+		String coverages = coverageList.stream().map(Coverage::getLocalId)
 				.collect(Collectors.joining(", ", "( ", " )"));
 
 		if (xpathForClause.getXpathQuery() != null) {
 			forClauseDefaultXpath = xpathForClause.getXpathQuery();
 		}
+
+		q.setSplittedQuery(XWCPSEvalUtils.constructForQueries(ctx.coverageVariableName().getText(), coverageList));
 
 		return q.appendQuery(" in " + coverages);
 	}
@@ -138,8 +141,8 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 						wcpsQuery.simpleWCPS();
 					}
 
-					return wcpsQuery.evaluated()
-							.setValue(wcsRequestBuilder.processCoverages().query(rewrittedQuery).build().get().getAggregatedValue());
+					return wcpsQuery.evaluated().setValue(wcsRequestBuilder.processCoverages().query(rewrittedQuery)
+							.build().get().getAggregatedValue());
 				} catch (WCSRequestException e) {
 					logger.error(e.getMessage(), e);
 
@@ -418,7 +421,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		List<String> xpathResults = xPathEvaluator.evaluate(xpath);
 
-		return xpathResults.stream().collect(Collectors.joining(" "));
+		return xpathResults == null ? "" : xpathResults.stream().collect(Collectors.joining(" "));
 	}
 
 }

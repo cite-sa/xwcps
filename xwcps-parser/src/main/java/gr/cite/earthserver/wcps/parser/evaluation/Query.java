@@ -2,14 +2,19 @@ package gr.cite.earthserver.wcps.parser.evaluation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import gr.cite.earthserver.metadata.core.Coverage;
+import gr.cite.earthserver.wcps.parser.core.Error;
+import gr.cite.earthserver.wcps.parser.core.MixedValue;
+import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 
 public class Query extends XwcpsQueryResult {
 	private String query;
+
+	private List<String> splittedQuery = new ArrayList<>();
 
 	private boolean evaluated = false;
 
@@ -50,12 +55,12 @@ public class Query extends XwcpsQueryResult {
 	}
 
 	public Query setValue(String value) {
-		this.aggregatedValue = value;
+		setAggregatedValue(value);
 		return this;
 	}
 
 	public Query prependValue(String prependValue) {
-		this.aggregatedValue = prependValue + this.aggregatedValue;
+		setAggregatedValue(prependValue + getAggregatedValue());
 		return this;
 	}
 
@@ -86,10 +91,31 @@ public class Query extends XwcpsQueryResult {
 		return getErrors().size() > 0;
 	}
 
-	public Query aggregate(Query nextResult, boolean overrideValue) {
-		// FIXME aggregations
+	public List<String> getSplittedQuery() {
+		return splittedQuery;
+	}
 
-		query = (query == null ? nextResult.getQuery() : query + " " + nextResult.getQuery());
+	public Query setSplittedQuery(List<String> splittedQuery) {
+		this.splittedQuery = splittedQuery;
+		return this;
+	}
+
+	public Query aggregate(Query nextResult, boolean overrideValue) {
+
+		query = aggreagateQuery(query, nextResult);
+
+		for (String splitted : splittedQuery) {
+			aggreagateQuery(splitted, nextResult);
+		}
+		if (splittedQuery.isEmpty() && !nextResult.getSplittedQuery().isEmpty()) {
+			// for (String splitted : nextResult.getSplittedQuery()) {
+			// splittedQuery.add(query + " " + splitted);
+			// }
+			//
+			// FIXME the afforementioned is the correct implementation,
+			// the following is temporal
+			splittedQuery = nextResult.getSplittedQuery();
+		}
 
 		if (aggregatedValue == null || overrideValue) {
 			aggregatedValue = nextResult.serializeValue();
@@ -111,6 +137,10 @@ public class Query extends XwcpsQueryResult {
 			evaluated = nextResult.isEvaluated();
 		}
 		return this;
+	}
+
+	private static String aggreagateQuery(String query, Query nextResult) {
+		return query == null ? nextResult.getQuery() : query + " " + nextResult.getQuery();
 	}
 
 	public String serializeValue() {

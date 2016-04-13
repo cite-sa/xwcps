@@ -14,6 +14,7 @@ import org.junit.Test;
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSLexer;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser;
+import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
 import gr.cite.earthserver.wcs.client.WCSRequest;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder.DescribeCoverage;

@@ -17,8 +17,10 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.EncodedCoverageExpressionLab
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ForClauseLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WcpsQueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
+import gr.cite.earthserver.wcps.parser.core.MixedValue;
+import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
-import gr.cite.earthserver.wcps.parser.evaluation.XwcpsQueryResult;
+import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.client.WCSRequest;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
@@ -57,13 +59,19 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	@Override
 	public Query visitForClauseLabel(ForClauseLabelContext ctx) {
 
-		variables.put(ctx.coverageVariableName().getText(), ctx.identifier().stream().map(identifier -> {
+		List<Coverage> coverages = ctx.identifier().stream().map(identifier -> {
 			Coverage c = new Coverage();
 			c.setLocalId(identifier.getText());
 			return c;
-		}).collect(Collectors.toList()));
+		}).collect(Collectors.toList());
 
-		return super.visitForClauseLabel(ctx);
+		variables.put(ctx.coverageVariableName().getText(), coverages);
+
+		Query query = super.visitForClauseLabel(ctx);
+
+		query.setSplittedQuery(XWCPSEvalUtils.constructForQueries(ctx.coverageVariableName().getText(), coverages));
+
+		return query;
 	}
 
 	@Override
@@ -104,8 +112,8 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 
 		Query returnClauseQuery = visit(ctx.returnClause());
 
-		// TODO rewrite encode query -- for c in (C1, C2) return encode.... 
-		
+		// TODO rewrite encode query -- for c in (C1, C2) return encode....
+
 		query.aggregate(returnClauseQuery);
 
 		try {
@@ -126,13 +134,41 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 			return query.setError(e.getError());
 		}
 	}
-	
+
 	@Override
 	public Query visitEncodedCoverageExpressionLabel(EncodedCoverageExpressionLabelContext ctx) {
-		Query encodedCoverageExpressionLabel = super.visitEncodedCoverageExpressionLabel(ctx);
-		
-		
-		
+		final Query encodedCoverageExpressionLabel = super.visitEncodedCoverageExpressionLabel(ctx);
+
+		if (!forWhereClauseQuery.getSplittedQuery().isEmpty()) {
+			encodedCoverageExpressionLabel.setMixedValues(
+
+					forWhereClauseQuery.getSplittedQuery().stream().map(forWhereClauseQuery -> {
+						MixedValue mixedValue = null;
+
+						String rewrittenQuery = forWhereClauseQuery + " return "
+								+ encodedCoverageExpressionLabel.getQuery();
+
+						try {
+							XwcpsQueryResult xwcpsQueryResult = wcsRequestBuilder.processCoverages()
+									.query(rewrittenQuery).build().get();
+							mixedValue = xwcpsQueryResult.getMixedValues().iterator().next();
+
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+							mixedValue = new MixedValue();
+							mixedValue.setXwcpsValue(e.getMessage());
+						}
+
+						mixedValue.setSubQuery(rewrittenQuery);
+
+						return mixedValue;
+					}).filter(mixedValue -> mixedValue != null).collect(Collectors.toSet())
+
+			);
+
+			encodedCoverageExpressionLabel.evaluated();
+		}
+
 		return encodedCoverageExpressionLabel;
 	}
 

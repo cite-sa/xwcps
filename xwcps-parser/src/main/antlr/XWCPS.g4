@@ -74,6 +74,10 @@ xwcpsCoveragesClause: xpath;
  * overrided wcps rules
  */
 
+whereClause: WHERE (booleanScalarExpression | booleanXpathClause );
+
+booleanXpathClause : xpathClause;
+
 // on return
 processingExpression: xmlClause
 					| xpathClause

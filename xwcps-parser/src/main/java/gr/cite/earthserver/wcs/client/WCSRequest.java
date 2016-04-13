@@ -10,8 +10,8 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gr.cite.earthserver.wcps.parser.evaluation.MixedValue;
-import gr.cite.earthserver.wcps.parser.evaluation.XwcpsQueryResult;
+import gr.cite.earthserver.wcps.parser.core.MixedValue;
+import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 
 public class WCSRequest {
 	private static final Logger logger = LoggerFactory.getLogger(WCSRequest.class);

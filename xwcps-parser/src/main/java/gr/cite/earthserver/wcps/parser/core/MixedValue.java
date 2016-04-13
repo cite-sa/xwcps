@@ -1,4 +1,4 @@
-package gr.cite.earthserver.wcps.parser.evaluation;
+package gr.cite.earthserver.wcps.parser.core;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +20,8 @@ public class MixedValue {
 	private InputStream wcpsValue;
 
 	private MediaType wcpsMediaType;
+
+	private String subQuery;
 
 	private String xwcpsValue;
 
@@ -45,6 +47,14 @@ public class MixedValue {
 
 	public void setXwcpsValue(String xwcpsValue) {
 		this.xwcpsValue = xwcpsValue;
+	}
+
+	public String getSubQuery() {
+		return subQuery;
+	}
+
+	public void setSubQuery(String subQuery) {
+		this.subQuery = subQuery;
 	}
 
 	@Override
@@ -92,10 +102,10 @@ class InputStreamBase64Serializer extends JsonSerializer<InputStream> {
 	public void serialize(InputStream inputStream, JsonGenerator jsonGenerator, SerializerProvider provider)
 			throws IOException, JsonProcessingException {
 
-		try(InputStream is = inputStream) {
+		try (InputStream is = inputStream) {
 			jsonGenerator.writeString(Base64.getEncoder().encodeToString(IOUtils.toByteArray(inputStream)));
 		}
-		
+
 	}
 
 }

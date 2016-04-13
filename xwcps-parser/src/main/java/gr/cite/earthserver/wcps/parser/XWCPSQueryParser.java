@@ -10,8 +10,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSLexer;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser;
+import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
-import gr.cite.earthserver.wcps.parser.evaluation.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
 import gr.cite.exmms.criteria.CriteriaQuery;
 

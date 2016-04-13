@@ -13,8 +13,8 @@ import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSLexer;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
-import gr.cite.earthserver.wcps.parser.evaluation.XWCPSEvalVisitor;
 import gr.cite.earthserver.wcps.parser.evaluation.XWCPSEvaluationMocks;
+import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import jersey.repackaged.com.google.common.collect.Lists;
 
@@ -27,11 +27,16 @@ public class WCPSEvalVisitorTest {
 	@Test
 	public void test() {
 		String query =
-				"for data in ( frt00003590_07_if164l_trr3 ) return encode( \n" + 
+				"for data in ( frt00003590_07_if164l_trr3 , frt0000b1bd_07_if166l_trr3 ) "
+				+ " where describeCoverage(data)//*[local-name()='cat_solar_longitude' and text()>86.0122]  " // TODO
+				+ " return encode( \n" + 
 				"{ red:(int)(255 / (1 - (1.395 / ((1 - ((data.band_61 - data.band_57)/(data.band_72 - data.band_57))) * 1.370 + ((data.band_61 - data.band_57)/(data.band_72 - data.band_57)) * 1.470)))); \n" + 
 				"green: (int)(255 / (1 - (1.525 / ((1 - ((data.band_80 - data.band_57)/(data.band_124 - data.band_57))) * 1.367 + ((data.band_80 - data.band_57)/(data.band_124 - data.band_57)) * 1.808)))); \n" + 
 				"blue: (int)(255/ (0.5 * (1 - (1.930 / ((1 - ((data.band_142 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_142 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))) * 0.5 * (1 - (1.985 / ((1 - ((data.band_151 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_151 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))))); \n" + 
 				"alpha: (data.band_100 != 65535) * 255 }, \"png\", \"nodata=null\")";
+		
+//		"for data in //coverage return describeCoverage(data)//*[local-name()='cat_solar_longitude' and text()>86.0122]";
+		
 		// TODO
 		// "for c in (AvgLandTemp) return <a attr=min(c[Lat(53.08), Long(8.80),
 		// ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>";
@@ -49,6 +54,8 @@ public class WCPSEvalVisitorTest {
 
 		// "/server//coverage/@*[local-name()='test']";
 		// "/server";
+		
+		System.out.println(query);
 
 		CharStream stream = new ANTLRInputStream(query);
 		XWCPSLexer lexer = new XWCPSLexer(stream);

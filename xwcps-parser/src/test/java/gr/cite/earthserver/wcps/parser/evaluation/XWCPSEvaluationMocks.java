@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import com.google.common.collect.Lists;
 
 import gr.cite.earthserver.metadata.core.Coverage;
+import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcs.client.WCSRequest;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder.DescribeCoverage;
