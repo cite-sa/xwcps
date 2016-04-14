@@ -1,5 +1,6 @@
 package gr.cite.earthserver.wcps.parser.core;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
@@ -102,6 +103,11 @@ class InputStreamBase64Serializer extends JsonSerializer<InputStream> {
 			throws IOException, JsonProcessingException {
 
 		jsonGenerator.writeString(Base64.getEncoder().encodeToString(IOUtils.toByteArray(inputStream)));
+
+		if (inputStream instanceof ByteArrayInputStream) {
+			// TODO remove temporal
+			inputStream.reset();
+		}
 
 		inputStream.close();
 	}

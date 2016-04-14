@@ -1,14 +1,23 @@
 package gr.cite.earthserver.wcs.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.HashSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import gr.cite.earthserver.wcps.parser.core.MixedValue;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
@@ -20,6 +29,9 @@ public class WCSRequest {
 		return new WCSRequestBuilder();
 	}
 
+	private static final Cache<URI, XwcpsQueryResult> CACHE = CacheBuilder.newBuilder().maximumSize(20)
+			.expireAfterAccess(1, TimeUnit.HOURS).build();
+
 	private WebTarget webTarget;
 
 	WCSRequest(WebTarget webTarget) {
@@ -27,45 +39,64 @@ public class WCSRequest {
 	}
 
 	public XwcpsQueryResult get() throws WCSRequestException {
-		// Response response =
-		// this.webTarget.request(MediaType.APPLICATION_XML).get();
-		Response response = this.webTarget.request(MediaType.TEXT_PLAIN).get();
 
-		XwcpsQueryResult xwcpsQueryResult = new XwcpsQueryResult();
+		try {
+			return CACHE.get(webTarget.getUri(), new Callable<XwcpsQueryResult>() {
 
-		MediaType mediaType = MediaType.valueOf(response.getHeaderString("Content-Type"));
+				@Override
+				public XwcpsQueryResult call() throws Exception {
+					Response response = webTarget.request(MediaType.TEXT_PLAIN).get();
 
-		if (mediaType.toString().contains("image")) {
-			xwcpsQueryResult.setMixedValues(new HashSet<>());
+					XwcpsQueryResult xwcpsQueryResult = new XwcpsQueryResult();
 
-			MixedValue image = new MixedValue();
-			image.setWcpsMediaType(mediaType);
-			image.setWcpsValue((InputStream) response.getEntity());
-			xwcpsQueryResult.getMixedValues().add(image);
+					MediaType mediaType = MediaType.valueOf(response.getHeaderString("Content-Type"));
 
-		} else {
-			String responseString = response.readEntity(String.class);
+					if (mediaType.toString().contains("image")) {
+						xwcpsQueryResult.setMixedValues(new HashSet<>());
 
-			if (response.getStatus() >= 300) {
-				throw new WCSRequestException(responseString, response.getStatus());
-			}
+						MixedValue image = new MixedValue();
+						image.setWcpsMediaType(mediaType);
 
-			// TODO Content-type: multipart/x-mixed-replace;boundary=End
-			logger.warn("-----------------------------------------------------------------------");
-			logger.warn("-----------------------------------------------------------------------");
-			logger.warn("--  TODO  read Content-type: multipart/x-mixed-replace;boundary=End  --");
-			logger.warn("-----------------------------------------------------------------------");
-			logger.warn("-----------------------------------------------------------------------");
-			// FIXME delete if
-			if (responseString.startsWith("\r\n--End")) {
-				responseString = responseString.replaceAll("--End--", "").replaceAll("--End", "")
-						.replaceAll("Content-type: text/plain", "").trim();
-			}
+						// image.setWcpsValue((InputStream)
+						// response.getEntity());
 
-			xwcpsQueryResult.setAggregatedValue(responseString);
+						ByteArrayInputStream byteArrayInputStream;
+						try (InputStream inputStream = (InputStream) response.getEntity()) {
+							byteArrayInputStream = new ByteArrayInputStream(IOUtils.toByteArray(inputStream));
+						}
+						image.setWcpsValue(byteArrayInputStream);
+
+						xwcpsQueryResult.getMixedValues().add(image);
+
+					} else {
+						String responseString = response.readEntity(String.class);
+
+						if (response.getStatus() >= 300) {
+							throw new WCSRequestException(responseString, response.getStatus());
+						}
+
+						// TODO Content-type:
+						// multipart/x-mixed-replace;boundary=End
+						logger.warn("-----------------------------------------------------------------------");
+						logger.warn("-----------------------------------------------------------------------");
+						logger.warn("--  TODO  read Content-type: multipart/x-mixed-replace;boundary=End  --");
+						logger.warn("-----------------------------------------------------------------------");
+						logger.warn("-----------------------------------------------------------------------");
+						// FIXME delete if
+						if (responseString.startsWith("\r\n--End")) {
+							responseString = responseString.replaceAll("--End--", "").replaceAll("--End", "")
+									.replaceAll("Content-type: text/plain", "").trim();
+						}
+
+						xwcpsQueryResult.setAggregatedValue(responseString);
+					}
+
+					return xwcpsQueryResult;
+				}
+			});
+		} catch (ExecutionException e) {
+			throw new WCSRequestException(e);
 		}
-
-		return xwcpsQueryResult;
 
 	}
 
