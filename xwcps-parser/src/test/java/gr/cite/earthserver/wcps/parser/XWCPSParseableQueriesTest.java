@@ -129,6 +129,12 @@ public class XWCPSParseableQueriesTest {
 	}
 
 	@Test
+	public void query21() {
+		parseQuery(
+				"for c in (AvgLandTemp) return <div> describeCoverage(c) </div>");
+	}
+
+	@Test
 	public void letQuery1() {
 		parseQuery("let d:= 10 for c in /server/coverage return describeCoverage(c)");
 	}

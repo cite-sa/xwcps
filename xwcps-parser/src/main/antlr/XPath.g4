@@ -71,10 +71,10 @@ filterExpr
   :  primaryExpr predicate*
   ;
 
-orExpr  :  andExpr ('or' andExpr)*
+orExpr  :  andExpr (OR andExpr)*
   ;
 
-andExpr  :  equalityExpr ('and' equalityExpr)*
+andExpr  :  equalityExpr (AND equalityExpr)*
   ;
 
 equalityExpr
@@ -90,8 +90,8 @@ additiveExpr
   ;
 
 multiplicativeExpr
-  :  unaryExprNoRoot (('*'|'div'|'mod') multiplicativeExpr)?
-  |  '/' (('div'|'mod') multiplicativeExpr)?
+  :  unaryExprNoRoot (( '*' | DIV | MOD ) multiplicativeExpr)?
+  |  '/' (( DIV | MOD ) multiplicativeExpr)?
   ;
 
 unaryExprNoRoot
@@ -137,6 +137,7 @@ wcpsHotWords:  FOR
 	|  CRS_TRANSFORM
 	|  DECODE
 	|  DESCRIBE_COVERAGE
+	|  DIV
 	|  ENCODE
 	|  EXP
 	|  EXTEND
@@ -150,6 +151,7 @@ wcpsHotWords:  FOR
 	|  LOG
 	|  MAX
 	|  MIN
+	|  MOD
 	|  NOT
 	|  OR
 	|  OVER
