@@ -127,7 +127,13 @@ public class Query extends XwcpsQueryResult {
 		if (coverageValueMap != null && nextResult.getCoverageValueMap() != null) {
 			for (Entry<Coverage, String> coverageEntry : nextResult.getCoverageValueMap().entrySet()) {
 				if (coverageEntry.getValue() != null) {
-					coverageValueMap.put(coverageEntry.getKey(), coverageEntry.getValue());
+					if (coverageValueMap.containsKey(coverageEntry.getKey())) {
+						String currentValue = coverageValueMap.get(coverageEntry.getKey());
+						
+						coverageValueMap.put(coverageEntry.getKey(), currentValue + coverageEntry.getValue());
+					} else {
+						coverageValueMap.put(coverageEntry.getKey(), coverageEntry.getValue());
+					}
 				}
 			}
 		} else if (nextResult.getCoverageValueMap() != null) {

@@ -115,8 +115,6 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 
 		Query returnClauseQuery = visit(ctx.returnClause());
 
-		// TODO rewrite encode query -- for c in (C1, C2) return encode....
-
 		query.aggregate(returnClauseQuery);
 
 		try {
