@@ -83,7 +83,7 @@
 
             <div class="col-xs-12" ng-show="response.result.aggregatedValue">
                 <div class="query-result">
-                    <div hljs hljs-source="response.result.aggregatedValue"></div>
+                    <div hljs hljs-source="prettifyXml(response.result.aggregatedValue)"></div>
                 </div>
             </div>
 
@@ -100,7 +100,7 @@
                             </div>
                             <div class="col-xs-12" ng-show="mixedValue.xwcpsValue">
                                 <div class="query-result">
-                                    <div hljs hljs-source="mixedValue.xwcpsValue"></div>
+                                    <div hljs hljs-source="prettifyXml(mixedValue.xwcpsValue)"></div>
                                 </div>
                             </div>
                         </div>

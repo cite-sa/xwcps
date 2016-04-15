@@ -11,7 +11,13 @@
     padding: 1em;
 }
 
+.mixedValue .panel-info {
+    border-color: #203864;
+}
+
 .mixedValue .panel-heading {
+    background-color: #203864;
+    color: white;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

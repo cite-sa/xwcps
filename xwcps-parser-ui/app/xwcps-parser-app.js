@@ -57,7 +57,6 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 		}).then(function (data) {
 			console.log(data);
 			$scope.response.result = data.data;
-			$scope.response.result.aggregatedValue = $scope.prettifyXml($scope.response.result.aggregatedValue);
 			console.log($scope.response.result)
 		}, function (e) {
 			console.log(e);
