@@ -6,6 +6,10 @@
     margin-top: 1em;
 }
 
+#query-form-container .error-message {
+    margin-top: 2em;
+}
+
 #query-form-container .mixedValue img {
     max-width: 100%;
     padding: 1em;

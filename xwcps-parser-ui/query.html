@@ -69,10 +69,14 @@
                 </form>
             </div>
 
-            <div class="spinner" ng-hide="loader || response.result">
+            <div class="spinner" ng-hide="loader || response.result || response.error">
                 <div class="bounce1"></div>
                 <div class="bounce2"></div>
                 <div class="bounce3"></div>
+            </div>
+
+            <div class="col-xs-12 error-message" ng-show="response.error">
+                <div class="alert alert-danger">Something went wrong. Please try again.</div>
             </div>
 
             <div class="col-xs-12 results-info" ng-show="response.result">
