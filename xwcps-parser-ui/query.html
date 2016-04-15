@@ -4,22 +4,25 @@
     <meta charset="UTF-8">
     <title></title>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
           integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
     <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
-          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">-->
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
             crossorigin="anonymous"></script>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
     <script src="https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/vkbeautify/vkbeautify.0.99.00.beta.js"></script>
+    <!--<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>-->
+    <script src="libs/google-code-prettify/prettify.js"></script>
+    <link rel="stylesheet" href="libs/google-code-prettify/prettify.css">
 
     <script src="./libs/angular.js"></script>
     <script src="./libs/angular-resource.js"></script>
@@ -32,15 +35,44 @@
 </head>
 <body>
 
-<div class="container">
-    <div class="query-form" ng-controller="xWCPSExecutorController">
+<nav class="navbar navbar-default navbar-fixed-top" id="service-navbar">
+    <div class="container-fluid">
+        <div class="navbar-header pull-left">
+            <a href="http://www.earthserver.eu" class="navbar-brand earthserver-logo">
+                <img alt="EarthServer Logo" src="images/earthserver_logo.png" class="img-responsive">
+            </a>
+        </div>
+    </div>
+</nav>
+
+
+<div id="query-form-container" class="container">
+    <div resize-query-form class="query-form" ng-controller="xWCPSExecutorController">
         <div class="row">
             <div class="col-xs-12">
                 <form ng-submit="execute()">
                     <div class="input-group">
-                        <input type="text" class="form-control" value="{{query}}" id="queryInput" placeholder="Query"
-                               ng-model="query">
-                        <span class="input-group-btn"><input class="btn btn-default" type="submit"/></span>
+                        <input type="text" class="form-control" value="{{queries.default}}" id="queryInput"
+                               placeholder="Query"
+                               ng-model="queries.default">
+                        <div class="input-group-btn">
+                            <button id="queries-dropdown-toggle" type="button"
+                                    class="btn btn-default dropdown-toggle query-btn"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                    ng-click="queryDropdownResize()">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                <li selector-click-handler ng-repeat='queryFromDropdown in queries.all'
+                                    data-description={{queryFromDropdown}}>
+                                    <a class="query-a">{{queryFromDropdown}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default query-btn" type="submit" submit-click-handler>Submit Query</button>
+                        </span>
                     </div>
                 </form>
             </div>
@@ -55,9 +87,7 @@
         <div class="row" ng-show="result.aggregatedValue">
             <div class="col-xs-12">
                 <div class="query-result">
-                    <pre>
-                        {{prettifyXml(result.aggregatedValue)}}
-                    </pre>
+                    <pre id="aggregate-value-result" post-render class="prettyprint">{{prettifyXml(result.aggregatedValue)}}</pre>
                 </div>
             </div>
         </div>
@@ -69,13 +99,12 @@
 
                 <div class="panel-body">
                     <div class="col-xs-12">
-                        <img ng-show="mixedValue.wcpsValue" ng-src="{{'data:image/png;base64,' + mixedValue.wcpsValue}}">
+                        <img ng-show="mixedValue.wcpsValue"
+                             ng-src="{{'data:image/png;base64,' + mixedValue.wcpsValue}}">
                     </div>
                     <div class="col-xs-12" ng-show="mixedValue.xwcpsValue">
                         <div class="query-result">
-                    <pre>
-                        {{prettifyXml(mixedValue.xwcpsValue)}}
-                    </pre>
+                            <pre id="mixed-value-result" post-render>{{prettifyXml(mixedValue.xwcpsValue)}}</pre>
                         </div>
                     </div>
                 </div>

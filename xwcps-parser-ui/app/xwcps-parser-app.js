@@ -4,41 +4,103 @@
 
 var parserApp = angular.module('xWCPSParserApp', ['ngResource']);
 
-parserApp.controller("xWCPSExecutorController", function ($scope, $http, $resource) {
 
+parserApp.directive('postRender', ['$timeout', function ($timeout) {
+	return {
+		link: function (scope, element, attrs) {
+			scope.$on('resultloaded', function () {
+				$(".prettyprinted").removeClass("prettyprinted");
+				if (scope.result.aggregatedValue != "") {
+					$timeout(function () {
+						prettyPrint();
+						scope.$apply();
+					}, 0, false);
+				}
+			})
+		}
+	};
+}]);
+
+parserApp.directive("selectorClickHandler", function () {
+	return {
+		link: function(scope, element, attrs) {
+
+			$(element).click(function () {
+				$(".prettyprinted").empty();
+				scope.queries.default = $(this).data("description");
+				scope.$apply();
+			});
+		}
+	}
+});
+
+parserApp.directive("submitClickHandler", function () {
+	return {
+		link: function(scope, element, attrs) {
+			$(element).click(function () {
+				scope.result = {};
+				scope.$apply();
+			});
+		}
+	}
+});
+
+parserApp.directive('resizeQueryForm', function($window) {
+	return function($scope) {
+		$scope.queryDropdownResize = function() {
+			var queryInputWidth =  angular.element(document.querySelector("#queryInput")).width();
+			var queriesDropdownToggleWidth = angular.element(document.querySelector("#queries-dropdown-toggle")).width();
+			angular.element(document.querySelectorAll('.query-a')).width(queryInputWidth + queriesDropdownToggleWidth + 10);
+		};
+		$scope.queryDropdownResize();
+		return angular.element($window).bind('resize', function() {
+			$scope.queryDropdownResize();
+			return $scope.$apply();
+		});
+	};
+});
+
+
+parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $http, $resource) {
 	// var QueryResponse = $resource("http://localhost:9292/parser/query");
-
 	$scope.loader = true;
-
 	$scope.result = undefined;
 
 	$scope.execute = function () {
 		$scope.loader = false;
-
 		$scope.result = undefined;
 
-		$http.jsonp("http://localhost:9292/parser/queryP", {
+		$http.jsonp("http://192.168.32.87:9292/parser/queryP", {
 			params: {
-				q: $scope.query,
+				q: $scope.queries.default,
 				callback: "JSON_CALLBACK"
 			}
 		}).then(function (data) {
 			console.log(data);
 			$scope.result = data.data;
+			$scope.$broadcast("resultloaded");
+			console.log($scope.result)
 		}, function (e) {
 			console.log(e);
 		});
 
 	};
 
+	/*$scope.emptyResult = function() {
+		$scope.result = undefined;
+		scope.$apply();
+	};*/
+
 	$scope.prettifyXml = function (value) {
 		if (value == null) {
 			return undefined;
 		}
-		return vkbeautify.xml(value);
+		return vkbeautify.xml(value, 4);
 	};
 
-	$scope.query =
+	$scope.queries = {};
+	$scope.queries.default =
+		/*"for data in //coverage return describeCoverage(data)//gml:cat_solar_longitude[text()>86.0122]";*/
 		"for data in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage " +
 		"where describeCoverage(data)//gml:cat_solar_longitude[text()>86.0122] return encode( \n" +
 		"{ red:(int)(255 / (1 - (1.395 / ((1 - ((data.band_61 - data.band_57)/(data.band_72 - data.band_57))) * 1.370 + ((data.band_61 - data.band_57)/(data.band_72 - data.band_57)) * 1.470)))); \n" +
@@ -47,7 +109,7 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $http, $resour
 		"alpha: (data.band_100 != 65535) * 255 }, \"png\", \"nodata=null\")";
 
 
-	$scope.queries = [
+	$scope.queries.all = [
 		"for data in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage " +
 			"where describeCoverage(data)//gml:cat_solar_longitude[text()>86.0122] return encode( \n" +
 			"{ red:(int)(255 / (1 - (1.395 / ((1 - ((data.band_61 - data.band_57)/(data.band_72 - data.band_57))) * 1.370 + ((data.band_61 - data.band_57)/(data.band_72 - data.band_57)) * 1.470)))); \n" +
