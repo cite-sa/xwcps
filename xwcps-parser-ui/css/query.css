@@ -1,5 +1,5 @@
 #query-form-container {
-    margin-top: 4em;
+    margin-top: 6em;
 }
 
 .query-form .row {
@@ -25,14 +25,20 @@
 
 
 #query-form-container .query-btn {
-    padding: 7px 12px;
-    margin: 0 2px;
     background-color: #203864;
     color: white;
-    border: none;
+    border-color: transparent;
     border-radius: 4px;
     /*box-shadow: 1px 1px 4px 0px rgba(0,0,0,0.4);*/
     transition: background-color 0.3s ease 0s;
+}
+
+#query-form-container #submit-query-btn.query-btn {
+    margin-left: 10px;
+}
+
+#query-form-container #queries-dropdown-toggle.query-btn {
+    border-radius: 0px 4px 4px 0px;
 }
 
 #query-form-container .query-btn:hover,
@@ -166,8 +172,7 @@
     transition: none;
 }
 
-.results-info {
+.results-info-body {
     margin: 1em;
     color: gray;
-    /* margin-top: 1em; */
 }

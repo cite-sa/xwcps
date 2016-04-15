@@ -11,41 +11,12 @@ parserApp.config(function (hljsServiceProvider) {
 	});
 });
 
-parserApp.directive('postRender', ['$timeout', function ($timeout) {
-	return {
-		link: function (scope, element, attrs) {
-			scope.$on('resultloaded', function () {
-				$("#aggregate-value-result").addClass("prettyprint");
-				/*$(".prettyprinted").removeClass("prettyprinted");*/
-				if (scope.response.result.aggregatedValue != "") {
-					$timeout(function () {
-						prettyPrint();
-						scope.$apply();
-					}, 0, false);
-				}
-			})
-		}
-	};
-}]);
-
 parserApp.directive("selectorClickHandler", function () {
 	return {
 		link: function (scope, element, attrs) {
 
 			$(element).click(function () {
-				/*$(".prettyprinted").empty();*/
 				scope.queries.default = $(this).data("description");
-				scope.$apply();
-			});
-		}
-	}
-});
-
-parserApp.directive("submitClickHandler", function () {
-	return {
-		link: function (scope, element, attrs) {
-			$(element).click(function () {
-				scope.response.result = {};
 				scope.$apply();
 			});
 		}
@@ -77,7 +48,6 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 	$scope.execute = function () {
 		$scope.loader = false;
 		$scope.response.result = undefined;
-		$("#aggregate-value-result").removeClass("prettyprint").removeClass("prettyprinted");
 
 		$http.jsonp("http://192.168.32.87:9292/parser/queryP", {
 			params: {
@@ -87,18 +57,13 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 		}).then(function (data) {
 			console.log(data);
 			$scope.response.result = data.data;
-			$scope.$broadcast("resultloaded");
+			$scope.response.result.aggregatedValue = $scope.prettifyXml($scope.response.result.aggregatedValue);
 			console.log($scope.response.result)
 		}, function (e) {
 			console.log(e);
 		});
 
 	};
-
-	/*$scope.emptyResult = function() {
-	 $scope.result = undefined;
-	 scope.$apply();
-	 };*/
 
 	$scope.prettifyXml = function (value) {
 		if (value == null) {
@@ -122,7 +87,7 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 		}
 
 		return size;
-	}
+	};
 
 	$scope.queries = {};
 	$scope.queries.default =
