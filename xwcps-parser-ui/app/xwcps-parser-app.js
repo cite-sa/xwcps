@@ -2,15 +2,22 @@
  * Created by ikavvouras on 11/4/2016.
  */
 
-var parserApp = angular.module('xWCPSParserApp', ['ngResource']);
+var parserApp = angular.module('xWCPSParserApp', ['ngResource', 'hljs']);
 
+parserApp.config(function (hljsServiceProvider) {
+	hljsServiceProvider.setOptions({
+		// replace tab with 4 spaces
+		tabReplace: '    '
+	});
+});
 
 parserApp.directive('postRender', ['$timeout', function ($timeout) {
 	return {
 		link: function (scope, element, attrs) {
 			scope.$on('resultloaded', function () {
-				$(".prettyprinted").removeClass("prettyprinted");
-				if (scope.result.aggregatedValue != "") {
+				$("#aggregate-value-result").addClass("prettyprint");
+				/*$(".prettyprinted").removeClass("prettyprinted");*/
+				if (scope.response.result.aggregatedValue != "") {
 					$timeout(function () {
 						prettyPrint();
 						scope.$apply();
@@ -26,7 +33,7 @@ parserApp.directive("selectorClickHandler", function () {
 		link: function(scope, element, attrs) {
 
 			$(element).click(function () {
-				$(".prettyprinted").empty();
+				/*$(".prettyprinted").empty();*/
 				scope.queries.default = $(this).data("description");
 				scope.$apply();
 			});
@@ -38,7 +45,7 @@ parserApp.directive("submitClickHandler", function () {
 	return {
 		link: function(scope, element, attrs) {
 			$(element).click(function () {
-				scope.result = {};
+				scope.response.result = {};
 				scope.$apply();
 			});
 		}
@@ -64,11 +71,13 @@ parserApp.directive('resizeQueryForm', function($window) {
 parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $http, $resource) {
 	// var QueryResponse = $resource("http://localhost:9292/parser/query");
 	$scope.loader = true;
-	$scope.result = undefined;
+	$scope.response = {};
+	$scope.response.result = undefined;
 
 	$scope.execute = function () {
 		$scope.loader = false;
-		$scope.result = undefined;
+		$scope.response.result = undefined;
+		$("#aggregate-value-result").removeClass("prettyprint").removeClass("prettyprinted");
 
 		$http.jsonp("http://192.168.32.87:9292/parser/queryP", {
 			params: {
@@ -77,9 +86,9 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 			}
 		}).then(function (data) {
 			console.log(data);
-			$scope.result = data.data;
+			$scope.response.result = data.data;
 			$scope.$broadcast("resultloaded");
-			console.log($scope.result)
+			console.log($scope.response.result)
 		}, function (e) {
 			console.log(e);
 		});
