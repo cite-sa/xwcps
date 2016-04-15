@@ -28,88 +28,92 @@
     <link rel="stylesheet" href="css/spinner.css">
 </head>
 <body>
-    <nav class="navbar navbar-default navbar-fixed-top" id="service-navbar">
-        <div class="container-fluid">
-            <div class="navbar-header pull-left">
-                <a href="http://www.earthserver.eu" class="navbar-brand earthserver-logo">
-                    <img alt="EarthServer Logo" src="images/earthserver_logo.png" class="img-responsive">
-                </a>
-            </div>
-        </div>
-    </nav>
-
-
-    <div id="query-form-container" class="container">
-        <div resize-query-form class="row query-form" ng-controller="xWCPSExecutorController">
-            <div class="col-xs-12">
-                <form ng-submit="execute()">
-                    <div class="input-group">
-                        <input type="text" class="form-control" value="{{queries.default}}" id="queryInput"
-                               placeholder="Query"
-                               ng-model="queries.default">
-                        <div class="input-group-btn">
-                            <button id="queries-dropdown-toggle" type="button"
-                                    class="btn btn-default dropdown-toggle query-btn"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                    ng-click="queryDropdownResize()">
-                                <span class="caret"></span>
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-right">
-                                <li selector-click-handler ng-repeat='queryFromDropdown in queries.all'
-                                    data-description={{queryFromDropdown}}>
-                                    <a class="query-a">{{queryFromDropdown}}</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <span class="input-group-btn">
-                            <button id="submit-query-btn" class="btn btn-default query-btn" type="submit">Submit Query</button>
-                        </span>
-                    </div>
-                </form>
-            </div>
-
-            <div class="spinner" ng-hide="loader || response.result">
-                <div class="bounce1"></div>
-                <div class="bounce2"></div>
-                <div class="bounce3"></div>
-            </div>
-
-            <div class="col-xs-12 results-info" ng-show="response.result">
-                <div class="results-info-body">
-                    {{ getSize(response.result) }} result(s) were found
-                </div>
-            </div>
-
-            <div class="col-xs-12" ng-show="response.result.aggregatedValue">
-                <div class="query-result">
-                    <div hljs hljs-source="prettifyXml(response.result.aggregatedValue)"></div>
-                </div>
-            </div>
-
-            <div class="col-xs-12 mixedValue" ng-repeat="mixedValue in response.result.mixedValues">
-                <div class="panel panel-info">
-
-                    <div class="panel-heading">{{mixedValue.subQuery}}</div>
-
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <img ng-show="mixedValue.wcpsValue"
-                                     ng-src="{{'data:image/png;base64,' + mixedValue.wcpsValue}}">
-                            </div>
-                            <div class="col-xs-12" ng-show="mixedValue.xwcpsValue">
-                                <div class="query-result">
-                                    <div hljs hljs-source="prettifyXml(mixedValue.xwcpsValue)"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
+<nav class="navbar navbar-default navbar-fixed-top" id="service-navbar">
+    <div class="container-fluid">
+        <div class="navbar-header pull-left">
+            <a href="http://www.earthserver.eu" class="navbar-brand earthserver-logo">
+                <img alt="EarthServer Logo" src="images/earthserver_logo.png" class="img-responsive">
+            </a>
         </div>
     </div>
+</nav>
+
+
+<div id="query-form-container" class="container">
+    <div resize-query-form class="row query-form" ng-controller="xWCPSExecutorController">
+        <div class="col-xs-12">
+            <form ng-submit="execute()">
+                <div class="input-group query-input">
+                    <!--<input type="text" class="form-control" value="{{queries.default}}" id="queryInput"-->
+                    <!--placeholder="Query"-->
+                    <!--ng-model="queries.default">-->
+
+                    <textarea value="{{queries.default}}" class="form-control" id="queryInput"
+                              placeholder="Query" ng-model="queries.default"></textarea>
+                    <div class="input-group-btn">
+                        <button id="queries-dropdown-toggle" type="button"
+                                class="btn btn-default dropdown-toggle query-btn"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                ng-click="queryDropdownResize()">
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <li selector-click-handler ng-repeat='queryFromDropdown in queries.all'
+                                data-description={{queryFromDropdown}}>
+                                <a class="query-a">{{queryFromDropdown}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                        <span class="input-group-btn">
+                            <button id="submit-query-btn" class="btn btn-default query-btn"
+                                    type="submit">Submit Query</button>
+                        </span>
+                </div>
+            </form>
+        </div>
+
+        <div class="spinner" ng-hide="loader || response.result">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+        </div>
+
+        <div class="col-xs-12 results-info" ng-show="response.result">
+            <div class="results-info-body">
+                {{ getSize(response.result) }} result(s) were found
+            </div>
+        </div>
+
+        <div class="col-xs-12" ng-show="response.result.aggregatedValue">
+            <div class="query-result">
+                <div hljs hljs-source="prettifyXml(response.result.aggregatedValue)"></div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 mixedValue" ng-repeat="mixedValue in response.result.mixedValues">
+            <div class="panel panel-info">
+
+                <div class="panel-heading">{{mixedValue.subQuery}}</div>
+
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <img ng-show="mixedValue.wcpsValue"
+                                 ng-src="{{'data:image/png;base64,' + mixedValue.wcpsValue}}">
+                        </div>
+                        <div class="col-xs-12" ng-show="mixedValue.xwcpsValue">
+                            <div class="query-result">
+                                <div hljs hljs-source="prettifyXml(mixedValue.xwcpsValue)"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
 </body>
 </html>

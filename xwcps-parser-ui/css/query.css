@@ -186,3 +186,15 @@
 #service-navbar #user-account #account-info-panel.collapsing {
     transition: none;
 }
+
+textarea#queryInput {
+    min-height: 6em;
+}
+
+.query-input .input-group-btn {
+    vertical-align: top;
+}
+
+.query-input .dropdown-menu {
+    top: 2.5em;
+}
