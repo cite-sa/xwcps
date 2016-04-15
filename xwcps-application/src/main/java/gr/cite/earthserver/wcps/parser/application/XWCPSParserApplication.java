@@ -59,7 +59,11 @@ public class XWCPSParserApplication extends Application<XWCPSParserConfiguration
 	}
 
 	public static void main(String[] args) throws Exception {
-		new XWCPSParserApplication().run("server", "xwcps-config.yaml");
+		if (args.length < 2) {
+			new XWCPSParserApplication().run("server", "xwcps-config.yaml");
+		} else {
+			new XWCPSParserApplication().run(args);
+		}
 	}
 
 }

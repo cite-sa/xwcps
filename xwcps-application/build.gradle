@@ -10,6 +10,13 @@
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+apply plugin: 'application'
+mainClassName = "gr.cite.earthserver.wcps.parser.application.XWCPSParserApplication"		
+
+group = 'gr.cite.earthserver'
+version = '0.1-SNAPSHOT'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -22,8 +29,6 @@ repositories {
     	url "http://maven.local.cite.gr:8080/repository/internal/"
     }
 }
-
-//new File(settingsDir, '../wcps2.0').exists()? project(':wcps2.0') :	
 
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.13',

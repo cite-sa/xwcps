@@ -5,14 +5,17 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import gr.cite.earthserver.metadata.core.Coverage;
+import gr.cite.earthserver.wcps.parser.core.MixedValue;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcs.client.WCSRequest;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
@@ -74,6 +77,8 @@ public class XWCPSEvaluationMocks {
 			when(wcsRequest.get()).thenReturn(new XwcpsQueryResult() {
 				{
 					setAggregatedValue(wcpsQueryResponse);
+					MixedValue mixed = new MixedValue();
+					setMixedValues(Sets.newHashSet(mixed));
 				}
 			});
 		} catch (WCSRequestException e) {

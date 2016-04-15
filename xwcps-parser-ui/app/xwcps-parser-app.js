@@ -44,10 +44,12 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 	$scope.loader = true;
 	$scope.response = {};
 	$scope.response.result = undefined;
+	$scope.response.error = undefined;
 
 	$scope.execute = function () {
 		$scope.loader = false;
 		$scope.response.result = undefined;
+		$scope.response.error = undefined;
 
 		$http.jsonp("http://192.168.32.87:9292/parser/queryP", {
 			params: {
@@ -58,8 +60,9 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 			console.log(data);
 			$scope.response.result = data.data;
 			console.log($scope.response.result)
-		}, function (e) {
-			console.log(e);
+		}, function (error) {
+			$scope.response.error = error;
+			console.log(error);
 		});
 
 	};
