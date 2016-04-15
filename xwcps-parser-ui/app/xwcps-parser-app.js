@@ -134,7 +134,9 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 			"<p>describeCoverage(data)//gml:cat_solar_longitude/text()</p></div>"
 		}];
 
-	$scope.queries.default = $scope.queries.all[0];
+	$scope.queries.default = {};
+	$scope.queries.default.query = $scope.queries.all[0].query;
+	$scope.queries.default.description = $scope.queries.all[0].description;
 
 });
 
