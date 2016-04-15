@@ -16,7 +16,8 @@ parserApp.directive("selectorClickHandler", function () {
 		link: function (scope, element, attrs) {
 
 			$(element).click(function () {
-				scope.queries.default = $(this).data("description");
+				scope.queries.default.query = $(this).data("description");
+				scope.queries.default.description = $(this).find("a").attr("title");
 				scope.$apply();
 			});
 		}
@@ -53,7 +54,7 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 
 		$http.jsonp("http://192.168.32.87:9292/parser/queryP", {
 			params: {
-				q: $scope.queries.default,
+				q: $scope.queries.default.query,
 				callback: "JSON_CALLBACK"
 			}
 		}).then(function (data) {
