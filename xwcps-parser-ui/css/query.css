@@ -6,16 +6,16 @@
     margin-top: 1em;
 }
 
-.mixedValue img {
+#query-form-container .mixedValue img {
     max-width: 100%;
     padding: 1em;
 }
 
-.mixedValue .panel-info {
+#query-form-container .mixedValue .panel-info {
     border-color: #203864;
 }
 
-.mixedValue .panel-heading {
+#query-form-container .mixedValue .panel-heading {
     background-color: #203864;
     color: white;
     overflow: hidden;
@@ -27,6 +27,15 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+#query-form-container .results-info-body {
+    margin: 1em;
+    color: gray;
+}
+
+#query-form-container .query-result > div > pre {
+    border: 1px solid rgb(32, 56, 100);
 }
 
 
@@ -176,9 +185,4 @@
 
 #service-navbar #user-account #account-info-panel.collapsing {
     transition: none;
-}
-
-.results-info-body {
-    margin: 1em;
-    color: gray;
 }
