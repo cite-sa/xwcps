@@ -1,5 +1,7 @@
 package gr.cite.earthserver.wcs.client;
 
+import java.util.concurrent.ExecutionException;
+
 public class WCSRequestException extends Exception {
 
 	/**
@@ -24,6 +26,10 @@ public class WCSRequestException extends Exception {
 	public WCSRequestException(Throwable cause, int status) {
 		super(cause);
 		this.status = status;
+	}
+
+	public WCSRequestException(ExecutionException e) {
+		super(e);
 	}
 
 	public String getError() {
