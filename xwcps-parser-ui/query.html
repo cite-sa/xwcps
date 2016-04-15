@@ -44,9 +44,10 @@
         <div class="col-xs-12">
             <form ng-submit="execute()">
                 <div class="input-group query-input">
-                    <textarea class="form-control" value="{{queries.default}}" id="queryInput"
+                    <textarea class="form-control" value="{{queries.default.query}}"
+                              title="{{queries.default.description}}" id="queryInput"
                               placeholder="Query"
-                              ng-model="queries.default">
+                              ng-model="queries.default.query">
                     </textarea>
                     <div class="input-group-btn">
                         <button id="queries-dropdown-toggle" type="button"
@@ -58,8 +59,8 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right">
                             <li selector-click-handler ng-repeat='queryFromDropdown in queries.all'
-                                data-description={{queryFromDropdown}}>
-                                <a class="query-a">{{queryFromDropdown}}</a>
+                                data-description={{queryFromDropdown.query}}>
+                                <a class="query-a" title="{{queryFromDropdown.description}}">{{queryFromDropdown.query}}</a>
                             </li>
                         </ul>
                     </div>
