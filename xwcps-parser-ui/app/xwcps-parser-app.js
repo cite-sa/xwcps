@@ -82,6 +82,9 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 		}
 
 		if (result.aggregatedValue) {
+			if (result.aggregatedValue == "<results></results>") {
+				return 0;
+			}
 			++size;
 		}
 		if (result.mixedValues) {

@@ -87,7 +87,7 @@
             </div>
         </div>
 
-        <div class="col-xs-12" ng-show="response.result.aggregatedValue">
+        <div class="col-xs-12" ng-show="response.result.aggregatedValue && getSize(response.result.aggregatedValue) > 0">
             <div class="query-result">
                 <div hljs hljs-source="prettifyXml(response.result.aggregatedValue)"></div>
             </div>
