@@ -92,28 +92,24 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 	};
 
 	$scope.queries = {};
-	$scope.queries.default =
-		/*"for data in //coverage return describeCoverage(data)//gml:cat_solar_longitude[text()>86.0122]";*/
-		"for data in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage " +
-		"where describeCoverage(data)//gml:cat_solar_longitude[text()>86.0122] return encode( \n" +
-		"{ red:(int)(255 / (1 - (1.395 / ((1 - ((data.band_61 - data.band_57)/(data.band_72 - data.band_57))) * 1.370 + ((data.band_61 - data.band_57)/(data.band_72 - data.band_57)) * 1.470)))); \n" +
-		"green: (int)(255 / (1 - (1.525 / ((1 - ((data.band_80 - data.band_57)/(data.band_124 - data.band_57))) * 1.367 + ((data.band_80 - data.band_57)/(data.band_124 - data.band_57)) * 1.808)))); \n" +
-		"blue: (int)(255/ (0.5 * (1 - (1.930 / ((1 - ((data.band_142 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_142 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))) * 0.5 * (1 - (1.985 / ((1 - ((data.band_151 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_151 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))))); \n" +
-		"alpha: (data.band_100 != 65535) * 255 }, \"png\", \"nodata=null\")";
-
 
 	$scope.queries.all = [
-		"for data in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage " +
-		"where describeCoverage(data)//gml:cat_solar_longitude[text()>86.0122] return encode( \n" +
+		"for data in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage \n" +
+		"where describeCoverage(data)//gml:cat_solar_longitude[text()>86.0122] \n" +
+		"return encode(\n" +
 		"{ red:(int)(255 / (1 - (1.395 / ((1 - ((data.band_61 - data.band_57)/(data.band_72 - data.band_57))) * 1.370 + ((data.band_61 - data.band_57)/(data.band_72 - data.band_57)) * 1.470)))); \n" +
-		"green: (int)(255 / (1 - (1.525 / ((1 - ((data.band_80 - data.band_57)/(data.band_124 - data.band_57))) * 1.367 + ((data.band_80 - data.band_57)/(data.band_124 - data.band_57)) * 1.808)))); \n" +
-		"blue: (int)(255/ (0.5 * (1 - (1.930 / ((1 - ((data.band_142 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_142 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))) * 0.5 * (1 - (1.985 / ((1 - ((data.band_151 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_151 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))))); \n" +
-		"alpha: (data.band_100 != 65535) * 255 }, \"png\", \"nodata=null\")",
+		"  green: (int)(255 / (1 - (1.525 / ((1 - ((data.band_80 - data.band_57)/(data.band_124 - data.band_57))) * 1.367 + ((data.band_80 - data.band_57)/(data.band_124 - data.band_57)) * 1.808)))); \n" +
+		"  blue: (int)(255/ (0.5 * (1 - (1.930 / ((1 - ((data.band_142 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_142 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))) * 0.5 * (1 - (1.985 / ((1 - ((data.band_151 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_151 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))))); \n" +
+		"  alpha: (data.band_100 != 65535) * 255 \n" +
+		"}, \"png\", \"nodata=null\")",
 		"for data in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage return describeCoverage(data)",
-		"for data in //coverage return describeCoverage(data)//gml:cat_solar_longitude[text()>86.0122]",
+		"for data in //coverage \nreturn describeCoverage(data)//gml:cat_solar_longitude[text()>86.0122]",
 		"for data in //coverage return <p> describeCoverage(data)//gml:cat_solar_longitude[text()>86.0122] </p>",
-		"for data in //coverage return <div><p>describeCoverage(data)//gml:adding_target/text()</p> " +
+		"for data in //coverage \n return <div><p>describeCoverage(data)//gml:adding_target/text()</p> " +
 		"<p>describeCoverage(data)//gml:cat_solar_longitude/text()</p></div>"];
+
+	$scope.queries.default = $scope.queries.all[0];
+
 });
 
 
