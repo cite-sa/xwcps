@@ -280,9 +280,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		Query payload = new Query();
 		if (ctx.xmlPayload() != null) {
-
 			payload.aggregate(visit(ctx.xmlPayload()));
-
 		} else {
 
 			if (ctx.quated() != null) {
@@ -299,6 +297,9 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		if (payload.getCoverageValueMap() != null) {
 			for (Entry<Coverage, String> entry : payload.getCoverageValueMap().entrySet()) {
 				String xmlPayload = entry.getValue();
+				if (xmlPayload == null || xmlPayload.isEmpty()) {
+					continue;
+				}
 				Query localQuery = new Query().evaluated();
 				Map<Coverage, String> localCoverageValueMap = new HashMap<>();
 				localCoverageValueMap.put(entry.getKey(),
@@ -468,12 +469,12 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 			whereClause.setQuery("");
 			whereClause.setAggregatedValue("");
 		}
-		
+
 		// clear coverage values
 		for (Entry<Coverage, String> coverageEntry : whereClause.getCoverageValueMap().entrySet()) {
 			coverageEntry.setValue(null);
 		}
-		
+
 		return whereClause;
 	}
 

@@ -85,14 +85,14 @@ public class XWCPSEvalVisitorTest {
 		assertEquals(formattedExpectedResult, formattedActualResult);
 	}
 
-	@Test
-	public void query5() {
-		String query = "for c in ( AvgLandTemp ) return encode(1, \"csv\")";
-
-		Query result = executeQuery(query, XWCPSEvaluationMocks.mockProcessCoverages("{1}"));
-
-		assertEquals("{1}", result.getValue());
-	}
+//	@Test
+//	public void query5() {
+//		String query = "for c in ( AvgLandTemp ) return encode(1, \"csv\")";
+//
+//		Query result = executeQuery(query, XWCPSEvaluationMocks.mockProcessCoverages("{1}"));
+//
+//		assertEquals("{1}", result.getValue());
+//	}
 
 	@Test
 	public void query6() {
