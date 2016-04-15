@@ -165,3 +165,9 @@
 #service-navbar #user-account #account-info-panel.collapsing {
     transition: none;
 }
+
+.results-info {
+    margin: 1em;
+    color: gray;
+    /* margin-top: 1em; */
+}
