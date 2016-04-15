@@ -5,29 +5,25 @@
     <title></title>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
           integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-
-    <!-- Optional theme -->
-    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
-          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">-->
-
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
             crossorigin="anonymous"></script>
 
-    <script src="https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/vkbeautify/vkbeautify.0.99.00.beta.js"></script>
-    <!--<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>-->
-    <script src="libs/google-code-prettify/prettify.js"></script>
-    <link rel="stylesheet" href="libs/google-code-prettify/prettify.css">
+    <!--<script src="https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/vkbeautify/vkbeautify.0.99.00.beta.js"></script>-->
+    <script src="libs/vkBeautify/vkbeautify.js"></script>
 
-    <script src="./libs/angular.js"></script>
-    <script src="./libs/angular-resource.js"></script>
 
-    <script src="./app/xwcps-parser-app.js"></script>
+    <script src="libs/angular.js"></script>
+    <script src="libs/angular-resource.js"></script>
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/github.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/highlight.min.js"></script>
+    <script src="libs/angular-highlightjs/angular-highlightjs.js"></script>
+    <script src="app/xwcps-parser-app.js"></script>
 
     <link rel="stylesheet" href="css/query.css">
     <link rel="stylesheet" href="css/spinner.css">
@@ -79,27 +75,28 @@
             </div>
         </div>
 
-        <div class="spinner" ng-hide="loader || result">
+        <div class="spinner" ng-hide="loader || response.result">
             <div class="bounce1"></div>
             <div class="bounce2"></div>
             <div class="bounce3"></div>
         </div>
 
-        <div class="results-info" ng-show="result">
+        <div class="results-info" ng-show="response.result">
             <div class="results-info-body">
-                {{ getSize(result) }} result(s) were found
+                {{ getSize(response.result) }} result(s) were found
             </div>
         </div>
 
-        <div class="row" ng-show="result.aggregatedValue">
+        <div class="row" ng-show="response.result.aggregatedValue">
             <div class="col-xs-12">
                 <div class="query-result">
-                    <pre id="aggregate-value-result" post-render class="prettyprint">{{prettifyXml(result.aggregatedValue)}}</pre>
+                    <!--<pre id="aggregate-value-result" post-render class="prettyprint">{{prettifyXml(response.result.aggregatedValue)}}</pre>-->
+                    <div hljs hljs-source="prettifyXml(response.result.aggregatedValue)"></div>
                 </div>
             </div>
         </div>
 
-        <div class="row mixedValue" ng-repeat="mixedValue in result.mixedValues">
+        <div class="row mixedValue" ng-repeat="mixedValue in response.result.mixedValues">
             <div class="panel panel-info">
 
                 <div class="panel-heading">{{mixedValue.subQuery}}</div>
@@ -111,7 +108,8 @@
                     </div>
                     <div class="col-xs-12" ng-show="mixedValue.xwcpsValue">
                         <div class="query-result">
-                            <pre id="mixed-value-result" post-render>{{prettifyXml(mixedValue.xwcpsValue)}}</pre>
+                            <!--<pre id="mixed-value-result" post-render>{{prettifyXml(mixedValue.xwcpsValue)}}</pre>-->
+                            <div hljs hljs-source="prettifyXml(mixedValue.xwcpsValue)"></div>
                         </div>
                     </div>
                 </div>
