@@ -6,6 +6,7 @@ import javax.ws.rs.client.WebTarget;
 import org.glassfish.jersey.uri.UriComponent;
 import org.glassfish.jersey.uri.UriComponent.Type;
 
+@Deprecated
 public class WCSRequestBuilder {
 	private String endpoint;
 

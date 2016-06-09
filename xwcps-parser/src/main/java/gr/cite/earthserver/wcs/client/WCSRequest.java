@@ -22,6 +22,7 @@ import com.google.common.cache.CacheBuilder;
 import gr.cite.earthserver.wcps.parser.core.MixedValue;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 
+@Deprecated
 public class WCSRequest {
 	private static final Logger logger = LoggerFactory.getLogger(WCSRequest.class);
 

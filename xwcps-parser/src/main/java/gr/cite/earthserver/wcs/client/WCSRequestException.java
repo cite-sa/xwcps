@@ -2,6 +2,7 @@ package gr.cite.earthserver.wcs.client;
 
 import java.util.concurrent.ExecutionException;
 
+@Deprecated
 public class WCSRequestException extends Exception {
 
 	/**
