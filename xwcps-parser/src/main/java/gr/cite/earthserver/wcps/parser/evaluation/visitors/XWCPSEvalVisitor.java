@@ -1,6 +1,5 @@
 package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +15,6 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Node;
-
-import com.google.common.base.CharMatcher;
 
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.AttributeContext;
@@ -46,8 +42,7 @@ import gr.cite.earthserver.wcps.parser.evaluation.XpathForClause;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
-import gr.cite.exmms.criteria.CriteriaQuery;
-import gr.cite.scarabaeus.utils.xml.UniversalNamespaceCache;
+import gr.cite.femme.query.criteria.CriteriaQuery;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
 

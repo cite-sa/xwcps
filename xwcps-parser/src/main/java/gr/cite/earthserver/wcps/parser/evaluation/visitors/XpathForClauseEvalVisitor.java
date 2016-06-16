@@ -22,11 +22,10 @@ import gr.cite.earthserver.wcps.parser.evaluation.XpathForClause;
 import gr.cite.earthserver.wcps.parser.utils.PrintVisitor;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
-import gr.cite.exmms.core.DataElementMetadatum;
-import gr.cite.exmms.core.Metadatum;
-import gr.cite.exmms.criteria.CriteriaQuery;
-import gr.cite.exmms.criteria.Where;
-import gr.cite.exmms.criteria.WhereBuilder;
+import gr.cite.femme.core.Metadatum;
+import gr.cite.femme.query.criteria.CriteriaQuery;
+import gr.cite.femme.query.criteria.Where;
+import gr.cite.femme.query.criteria.WhereBuilder;
 
 public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> {
 	private static final Logger logger = LoggerFactory.getLogger(XpathForClauseEvalVisitor.class);
@@ -234,7 +233,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		String key = ctx.relationalExpr(0).getText();
 		String value = ctx.relationalExpr(1).getText();
 
-		Metadatum metadatum = new DataElementMetadatum();
+		Metadatum metadatum = new Metadatum();
 		metadatum.setName(key.replaceAll("@", ""));
 		metadatum.setValue(XWCPSEvalUtils.removeQuates(value));
 

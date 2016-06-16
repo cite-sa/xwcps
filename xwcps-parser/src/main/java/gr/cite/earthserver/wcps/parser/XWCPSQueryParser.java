@@ -13,7 +13,7 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
-import gr.cite.exmms.criteria.CriteriaQuery;
+import gr.cite.femme.query.criteria.CriteriaQuery;
 
 public class XWCPSQueryParser {
 

@@ -1,15 +1,13 @@
 package gr.cite.earthserver.wcps.parser.evaluation;
 
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashSet;
 import java.util.List;
 
 import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -22,12 +20,12 @@ import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder.DescribeCoverage;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder.ProcessCoverages;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
-import gr.cite.exmms.core.DataElement;
-import gr.cite.exmms.core.Metadatum;
-import gr.cite.exmms.criteria.CriteriaQuery;
-import gr.cite.exmms.criteria.UnsupportedQueryOperationException;
-import gr.cite.exmms.criteria.Where;
-import gr.cite.exmms.criteria.WhereBuilder;
+import gr.cite.femme.core.DataElement;
+import gr.cite.femme.core.Metadatum;
+import gr.cite.femme.query.criteria.CriteriaQuery;
+import gr.cite.femme.query.criteria.UnsupportedQueryOperationException;
+import gr.cite.femme.query.criteria.Where;
+import gr.cite.femme.query.criteria.WhereBuilder;
 
 public class XWCPSEvaluationMocks {
 	public static WCSRequestBuilder mockWCSRequestBuilder() {
@@ -116,7 +114,7 @@ public class XWCPSEvaluationMocks {
 		when(query.<Coverage> expressionFactory()).thenReturn(where);
 		when(query.whereBuilder()).thenReturn(where);
 
-		when(where.exists(any())).thenReturn(whereBuilder);
+//		when(where.exists(any())).thenReturn(whereBuilder);
 		when(where.expression(Matchers.<Metadatum> any())).thenReturn(whereBuilder);
 		when(where.expression(Matchers.<WhereBuilder<Coverage>> any())).thenReturn(whereBuilder);
 		when(where.isChildOf(Matchers.<DataElement> any())).thenReturn(whereBuilder);
@@ -136,7 +134,7 @@ public class XWCPSEvaluationMocks {
 		CriteriaQuery<Coverage> query = mockCriteriaQuery();
 
 		when(query.find(anyString())).thenReturn(returnedCoverage);
-		when(query.find(Matchers.<Coverage> any())).thenReturn(returnedCoverage);
+//		when(query.find(Matchers.<Coverage> any())).thenReturn(returnedCoverage);
 		when(query.find()).thenReturn(Lists.newArrayList(returnedCoverage));
 
 		return query;

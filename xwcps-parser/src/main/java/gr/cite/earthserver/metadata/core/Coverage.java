@@ -1,10 +1,9 @@
 package gr.cite.earthserver.metadata.core;
 
 import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
-import gr.cite.exmms.core.Collection;
-import gr.cite.exmms.core.DataElement;
-import gr.cite.exmms.core.DataElementMetadatum;
-import gr.cite.exmms.core.Metadatum;
+import gr.cite.femme.core.Collection;
+import gr.cite.femme.core.DataElement;
+import gr.cite.femme.core.Metadatum;
 
 public class Coverage extends DataElement {
 

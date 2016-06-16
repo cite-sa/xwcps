@@ -1,7 +1,6 @@
 package gr.cite.earthserver.wcps.parser.evaluation;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 
@@ -15,14 +14,10 @@ import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSLexer;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser;
 import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
-import gr.cite.earthserver.wcs.client.WCSRequest;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
-import gr.cite.earthserver.wcs.client.WCSRequestBuilder.DescribeCoverage;
-import gr.cite.earthserver.wcs.client.WCSRequestBuilder.ProcessCoverages;
-import gr.cite.exmms.criteria.CriteriaQuery;
+import gr.cite.femme.query.criteria.CriteriaQuery;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import jersey.repackaged.com.google.common.collect.Lists;
-import gr.cite.earthserver.wcs.client.WCSRequestException;
 
 public class XWCPSEvalVisitorTest {
 
