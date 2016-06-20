@@ -24,7 +24,7 @@ public class WCPSEvalVisitorTest {
 	private static final String WCS_ENDPOINT = "http://access.planetserver.eu:8080/rasdaman/ows";
 
 	
-	@Test
+//	@Test
 	public void test() {
 		String query =
 //				"for data in ( frt00003590_07_if164l_trr3 , frt0000b1bd_07_if166l_trr3 ) "
@@ -64,23 +64,7 @@ public class WCPSEvalVisitorTest {
 
 		ParseTree tree = parser.xwcps();
 
-		System.out.println(tokenStream.getTokens().stream().map(token -> {
-			String channelStr = "";
-			String txt = token.getText();
-			if (txt != null) {
-				txt = txt.replace("\n", "\\n");
-				txt = txt.replace("\r", "\\r");
-				txt = txt.replace("\t", "\\t");
-			} else {
-				txt = "<no text>";
-			}
-			return "[@" + token.getTokenIndex() + "," + token.getStartIndex() + ":" + token.getStopIndex() + "='" + txt
-					+ "',<" + (token.getType() >= 0 ? XWCPSLexer.ruleNames[token.getType() - 1] : "-1") + ">"
-					+ channelStr + "," + token.getLine() + ":" + token.getCharPositionInLine() + "]";
-		}).collect(Collectors.toList()).toString());
-
-		System.out.println(tokenStream.getTokens());
-		System.out.println(tree.toStringTree(parser));
+		printInfo(tokenStream, parser, tree);
 
 		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(WCS_ENDPOINT,
 				XWCPSEvaluationMocks.mockCriteriaQuery(Lists.newArrayList(/*new Coverage() {
@@ -99,6 +83,27 @@ public class WCPSEvalVisitorTest {
 		System.out.println(result.getValue());
 		System.out.println(XMLConverter.nodeToString(XMLConverter.stringToNode(result.getValue(), true), true));
 
+	}
+
+
+	private void printInfo(CommonTokenStream tokenStream, XWCPSParser parser, ParseTree tree) {
+		System.out.println(tokenStream.getTokens().stream().map(token -> {
+			String channelStr = "";
+			String txt = token.getText();
+			if (txt != null) {
+				txt = txt.replace("\n", "\\n");
+				txt = txt.replace("\r", "\\r");
+				txt = txt.replace("\t", "\\t");
+			} else {
+				txt = "<no text>";
+			}
+			return "[@" + token.getTokenIndex() + "," + token.getStartIndex() + ":" + token.getStopIndex() + "='" + txt
+					+ "',<" + (token.getType() >= 0 ? XWCPSLexer.ruleNames[token.getType() - 1] : "-1") + ">"
+					+ channelStr + "," + token.getLine() + ":" + token.getCharPositionInLine() + "]";
+		}).collect(Collectors.toList()).toString());
+
+		System.out.println(tokenStream.getTokens());
+		System.out.println(tree.toStringTree(parser));
 	}
 
 	void xpath2() throws Exception {
