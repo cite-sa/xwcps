@@ -1,6 +1,5 @@
 package gr.cite.earthserver.wcps.parser.evaluation;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -13,13 +12,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import gr.cite.earthserver.metadata.core.Coverage;
-import gr.cite.earthserver.wcps.parser.core.MixedValue;
+import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcs.client.WCSRequest;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder.DescribeCoverage;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder.ProcessCoverages;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
+import gr.cite.earthserver.wcs.client.WCSResponse;
 import gr.cite.femme.core.DataElement;
 import gr.cite.femme.core.Metadatum;
 import gr.cite.femme.query.criteria.CriteriaQuery;
@@ -51,9 +51,9 @@ public class XWCPSEvaluationMocks {
 		when(describeCoverage.build()).thenReturn(wcsRequest);
 
 		try {
-			when(wcsRequest.get()).thenReturn(new XwcpsQueryResult() {
+			when(wcsRequest.get()).thenReturn(new WCSResponse() {
 				{
-					setAggregatedValue(XWCPSQueryMockedResponses.AVGLANDTEMP_DESCRIBE_COVERAGE);
+					setResponse(XWCPSQueryMockedResponses.AVGLANDTEMP_DESCRIBE_COVERAGE);
 				}
 			});
 		} catch (WCSRequestException e) {
@@ -72,11 +72,11 @@ public class XWCPSEvaluationMocks {
 		when(processCoverages.build()).thenReturn(wcsRequest);
 
 		try {
-			when(wcsRequest.get()).thenReturn(new XwcpsQueryResult() {
+			when(wcsRequest.get()).thenReturn(new WCSResponse() {
 				{
-					setAggregatedValue(wcpsQueryResponse);
-					MixedValue mixed = new MixedValue();
-					setMixedValues(Sets.newHashSet(mixed));
+					setResponse(wcpsQueryResponse);
+					//MixedValue mixed = new MixedValue();
+					//setMixedValues(Sets.newHashSet(mixed));
 				}
 			});
 		} catch (WCSRequestException e) {
@@ -95,9 +95,9 @@ public class XWCPSEvaluationMocks {
 		when(processCoverages.build()).thenReturn(wcsRequest);
 
 		try {
-			when(wcsRequest.get()).thenReturn(new XwcpsQueryResult() {
+			when(wcsRequest.get()).thenReturn(new WCSResponse() {
 				{
-					setAggregatedValue(wcpsQueryResponse);
+					setResponse(wcpsQueryResponse);
 				}
 			});
 		} catch (WCSRequestException e) {

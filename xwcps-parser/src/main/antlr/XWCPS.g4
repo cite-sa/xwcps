@@ -70,6 +70,8 @@ xpathForClause:  coverageVariableName IN xwcpsCoveragesClause;
 
 xwcpsCoveragesClause: xpath;
 
+mixedClause: MIXED LEFT_PARANTHESIS encodedCoverageExpression COMMA (xmlClause | xpathClause) RIGHT_PARANTHESIS;
+
 /*
  * overrided wcps rules
  */
@@ -82,7 +84,8 @@ booleanXpathClause : xpathClause;
 processingExpression: xmlClause
 					| xpathClause
 					| wrapResultClause
-                    | encodedCoverageExpression;
+                    | encodedCoverageExpression
+                    | mixedClause;
 
 wcpsQuery : (forClauseList) (letClause)* (whereClause)? (returnClause) ;
 

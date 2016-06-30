@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 
 import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.parser.core.Error;
-import gr.cite.earthserver.wcps.parser.core.MixedValue;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
+import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
 
 public class Query extends XwcpsQueryResult {
 	private String query;
@@ -21,7 +21,7 @@ public class Query extends XwcpsQueryResult {
 
 	private boolean isSimpleWCPS;
 
-	private Map<Coverage, String> coverageValueMap;
+	private Map<Coverage, XwcpsReturnValue> coverageValueMap;
 
 	public Query() {
 		setMixedValues(new HashSet<>());
@@ -47,7 +47,7 @@ public class Query extends XwcpsQueryResult {
 	}
 
 	public Query evaluated() {
-		setEvaluated(true);
+		this.setEvaluated(true);
 		return this;
 	}
 
@@ -65,7 +65,7 @@ public class Query extends XwcpsQueryResult {
 		return this;
 	}
 
-	public Query addMixedValue(MixedValue mixedValue) {
+	public Query addMixedValue(XwcpsReturnValue mixedValue) {
 		getMixedValues().add(mixedValue);
 		return this;
 	}
@@ -125,12 +125,15 @@ public class Query extends XwcpsQueryResult {
 		}
 
 		if (coverageValueMap != null && nextResult.getCoverageValueMap() != null) {
-			for (Entry<Coverage, String> coverageEntry : nextResult.getCoverageValueMap().entrySet()) {
+			for (Entry<Coverage, XwcpsReturnValue> coverageEntry : nextResult.getCoverageValueMap().entrySet()) {
 				if (coverageEntry.getValue() != null) {
 					if (coverageValueMap.containsKey(coverageEntry.getKey())) {
-						String currentValue = coverageValueMap.get(coverageEntry.getKey());
+						XwcpsReturnValue currentValue = coverageValueMap.get(coverageEntry.getKey());
 						
-						coverageValueMap.put(coverageEntry.getKey(), currentValue + coverageEntry.getValue());
+						XwcpsReturnValue returnValue = new XwcpsReturnValue();
+						returnValue.setXwcpsValue(currentValue.getXwcpsValue() + coverageEntry.getValue().getXwcpsValue());
+
+						coverageValueMap.put(coverageEntry.getKey(), returnValue);
 					} else {
 						coverageValueMap.put(coverageEntry.getKey(), coverageEntry.getValue());
 					}
@@ -156,7 +159,7 @@ public class Query extends XwcpsQueryResult {
 
 	public String serializeValue() {
 		if (coverageValueMap != null) {
-			return coverageValueMap.values().stream().filter(v -> v != null).collect(Collectors.joining());
+			return coverageValueMap.values().stream().filter(v -> v != null).map(x -> x.getXwcpsValue()).collect(Collectors.joining());
 		} else if (aggregatedValue != null) {
 			return aggregatedValue;
 		} else {
@@ -187,11 +190,12 @@ public class Query extends XwcpsQueryResult {
 		return isSimpleWCPS;
 	}
 
-	public Map<Coverage, String> getCoverageValueMap() {
+	public Map<Coverage, XwcpsReturnValue> getCoverageValueMap() {
+		//if (this.coverageValueMap == null) this.coverageValueMap = new HashMap<Coverage, XwcpsReturnValue>(); 
 		return coverageValueMap;
 	}
 
-	public Query setCoverageValueMap(Map<Coverage, String> coverageValueMap) {
+	public Query setCoverageValueMap(Map<Coverage, XwcpsReturnValue> coverageValueMap) {
 		this.coverageValueMap = coverageValueMap;
 		return this;
 	}

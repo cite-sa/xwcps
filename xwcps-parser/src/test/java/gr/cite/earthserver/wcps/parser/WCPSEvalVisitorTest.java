@@ -35,7 +35,9 @@ public class WCPSEvalVisitorTest {
 //				"blue: (int)(255/ (0.5 * (1 - (1.930 / ((1 - ((data.band_142 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_142 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))) * 0.5 * (1 - (1.985 / ((1 - ((data.band_151 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_151 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))))); \n" + 
 //				"alpha: (data.band_100 != 65535) * 255 }, \"png\", \"nodata=null\")";
 		
-		"for data in ( frt00003590_07_if164l_trr3 ) return <div> describeCoverage(data)//gml:cat_solar_longitude </div>";
+		//"for data in ( frt00003590_07_if164l_trr3 ) return <div> describeCoverage(data)//gml:cat_solar_longitude </div>";
+				
+		"for c in ( frt00003590_07_if164l_trr3 ) return mixed(encode(1, \"csv\"), describeCoverage(c)//gml:cat_solar_longitude)";
 		
 		// TODO
 		// "for c in (AvgLandTemp) return <a attr=min(c[Lat(53.08), Long(8.80),

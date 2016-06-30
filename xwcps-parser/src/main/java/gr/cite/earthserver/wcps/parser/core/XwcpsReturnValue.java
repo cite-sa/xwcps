@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-public class MixedValue {
+public class XwcpsReturnValue {
 	@JsonSerialize(using = InputStreamBase64Serializer.class)
 	private InputStream wcpsValue;
 
@@ -24,6 +24,14 @@ public class MixedValue {
 	private String subQuery;
 
 	private String xwcpsValue;
+	
+	public XwcpsReturnValue() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public XwcpsReturnValue(String xwcpsValue) {
+		this.xwcpsValue = xwcpsValue;
+	}
 
 	public InputStream getWcpsValue() {
 		return wcpsValue;
@@ -75,7 +83,7 @@ public class MixedValue {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MixedValue other = (MixedValue) obj;
+		XwcpsReturnValue other = (XwcpsReturnValue) obj;
 		if (wcpsMediaType == null) {
 			if (other.wcpsMediaType != null)
 				return false;

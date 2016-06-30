@@ -1,7 +1,10 @@
 package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,13 +23,14 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.EncodedCoverageExpressionLab
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ForClauseLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WcpsQueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
-import gr.cite.earthserver.wcps.parser.core.MixedValue;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
+import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.client.WCSRequest;
 import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.client.WCSRequestException;
+import gr.cite.earthserver.wcs.client.WCSResponse;
 
 public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	private static final Logger logger = LoggerFactory.getLogger(WCPSEvalVisitor.class);
@@ -34,7 +38,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	/**
 	 * expecting a link on the federated rasdaman
 	 */
-	@Deprecated
+
 	WCSRequestBuilder wcsRequestBuilder;
 
 	Map<String, List<Coverage>> variables = new HashMap<>();
@@ -82,13 +86,16 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		Query query = super.visitDescribeCoverageExpressionLabel(ctx);
 
 		String variable = ctx.coverageVariableName().getText();
-		Map<Coverage, String> describeCoverages = variables.get(variable).stream().map(coverage -> {
+		Map<Coverage, XwcpsReturnValue> describeCoverages = variables.get(variable).stream().map(coverage -> {
 			try {
 				String describeCoverage = wcsRequestBuilder.describeCoverage().coverageId(coverage.getLocalId()).build()
-						.get().getAggregatedValue();
+						.get().getResponse();
 
-				Entry<Coverage, String> entry = new SimpleImmutableEntry<>(coverage, "<coverage id='" + coverage + "'>"
+				XwcpsReturnValue result = new XwcpsReturnValue();
+				result.setXwcpsValue("<coverage id='" + coverage + "'>"
 						+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
+
+				Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
 
 				return entry;
 			} catch (WCSRequestException e) {
@@ -119,8 +126,9 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 
 		try {
 			if (!query.isEvaluated()) {
-				XwcpsQueryResult xwcpsQueryResult = wcsRequestBuilder.processCoverages().query(query.getQuery()).build()
-						.get();
+				XwcpsQueryResult xwcpsQueryResult = new XwcpsQueryResult();
+				xwcpsQueryResult.setAggregatedValue(
+						wcsRequestBuilder.processCoverages().query(query.getQuery()).build().get().getResponse());
 
 				if (xwcpsQueryResult.getMixedValues() != null) {
 					query.getMixedValues().addAll(xwcpsQueryResult.getMixedValues());
@@ -148,31 +156,76 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 							forWhereClauseQuery.getCoverageValueMap().keySet()).isEmpty()))
 					: stream;
 
-			encodedCoverageExpressionLabel.setMixedValues(
+			List<Map<Coverage, XwcpsReturnValue>> resultsPerCoverageList = stream.map(forWhereClauseQuery -> {
+				String rewrittenQuery = forWhereClauseQuery.getQuery() + " return "
+						+ encodedCoverageExpressionLabel.getQuery();
 
-					stream.map(forWhereClauseQuery -> {
-						MixedValue mixedValue = null;
+				Map<Coverage, XwcpsReturnValue> resultByCoverage = null;
+				try {
+					resultByCoverage = new HashMap<Coverage, XwcpsReturnValue>();
 
-						String rewrittenQuery = forWhereClauseQuery.getQuery() + " return "
-								+ encodedCoverageExpressionLabel.getQuery();
+					WCSResponse wcsResponce = wcsRequestBuilder.processCoverages().query(rewrittenQuery).build().get();
 
-						try {
-							XwcpsQueryResult xwcpsQueryResult = wcsRequestBuilder.processCoverages()
-									.query(rewrittenQuery).build().get();
-							mixedValue = xwcpsQueryResult.getMixedValues().iterator().next();
+					for (Entry<Coverage, XwcpsReturnValue> coverageEntry : forWhereClauseQuery.getCoverageValueMap()
+							.entrySet()) {
+						XwcpsReturnValue encodedResult = new XwcpsReturnValue();
 
-						} catch (Exception e) {
-							logger.error(e.getMessage(), e);
-							mixedValue = new MixedValue();
-							mixedValue.setXwcpsValue(e.getMessage());
-						}
+						encodedResult.setWcpsValue(
+								new ByteArrayInputStream(wcsResponce.getResponse().getBytes(StandardCharsets.UTF_8)));
+						encodedResult.setWcpsMediaType(wcsResponce.getContentType());
+						encodedResult.setSubQuery(rewrittenQuery);
 
-						mixedValue.setSubQuery(rewrittenQuery);
+						resultByCoverage.put(coverageEntry.getKey(), encodedResult);
+					}
 
-						return mixedValue;
-					}).filter(mixedValue -> mixedValue != null).collect(Collectors.toSet())
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+					// mixedValue = new XwcpsReturnValue();
+					// mixedValue.setXwcpsValue(e.getMessage());
+				}
+				return resultByCoverage;
+			}).collect(Collectors.toList());
 
-			);
+			if (encodedCoverageExpressionLabel.getCoverageValueMap() == null) encodedCoverageExpressionLabel.setCoverageValueMap(new HashMap<Coverage, XwcpsReturnValue>());
+			
+			for (Map<Coverage, XwcpsReturnValue> resultPerCoverage : resultsPerCoverageList) {
+				for (Entry<Coverage, XwcpsReturnValue> coverageEntry : resultPerCoverage.entrySet()) {
+					encodedCoverageExpressionLabel.getCoverageValueMap().put(coverageEntry.getKey(),
+							coverageEntry.getValue());
+				}
+			}
+
+			// encodedCoverageExpressionLabel.setMixedValues(
+			// stream.map(forWhereClauseQuery -> {
+			// XwcpsReturnValue mixedValue = null;
+			//
+			// String rewrittenQuery = forWhereClauseQuery.getQuery() + " return
+			// "
+			// + encodedCoverageExpressionLabel.getQuery();
+			//
+			// try {
+			// XwcpsQueryResult xwcpsQueryResult = new XwcpsQueryResult();
+			//
+			// WCSResponse wcsResponce = wcsRequestBuilder.processCoverages()
+			// .query(rewrittenQuery).build().get();
+			//
+			// xwcpsQueryResult.setAggregatedValue(wcsResponce.getResponse());
+			//
+			// mixedValue = xwcpsQueryResult.getMixedValues().iterator().next();
+			//
+			// } catch (Exception e) {
+			// logger.error(e.getMessage(), e);
+			// mixedValue = new XwcpsReturnValue();
+			// mixedValue.setXwcpsValue(e.getMessage());
+			// }
+			//
+			// mixedValue.setSubQuery(rewrittenQuery);
+			//
+			// return mixedValue;
+			// }).filter(mixedValue -> mixedValue !=
+			// null).collect(Collectors.toSet())
+			//
+			// );
 
 			encodedCoverageExpressionLabel.evaluated();
 		}

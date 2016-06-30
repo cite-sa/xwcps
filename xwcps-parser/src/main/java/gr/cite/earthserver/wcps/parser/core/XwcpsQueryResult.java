@@ -1,12 +1,16 @@
 package gr.cite.earthserver.wcps.parser.core;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import gr.cite.earthserver.metadata.core.Coverage;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE)
@@ -17,19 +21,19 @@ public class XwcpsQueryResult {
 	protected List<Error> errors;
 
 	@JsonProperty
-	protected Set<MixedValue> mixedValues;
-
+	protected Set<XwcpsReturnValue> mixedValues;
+	
 	@JsonProperty
 	protected String aggregatedValue;
 
-	public Set<MixedValue> getMixedValues() {
+	public Set<XwcpsReturnValue> getMixedValues() {
 		return mixedValues;
 	}
 
-	public void setMixedValues(Set<MixedValue> mixedValues) {
+	public void setMixedValues(Set<XwcpsReturnValue> mixedValues) {
 		this.mixedValues = mixedValues;
 	}
-
+	
 	public String getAggregatedValue() {
 		return aggregatedValue;
 	}

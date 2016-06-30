@@ -85,6 +85,7 @@ LOWER_OR_EQUAL_THAN: '<=';
 MAX:('m'|'M')('a'|'A')('x'|'X');
 MIN: ('m'|'M')('i'|'I')('n'|'N');
 MINUS: '-';
+MIXED:('m'|'M')('i'|'I')('x'|'X')('e'|'E')('d'|'D');
 MOD: ('m'|'M')('o'|'O')('d'|'D');
 MULTIPLICATION: '*';
 NOT: ('n'|'N')('o'|'O')('t'|'T');
@@ -119,6 +120,7 @@ WHERE: ('w'|'W')('h'|'H')('e'|'E')('r'|'R')('e'|'E');
 WRAP_RESULT: ('w'|'W')('r'|'R')('a'|'A')('p'|'P')'-'('r'|'R')('e'|'E')('s'|'S')('u'|'U')('l'|'L')('t'|'T');
 XOR: ('x'|'X')('o'|'O')('r'|'R');
 REAL_NUMBER_CONSTANT:'-'?NUMBERS+('.'NUMBERS*)?;
+
 
 SIMPLE_IDENTIFIER: START_CHARS + ;
 
