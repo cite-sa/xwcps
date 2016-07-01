@@ -13,12 +13,12 @@ import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.parser.XWCPSQueryParser;
 import gr.cite.earthserver.wcps.parser.application.config.XWCPSParserConfiguration;
 import gr.cite.earthserver.wcps.parser.application.resource.ParserResource;
-import gr.cite.exmms.core.Element;
-import gr.cite.exmms.core.Metadatum;
-import gr.cite.exmms.criteria.CriteriaQuery;
-import gr.cite.exmms.criteria.UnsupportedQueryOperationException;
-import gr.cite.exmms.criteria.Where;
-import gr.cite.exmms.criteria.WhereBuilder;
+import gr.cite.femme.core.Element;
+import gr.cite.femme.core.Metadatum;
+import gr.cite.femme.query.criteria.CriteriaQuery;
+import gr.cite.femme.query.criteria.UnsupportedQueryOperationException;
+import gr.cite.femme.query.criteria.Where;
+import gr.cite.femme.query.criteria.WhereBuilder;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
 
@@ -82,8 +82,8 @@ class MyCriteriaQuery implements CriteriaQuery<Coverage> {
 	}
 
 	@Override
-	public Coverage find(Coverage t) {
-		return t;
+	public List<Coverage> find(Coverage t) {
+		return Lists.newArrayList(t);
 	}
 
 	@Override
@@ -196,12 +196,6 @@ class MyWhere implements Where<Coverage> {
 
 	@Override
 	public WhereBuilder<Coverage> expression(WhereBuilder<Coverage> expression) {
-		return builder;
-
-	}
-
-	@Override
-	public <S extends Metadatum> WhereBuilder<Coverage> exists(S metadatum) {
 		return builder;
 
 	}

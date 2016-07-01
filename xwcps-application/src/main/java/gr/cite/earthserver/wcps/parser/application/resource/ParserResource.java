@@ -18,7 +18,6 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 
 import gr.cite.earthserver.wcps.parser.XWCPSQueryParser;
-import gr.cite.earthserver.wcps.parser.core.MixedValue;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 
@@ -43,43 +42,45 @@ public class ParserResource {
 	@Produces("multipart/mixed")
 	public Response queryWithMixedResponse(@QueryParam("q") String query) {
 
-		// TODO 
+//		// TODO 
+//		
+//		XwcpsQueryResult queryResult = xwcpsQueryParser.parse(query);
+//
+//		MultiPart multiPart = new MultiPart();
+//		List<BodyPart> bodyParts = multiPart.getBodyParts();
+//
+//		String aggregatedValue = queryResult.getAggregatedValue();
+//		if (aggregatedValue != null && !aggregatedValue.isEmpty()) {
+//			BodyPart bodyPart = new BodyPart(aggregatedValue, MediaType.APPLICATION_XML_TYPE);
+//			try {
+//				bodyPart.setContentDisposition(new ContentDisposition("aggregation_value"));
+//			} catch (ParseException e) {
+//				throw new WebApplicationException();
+//			}
+//			bodyParts.add(bodyPart);
+//		}
+//
+//		for (MixedValue mixedValue : queryResult.getMixedValues()) {
+//			
+////			MultiPart coverageMultiPart = new MultiPart();
+//			
+//			BodyPart bodyPart = new BodyPart(mixedValue.getWcpsValue(), mixedValue.getWcpsMediaType());
+//
+////			coverageMultiPart.getBodyParts().add(bodyPart);
+//
+//			try {
+//				ContentDisposition contentDisposition = new ContentDisposition("coverage");
+//				bodyPart.setContentDisposition(contentDisposition);
+//			} catch (ParseException e) {
+//				throw new WebApplicationException();
+//			}
+//			
+//			bodyParts.add(bodyPart);
+//		}
+//
+//		return Response.ok(multiPart).build();
 		
-		XwcpsQueryResult queryResult = xwcpsQueryParser.parse(query);
-
-		MultiPart multiPart = new MultiPart();
-		List<BodyPart> bodyParts = multiPart.getBodyParts();
-
-		String aggregatedValue = queryResult.getAggregatedValue();
-		if (aggregatedValue != null && !aggregatedValue.isEmpty()) {
-			BodyPart bodyPart = new BodyPart(aggregatedValue, MediaType.APPLICATION_XML_TYPE);
-			try {
-				bodyPart.setContentDisposition(new ContentDisposition("aggregation_value"));
-			} catch (ParseException e) {
-				throw new WebApplicationException();
-			}
-			bodyParts.add(bodyPart);
-		}
-
-		for (MixedValue mixedValue : queryResult.getMixedValues()) {
-			
-//			MultiPart coverageMultiPart = new MultiPart();
-			
-			BodyPart bodyPart = new BodyPart(mixedValue.getWcpsValue(), mixedValue.getWcpsMediaType());
-
-//			coverageMultiPart.getBodyParts().add(bodyPart);
-
-			try {
-				ContentDisposition contentDisposition = new ContentDisposition("coverage");
-				bodyPart.setContentDisposition(contentDisposition);
-			} catch (ParseException e) {
-				throw new WebApplicationException();
-			}
-			
-			bodyParts.add(bodyPart);
-		}
-
-		return Response.ok(multiPart).build();
+		return Response.ok("YANNIS").build();
 	}
 
 	@GET
