@@ -104,8 +104,11 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 				throw new ParseCancellationException(e);
 			}
 		}).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
-
-		return query.evaluated().setCoverageValueMap(describeCoverages);
+		
+		query.getCoverageValueMap().putAll(describeCoverages);
+		return query.evaluated();
+				
+		//return query.evaluated().setCoverageValueMap(describeCoverages);
 		// .setValue("<coverages>" +
 		// describeCoverages.stream().collect(Collectors.joining()) +
 		// "</coverages>");
@@ -151,7 +154,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		if (!forWhereClauseQuery.getSplittedQuery().isEmpty()) {
 			Stream<Query> stream = forWhereClauseQuery.getSplittedQuery().stream();
 
-			stream = forWhereClauseQuery.getCoverageValueMap() != null
+			stream = !forWhereClauseQuery.getCoverageValueMap().isEmpty()
 					? stream.filter(splitted -> !(Sets.intersection(splitted.getCoverageValueMap().keySet(),
 							forWhereClauseQuery.getCoverageValueMap().keySet()).isEmpty()))
 					: stream;
@@ -186,7 +189,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 				return resultByCoverage;
 			}).collect(Collectors.toList());
 
-			if (encodedCoverageExpressionLabel.getCoverageValueMap() == null) encodedCoverageExpressionLabel.setCoverageValueMap(new HashMap<Coverage, XwcpsReturnValue>());
+			//if (encodedCoverageExpressionLabel.getCoverageValueMap() == null) encodedCoverageExpressionLabel.setCoverageValueMap(new HashMap<Coverage, XwcpsReturnValue>());
 			
 			for (Map<Coverage, XwcpsReturnValue> resultPerCoverage : resultsPerCoverageList) {
 				for (Entry<Coverage, XwcpsReturnValue> coverageEntry : resultPerCoverage.entrySet()) {

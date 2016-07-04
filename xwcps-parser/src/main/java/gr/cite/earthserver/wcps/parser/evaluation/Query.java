@@ -1,6 +1,7 @@
 package gr.cite.earthserver.wcps.parser.evaluation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -124,23 +125,24 @@ public class Query extends XwcpsQueryResult {
 			aggregatedValue = serializeValue() + nextResult.serializeValue();
 		}
 
-		if (coverageValueMap != null && nextResult.getCoverageValueMap() != null) {
+		if (!this.getCoverageValueMap().isEmpty() && !nextResult.getCoverageValueMap().isEmpty()) {
 			for (Entry<Coverage, XwcpsReturnValue> coverageEntry : nextResult.getCoverageValueMap().entrySet()) {
 				if (coverageEntry.getValue() != null) {
-					if (coverageValueMap.containsKey(coverageEntry.getKey())) {
-						XwcpsReturnValue currentValue = coverageValueMap.get(coverageEntry.getKey());
+					if (this.getCoverageValueMap().containsKey(coverageEntry.getKey())) {
+						XwcpsReturnValue currentValue = this.getCoverageValueMap().get(coverageEntry.getKey());
 						
 						XwcpsReturnValue returnValue = new XwcpsReturnValue();
 						returnValue.setXwcpsValue(currentValue.getXwcpsValue() + coverageEntry.getValue().getXwcpsValue());
 
-						coverageValueMap.put(coverageEntry.getKey(), returnValue);
+						this.getCoverageValueMap().put(coverageEntry.getKey(), returnValue);
 					} else {
-						coverageValueMap.put(coverageEntry.getKey(), coverageEntry.getValue());
+						this.getCoverageValueMap().put(coverageEntry.getKey(), coverageEntry.getValue());
 					}
 				}
 			}
-		} else if (nextResult.getCoverageValueMap() != null) {
-			coverageValueMap = nextResult.getCoverageValueMap();
+		} else if (!nextResult.getCoverageValueMap().isEmpty()) {
+			//coverageValueMap = nextResult.getCoverageValueMap();
+			this.getCoverageValueMap().putAll(nextResult.getCoverageValueMap());
 		}
 
 		getMixedValues().addAll(nextResult.getMixedValues());
@@ -158,8 +160,8 @@ public class Query extends XwcpsQueryResult {
 	}
 
 	public String serializeValue() {
-		if (coverageValueMap != null) {
-			return coverageValueMap.values().stream().filter(v -> v != null).map(x -> x.getXwcpsValue()).collect(Collectors.joining());
+		if (!this.getCoverageValueMap().isEmpty()) {
+			return this.getCoverageValueMap().values().stream().filter(v -> v != null).map(x -> x.getXwcpsValue()).collect(Collectors.joining());
 		} else if (aggregatedValue != null) {
 			return aggregatedValue;
 		} else {
@@ -191,12 +193,12 @@ public class Query extends XwcpsQueryResult {
 	}
 
 	public Map<Coverage, XwcpsReturnValue> getCoverageValueMap() {
-		//if (this.coverageValueMap == null) this.coverageValueMap = new HashMap<Coverage, XwcpsReturnValue>(); 
+		if (this.coverageValueMap == null) this.coverageValueMap = new HashMap<Coverage, XwcpsReturnValue>(); 
 		return coverageValueMap;
 	}
 
-	public Query setCoverageValueMap(Map<Coverage, XwcpsReturnValue> coverageValueMap) {
-		this.coverageValueMap = coverageValueMap;
-		return this;
-	}
+//	public Query setCoverageValueMap(Map<Coverage, XwcpsReturnValue> coverageValueMap) {
+//		this.coverageValueMap = coverageValueMap;
+//		return this;
+//	}
 }
