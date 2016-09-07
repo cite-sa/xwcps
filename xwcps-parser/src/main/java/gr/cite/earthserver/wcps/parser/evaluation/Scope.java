@@ -26,7 +26,7 @@ public class Scope {
 	}
 
 	public Set<String> getVariables() {
-		return variables.keySet();
+		return this.variables.keySet();
 	}
 
 	public String getVariableValue(String variableName) {
@@ -42,20 +42,20 @@ public class Scope {
 	}
 
 	private String getLocalVariableValue(String variableName) {
-		return variables.get(variableName);
+		return this.variables.get(variableName);
 	}
 
 	public void setVariable(String variable, String value) {
-		variables.put(variable, value);
+		this.variables.put(variable, value);
 	}
 
 	public Scope addScope() {
 		Scope scope = new Scope(this);
-		scopes.add(scope);
+		this.scopes.add(scope);
 		return scope;
 	}
 
 	public Scope getParentScope() {
-		return parentScope;
+		return this.parentScope;
 	}
 }

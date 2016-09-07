@@ -44,7 +44,7 @@ public class Query extends XwcpsQueryResult {
 	}
 
 	public boolean isEvaluated() {
-		return evaluated;
+		return this.evaluated;
 	}
 
 	public Query evaluated() {
@@ -104,53 +104,122 @@ public class Query extends XwcpsQueryResult {
 
 	public Query aggregate(Query nextResult, boolean overrideValue) {
 
-		query = aggreagateQuery(query, nextResult);
+		this.query = aggreagateQuery(this.query, nextResult);
 
-		for (Query splitted : splittedQuery) {
+		for (Query splitted : this.splittedQuery) {
 			splitted.setAggregatedValue(aggreagateQuery(splitted.getAggregatedValue(), nextResult));
 		}
-		if (splittedQuery.isEmpty() && !nextResult.getSplittedQuery().isEmpty()) {
+		if (this.splittedQuery.isEmpty() && !nextResult.getSplittedQuery().isEmpty()) {
 			// for (String splitted : nextResult.getSplittedQuery()) {
 			// splittedQuery.add(query + " " + splitted);
 			// }
 			//
 			// FIXME the afforementioned is the correct implementation,
 			// the following is temporal
-			splittedQuery = nextResult.getSplittedQuery();
+			this.splittedQuery = nextResult.getSplittedQuery();
 		}
 
-		if (aggregatedValue == null || overrideValue) {
-			aggregatedValue = nextResult.serializeValue();
+		if (this.aggregatedValue == null || overrideValue) {
+			this.aggregatedValue = nextResult.serializeValue();
 		} else {
-			aggregatedValue = serializeValue() + nextResult.serializeValue();
+			this.aggregatedValue = serializeValue() + nextResult.serializeValue();
 		}
 
-		if (!this.getCoverageValueMap().isEmpty() && !nextResult.getCoverageValueMap().isEmpty()) {
-			for (Entry<Coverage, XwcpsReturnValue> coverageEntry : nextResult.getCoverageValueMap().entrySet()) {
-				if (coverageEntry.getValue() != null) {
+		if (!nextResult.getCoverageValueMap().isEmpty()) {
+			if (this.getCoverageValueMap().isEmpty()) {
+				this.getCoverageValueMap().putAll(nextResult.getCoverageValueMap());
+			} else {
+				for (Entry<Coverage, XwcpsReturnValue> coverageEntry : nextResult.getCoverageValueMap().entrySet()) {
+					if (coverageEntry.getValue() == null)
+						continue;
+
 					if (this.getCoverageValueMap().containsKey(coverageEntry.getKey())) {
 						XwcpsReturnValue currentValue = this.getCoverageValueMap().get(coverageEntry.getKey());
-						
-						XwcpsReturnValue returnValue = new XwcpsReturnValue();
-						returnValue.setXwcpsValue(currentValue.getXwcpsValue() + coverageEntry.getValue().getXwcpsValue());
 
-						this.getCoverageValueMap().put(coverageEntry.getKey(), returnValue);
+						if (currentValue == null)
+							this.getCoverageValueMap().put(coverageEntry.getKey(), coverageEntry.getValue());
+						else if (coverageEntry.getValue().getXwcpsValue() == null)
+							continue;
+						else {
+							XwcpsReturnValue returnValue = new XwcpsReturnValue();
+							returnValue.setXwcpsValue(
+									currentValue.getXwcpsValue() + coverageEntry.getValue().getXwcpsValue());
+							this.getCoverageValueMap().put(coverageEntry.getKey(), returnValue);
+						}
 					} else {
 						this.getCoverageValueMap().put(coverageEntry.getKey(), coverageEntry.getValue());
 					}
 				}
 			}
-		} else if (!nextResult.getCoverageValueMap().isEmpty()) {
-			//coverageValueMap = nextResult.getCoverageValueMap();
-			this.getCoverageValueMap().putAll(nextResult.getCoverageValueMap());
 		}
 
 		getMixedValues().addAll(nextResult.getMixedValues());
 
 		getErrors().addAll(nextResult.getErrors());
 
-		if (!evaluated) {
-			evaluated = nextResult.isEvaluated();
+		if (!this.evaluated) {
+			this.evaluated = nextResult.isEvaluated();
+		}
+		return this;
+	}
+	
+	public Query aggregateReturn(Query nextResult, boolean overrideValue) {
+
+		this.query = aggreagateQuery(this.query, nextResult);
+
+		for (Query splitted : splittedQuery) {
+			splitted.setAggregatedValue(aggreagateQuery(splitted.getAggregatedValue(), nextResult));
+		}
+		if (this.splittedQuery.isEmpty() && !nextResult.getSplittedQuery().isEmpty()) {
+			// for (String splitted : nextResult.getSplittedQuery()) {
+			// splittedQuery.add(query + " " + splitted);
+			// }
+			//
+			// FIXME the afforementioned is the correct implementation,
+			// the following is temporal
+			this.splittedQuery = nextResult.getSplittedQuery();
+		}
+
+		if (this.aggregatedValue == null || overrideValue) {
+			this.aggregatedValue = nextResult.serializeValue();
+		} else {
+			this.aggregatedValue = serializeValue() + nextResult.serializeValue();
+		}
+
+		if (!nextResult.getCoverageValueMap().isEmpty()) {
+			if (this.getCoverageValueMap().isEmpty()) {
+				this.getCoverageValueMap().putAll(nextResult.getCoverageValueMap());
+			} else {
+				for (Entry<Coverage, XwcpsReturnValue> coverageEntry : nextResult.getCoverageValueMap().entrySet()) {
+					if (coverageEntry.getValue() == null)
+						continue;
+
+					if (this.getCoverageValueMap().containsKey(coverageEntry.getKey())) {
+						XwcpsReturnValue currentValue = this.getCoverageValueMap().get(coverageEntry.getKey());
+
+						if (currentValue == null)
+							this.getCoverageValueMap().put(coverageEntry.getKey(), coverageEntry.getValue());
+						else if (coverageEntry.getValue().getXwcpsValue() == null)
+							continue;
+						else {
+							XwcpsReturnValue returnValue = new XwcpsReturnValue();
+							returnValue.setXwcpsValue(
+									currentValue.getXwcpsValue() + coverageEntry.getValue().getXwcpsValue());
+							this.getCoverageValueMap().put(coverageEntry.getKey(), returnValue);
+						}
+					} else {
+						this.getCoverageValueMap().put(coverageEntry.getKey(), coverageEntry.getValue());
+					}
+				}
+			}
+		}
+
+		getMixedValues().addAll(nextResult.getMixedValues());
+
+		getErrors().addAll(nextResult.getErrors());
+
+		if (!this.evaluated) {
+			this.evaluated = nextResult.isEvaluated();
 		}
 		return this;
 	}
@@ -161,9 +230,10 @@ public class Query extends XwcpsQueryResult {
 
 	public String serializeValue() {
 		if (!this.getCoverageValueMap().isEmpty()) {
-			return this.getCoverageValueMap().values().stream().filter(v -> v != null).map(x -> x.getXwcpsValue()).collect(Collectors.joining());
-		} else if (aggregatedValue != null) {
-			return aggregatedValue;
+			return this.getCoverageValueMap().values().stream().filter(v -> v != null).map(x -> x.getXwcpsValue())
+					.collect(Collectors.joining());
+		} else if (this.aggregatedValue != null) {
+			return this.aggregatedValue;
 		} else {
 			return "";
 		}
@@ -175,7 +245,7 @@ public class Query extends XwcpsQueryResult {
 
 	@Override
 	public String toString() {
-		return query;
+		return this.query;
 	}
 
 	public Query prependQuery(String prependedQuery) {
@@ -189,16 +259,18 @@ public class Query extends XwcpsQueryResult {
 	}
 
 	public boolean isSimpleWCPS() {
-		return isSimpleWCPS;
+		return this.isSimpleWCPS;
 	}
 
 	public Map<Coverage, XwcpsReturnValue> getCoverageValueMap() {
-		if (this.coverageValueMap == null) this.coverageValueMap = new HashMap<Coverage, XwcpsReturnValue>(); 
-		return coverageValueMap;
+		if (this.coverageValueMap == null)
+			this.coverageValueMap = new HashMap<Coverage, XwcpsReturnValue>();
+		return this.coverageValueMap;
 	}
 
-//	public Query setCoverageValueMap(Map<Coverage, XwcpsReturnValue> coverageValueMap) {
-//		this.coverageValueMap = coverageValueMap;
-//		return this;
-//	}
+	// public Query setCoverageValueMap(Map<Coverage, XwcpsReturnValue>
+	// coverageValueMap) {
+	// this.coverageValueMap = coverageValueMap;
+	// return this;
+	// }
 }

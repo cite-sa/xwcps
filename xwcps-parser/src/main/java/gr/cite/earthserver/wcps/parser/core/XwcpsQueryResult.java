@@ -1,15 +1,12 @@
 package gr.cite.earthserver.wcps.parser.core;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import gr.cite.earthserver.metadata.core.Coverage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -14,8 +14,9 @@ public class XWCPSEvalUtils {
 	public static final String DEFAULT_XML_RETURN_ELEMENT = "results";
 
 	public static final Query wrapDefaultXmlReturnElement(Query query) {
-		//query.setCoverageValueMap(null);
-		query.getCoverageValueMap().clear();
+		// query.setCoverageValueMap(null);
+		// TODO: Check why we were clearing the map!!!
+		// query.getCoverageValueMap().clear();
 		return query.prependValue("<" + XWCPSEvalUtils.DEFAULT_XML_RETURN_ELEMENT + ">")
 				.appendValue("</" + XWCPSEvalUtils.DEFAULT_XML_RETURN_ELEMENT + ">");
 	}
@@ -29,18 +30,17 @@ public class XWCPSEvalUtils {
 	}
 
 	public static List<Query> constructForQueries(String variable, List<Coverage> coverages) {
-		return coverages.stream().map(c -> {
 
+		List<Query> forQueries = coverages.stream().map(c -> {
 			Map<Coverage, XwcpsReturnValue> coverageMap = new HashMap<>();
 			coverageMap.put(c, null);
 
-//			Query q = new Query().setQuery("for " + variable + " in ( " + c.getLocalId() + " ) ")
-//					.setCoverageValueMap(coverageMap);
-			
 			Query q = new Query().setQuery("for " + variable + " in ( " + c.getLocalId() + " ) ");
 			q.getCoverageValueMap().putAll(coverageMap);
 
 			return q;
 		}).collect(Collectors.toList());
+
+		return forQueries;
 	}
 }

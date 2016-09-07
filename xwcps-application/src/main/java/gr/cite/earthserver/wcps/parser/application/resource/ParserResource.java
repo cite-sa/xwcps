@@ -1,7 +1,13 @@
 package gr.cite.earthserver.wcps.parser.application.resource;
 
+import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -17,6 +23,7 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 
 import com.fasterxml.jackson.databind.util.JSONPObject;
 
+import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.parser.XWCPSQueryParser;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
@@ -32,9 +39,59 @@ public class ParserResource {
 	}
 
 	@GET
-	@Path("query")
+	@Path("QueryXwcps")
+	//@Produces("multipart/mixed")
 	public XwcpsQueryResult query(@QueryParam("q") String query) {
-		return xwcpsQueryParser.parse(query);
+		// return "blakas";
+
+		Query result = xwcpsQueryParser.parse(query);
+		
+		return result;
+
+		// gr.cite.earthserver.wcps.parser.core.Error error = new
+		// gr.cite.earthserver.wcps.parser.core.Error();
+		// error.setMessage("gamw pio poli tin java");
+		// List<gr.cite.earthserver.wcps.parser.core.Error> tErrors = new
+		// ArrayList<>();
+		// tErrors.add(error);
+		// result.setErrors(tErrors);
+		
+		//MultiPart multiPart = this.GenerateMultiPartResponse(result);
+		//return Response.ok(multiPart).build();
+	}
+	
+	private MultiPart GenerateMultiPartResponse(Query result){
+		MultiPart multiPart = new MultiPart();
+		multiPart.type(new MediaType("multipart", "mixed"));
+		
+		List<BodyPart> bodyParts = multiPart.getBodyParts();
+
+		for (Coverage c : result.getCoverageValueMap().keySet()) {
+			if (result.getCoverageValueMap().get(c).getWcpsValue() != null) {
+
+				BodyPart bodyPart = new BodyPart(result.getCoverageValueMap().get(c).getWcpsValue(),
+						result.getCoverageValueMap().get(c).getWcpsMediaType());
+
+				try {
+					ContentDisposition contentDisposition = new ContentDisposition("coverage");
+					bodyPart.setContentDisposition(contentDisposition);
+				} catch (ParseException e) {
+					throw new WebApplicationException();
+				}
+
+				bodyParts.add(bodyPart);
+
+				break;
+			}
+		}
+		
+		try {
+			multiPart.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return multiPart;
 	}
 
 	@GET
@@ -42,8 +99,8 @@ public class ParserResource {
 	@Produces("multipart/mixed")
 	public Response queryWithMixedResponse(@QueryParam("q") String query) {
 
-//		// TODO 
-//		
+//		// TODO
+//
 //		XwcpsQueryResult queryResult = xwcpsQueryParser.parse(query);
 //
 //		MultiPart multiPart = new MultiPart();
@@ -61,12 +118,12 @@ public class ParserResource {
 //		}
 //
 //		for (MixedValue mixedValue : queryResult.getMixedValues()) {
-//			
-////			MultiPart coverageMultiPart = new MultiPart();
-//			
+//
+//			// MultiPart coverageMultiPart = new MultiPart();
+//
 //			BodyPart bodyPart = new BodyPart(mixedValue.getWcpsValue(), mixedValue.getWcpsMediaType());
 //
-////			coverageMultiPart.getBodyParts().add(bodyPart);
+//			// coverageMultiPart.getBodyParts().add(bodyPart);
 //
 //			try {
 //				ContentDisposition contentDisposition = new ContentDisposition("coverage");
@@ -74,12 +131,12 @@ public class ParserResource {
 //			} catch (ParseException e) {
 //				throw new WebApplicationException();
 //			}
-//			
+//
 //			bodyParts.add(bodyPart);
 //		}
 //
 //		return Response.ok(multiPart).build();
-		
+
 		return Response.ok("YANNIS").build();
 	}
 

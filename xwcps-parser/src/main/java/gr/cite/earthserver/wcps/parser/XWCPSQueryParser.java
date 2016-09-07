@@ -28,7 +28,7 @@ public class XWCPSQueryParser {
 		this.criteriaQuery = criteriaQuery;
 	}
 
-	public XwcpsQueryResult parse(String query) {
+	public Query parse(String query) {
 		CharStream stream = new ANTLRInputStream(query);
 		XWCPSLexer lexer = new XWCPSLexer(stream);
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
@@ -57,7 +57,7 @@ public class XWCPSQueryParser {
 		// System.out.println(tokenStream.getTokens());
 		// System.out.println(tree.toStringTree(parser));
 
-		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(WCS_ENDPOINT, criteriaQuery);
+		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(XWCPSQueryParser.WCS_ENDPOINT, this.criteriaQuery);
 		Query result = visitor.visit(tree);
 
 		return result;

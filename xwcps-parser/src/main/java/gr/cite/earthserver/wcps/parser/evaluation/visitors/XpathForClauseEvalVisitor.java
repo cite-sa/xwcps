@@ -41,9 +41,9 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		this.query = query;
 	}
 
-	XpathForClause executeQuery() {
-		if (!stack.isEmptyWhereBuilderStack()) {
-			this.query = stack.popWhereBuilderStack().build();
+	public XpathForClause executeQuery() {
+		if (!this.stack.isEmptyWhereBuilderStack()) {
+			this.query = this.stack.popWhereBuilderStack().build();
 		}
 
 		List<Coverage> coverages = this.query.find();
@@ -54,14 +54,16 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 	@Override
 	public XpathForClause visitMain(MainContext ctx) {
 
-		Where<Coverage> whereRoot = query.whereBuilder();
-		stack.pushWhereStack(whereRoot);
+		Where<Coverage> whereRoot = this.query.whereBuilder();
+		this.stack.pushWhereStack(whereRoot);
 
 		XpathForClause visitMain = super.visitMain(ctx);
 
-		stack.popWhereStack();
+		this.stack.popWhereStack();
+		
+		XpathForClause executedQuery = this.executeQuery();
 
-		return visitMain.aggregate(executeQuery());
+		return visitMain.aggregate(executedQuery);
 
 	}
 
@@ -72,10 +74,10 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		TerminalNode xpathStartingTerminal = null;
 
 		for (ParseTree parseTree : ctx.children) {
-			if (isSimpleXpath && (parseTree instanceof TerminalNode)) {
+			if (this.isSimpleXpath && (parseTree instanceof TerminalNode)) {
 				xpathStartingTerminal = (TerminalNode) parseTree;
 				continue;
-			} else if (isSimpleXpath && (parseTree instanceof StepContext)) {
+			} else if (this.isSimpleXpath && (parseTree instanceof StepContext)) {
 				simpleXpathContext = (StepContext) parseTree;
 				break;
 			}
@@ -98,14 +100,14 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 	@Override
 	public XpathForClause visitOrExpr(OrExprContext ctx) {
-		if (isSimpleXpath) {
+		if (this.isSimpleXpath) {
 			return super.visitOrExpr(ctx);
 		}
 
 		if (ctx.andExpr().size() > 1) {
 
-			Where<Coverage> orWhere = query.expressionFactory();
-			stack.pushWhereStack(orWhere);
+			Where<Coverage> orWhere = this.query.expressionFactory();
+			this.stack.pushWhereStack(orWhere);
 
 			int i = 0;
 			for (AndExprContext andExprContext : ctx.andExpr()) {
@@ -113,16 +115,16 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 				visit(andExprContext);
 
 				if (i + 1 < ctx.andExpr().size()) {
-					stack.popWhereStack();
-					stack.pushWhereStack(stack.popWhereBuilderStack().or());
+					this.stack.popWhereStack();
+					this.stack.pushWhereStack(this.stack.popWhereBuilderStack().or());
 
 				}
 
 				++i;
 			}
 
-			stack.popWhereStack();
-			stack.pushWhereBuilderStack(stack.peekWhereStack().expression(stack.popWhereBuilderStack()));
+			this.stack.popWhereStack();
+			this.stack.pushWhereBuilderStack(this.stack.peekWhereStack().expression(this.stack.popWhereBuilderStack()));
 
 			return null;
 		} else {
@@ -132,14 +134,14 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 	@Override
 	public XpathForClause visitAndExpr(AndExprContext ctx) {
-		if (isSimpleXpath) {
+		if (this.isSimpleXpath) {
 			return super.visitAndExpr(ctx);
 		}
 
 		if (ctx.equalityExpr().size() > 1) {
 
-			Where<Coverage> andWhere = query.expressionFactory();
-			stack.pushWhereStack(andWhere);
+			Where<Coverage> andWhere = this.query.expressionFactory();
+			this.stack.pushWhereStack(andWhere);
 
 			int i = 0;
 			for (EqualityExprContext equalityExprContext : ctx.equalityExpr()) {
@@ -147,15 +149,15 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 				visit(equalityExprContext);
 
 				if (i + 1 < ctx.equalityExpr().size()) {
-					stack.popWhereStack();
-					stack.pushWhereStack(stack.popWhereBuilderStack().and());
+					this.stack.popWhereStack();
+					this.stack.pushWhereStack(this.stack.popWhereBuilderStack().and());
 				}
 
 				++i;
 			}
 
-			stack.popWhereStack();
-			stack.pushWhereBuilderStack(stack.peekWhereStack().expression(stack.popWhereBuilderStack()));
+			this.stack.popWhereStack();
+			this.stack.pushWhereBuilderStack(this.stack.peekWhereStack().expression(this.stack.popWhereBuilderStack()));
 
 			return null;
 		} else {
@@ -166,7 +168,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 	@Override
 	public XpathForClause visitStep(StepContext ctx) {
 
-		if (isSimpleXpath) {
+		if (this.isSimpleXpath) {
 			return super.visitStep(ctx);
 		}
 
@@ -189,19 +191,19 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 				break;
 			case XWCPSReservedWords.SERVER:
 
-				Where<Coverage> serverWhere = query.expressionFactory();
-				stack.pushWhereStack(serverWhere);
+				Where<Coverage> serverWhere = this.query.expressionFactory();
+				this.stack.pushWhereStack(serverWhere);
 
 				for (PredicateContext predicate : ctx.predicate()) {
 					visit(predicate);
 				}
 
-				stack.popWhereStack();
-				WhereBuilder<Coverage> serverWhereBuilder = stack.peekWhereStack()
-						.isChildOf(stack.popWhereBuilderStack());
-				stack.popWhereStack();
+				this.stack.popWhereStack();
+				WhereBuilder<Coverage> serverWhereBuilder = this.stack.peekWhereStack()
+						.isChildOf(this.stack.popWhereBuilderStack());
+				this.stack.popWhereStack();
 
-				stack.pushWhereStack(serverWhereBuilder.and());
+				this.stack.pushWhereStack(serverWhereBuilder.and());
 
 				break;
 			default:
@@ -212,7 +214,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		}
 
 		if (foundCoverage) {
-			isSimpleXpath = true;
+			this.isSimpleXpath = true;
 		}
 
 		// FIXME
@@ -222,7 +224,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 	@Override
 	public XpathForClause visitEqualityExpr(EqualityExprContext ctx) {
-		if (isSimpleXpath) {
+		if (this.isSimpleXpath) {
 			return super.visitEqualityExpr(ctx);
 		}
 
@@ -237,7 +239,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		metadatum.setName(key.replaceAll("@", ""));
 		metadatum.setValue(XWCPSEvalUtils.removeQuates(value));
 
-		stack.pushWhereBuilderStack(stack.peekWhereStack().expression(metadatum));
+		this.stack.pushWhereBuilderStack(this.stack.peekWhereStack().expression(metadatum));
 
 		// FIXME
 		return null;
@@ -252,7 +254,6 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		}
 		return aggregate.aggregate(nextResult);
 	}
-
 }
 
 class XpathForClauseEvalVisitorStack {

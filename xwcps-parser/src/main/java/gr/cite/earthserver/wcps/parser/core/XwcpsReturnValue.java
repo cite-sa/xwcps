@@ -24,11 +24,10 @@ public class XwcpsReturnValue {
 	private String subQuery;
 
 	private String xwcpsValue;
-	
+
 	public XwcpsReturnValue() {
-		// TODO Auto-generated constructor stub
 	}
-	
+
 	public XwcpsReturnValue(String xwcpsValue) {
 		this.xwcpsValue = xwcpsValue;
 	}
