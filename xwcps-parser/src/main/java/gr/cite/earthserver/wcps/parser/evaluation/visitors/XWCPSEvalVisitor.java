@@ -16,7 +16,9 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gr.cite.earthserver.metadata.core.Coverage;
+import com.fasterxml.jackson.databind.deser.Deserializers.Base;
+
+import gr.cite.earthserver.query.CriteriaQuery;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.AttributeContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.BooleanXpathClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
@@ -42,11 +44,15 @@ import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.Scope;
 import gr.cite.earthserver.wcps.parser.evaluation.XpathForClause;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
-import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
-import gr.cite.earthserver.wcs.client.WCSRequestException;
-import gr.cite.femme.query.criteria.CriteriaQuery;
+import gr.cite.earthserver.wcs.adaper.api.WCSAdapterAPI;
+import gr.cite.earthserver.wcs.core.Coverage;
+import gr.cite.earthserver.wcs.core.WCSRequestBuilder;
+import gr.cite.earthserver.wcs.core.WCSRequestException;
+//import gr.cite.femme.query.criteria.CriteriaQuery;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
+import gr.cite.scarabaues.utils.xml.exceptions.XMLConversionException;
+import gr.cite.scarabaues.utils.xml.exceptions.XPathEvaluationException;
 
 public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	private static final Logger logger = LoggerFactory.getLogger(XWCPSEvalVisitor.class);
@@ -58,6 +64,15 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	private String forClauseDefaultXpath = null;
 
 	private Stack<Scope> scopes = new Stack<>();
+	
+//	public XWCPSEvalVisitor(String wcsEndpoint) {
+//		super(wcsEndpoint);
+//	}
+	
+	public XWCPSEvalVisitor(WCSAdapterAPI wcsAdapter, CriteriaQuery<Coverage> exmmsQuery) {
+		super(wcsAdapter);
+		this.exmmsQuery = exmmsQuery;
+	}
 
 	/**
 	 * 
@@ -66,20 +81,29 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	 * @param exmmsQuery
 	 *            TODO
 	 */
-	public XWCPSEvalVisitor(String wcsEndpoint, CriteriaQuery<Coverage> exmmsQuery) {
-		super(wcsEndpoint);
-		this.exmmsQuery = exmmsQuery;
-	}
+//	public XWCPSEvalVisitor(String wcsEndpoint, CriteriaQuery<Coverage> exmmsQuery) {
+//		super(wcsEndpoint);
+//		this.exmmsQuery = exmmsQuery;
+//	}
 
 	/**
 	 * 
 	 * @param wcsRequestBuilder
 	 *            wcs request builder with url on the federated rasdaman
 	 */
-	public XWCPSEvalVisitor(WCSRequestBuilder wcsRequestBuilder, CriteriaQuery<Coverage> exmmsQuery) {
-		super(wcsRequestBuilder);
-		this.exmmsQuery = exmmsQuery;
-	}
+//	public XWCPSEvalVisitor(WCSRequestBuilder wcsRequestBuilder) {
+//		super(wcsRequestBuilder);
+//	}
+	
+//	/**
+//	 * 
+//	 * @param wcsRequestBuilder
+//	 *            wcs request builder with url on the federated rasdaman
+//	 */
+//	public XWCPSEvalVisitor(WCSRequestBuilder wcsRequestBuilder, CriteriaQuery<Coverage> exmmsQuery) {
+//		super(wcsRequestBuilder);
+//		this.exmmsQuery = exmmsQuery;
+//	}
 
 	@Override
 	public Query visitXwcps(XwcpsContext ctx) {
@@ -100,13 +124,13 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	public Query visitXpathForClause(XpathForClauseContext ctx) {
 		Query q = visit(ctx.coverageVariableName());
 
-		XpathForClauseEvalVisitor xpathForClauseEvalVisitor = new XpathForClauseEvalVisitor(exmmsQuery);
+		XpathForClauseEvalVisitor xpathForClauseEvalVisitor = new XpathForClauseEvalVisitor(exmmsQuery, this.getWcsAdapter());
 		XpathForClause xpathForClause = xpathForClauseEvalVisitor.visit(ctx);
 
 		List<Coverage> coverageList = xpathForClause.getCoverages();
 		variables.put(ctx.coverageVariableName().getText(), coverageList);
 
-		String coverages = coverageList.stream().map(Coverage::getLocalId)
+		String coverages = coverageList.stream().map(Coverage::getCoverageId)
 				.collect(Collectors.joining(", ", "( ", " )"));
 
 		if (xpathForClause.getXpathQuery() != null) {
@@ -134,7 +158,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 				 * return <a attr=min(c[Lat(53.08), Long(8.80),
 				 * ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>
 				 */
-				try {
+				//try {
 
 					String defaultForWhereClauseQuery = "for c in (NIR) return "; // FIXME
 					if (this.forWhereClauseQuery != null) {
@@ -146,14 +170,17 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 					if (ctx.getParent() instanceof ProcessingExpressionContext) {
 						wcpsQuery.simpleWCPS();
 					}
-
-					return wcpsQuery.evaluated().setValue(
-							wcsRequestBuilder.processCoverages().query(rewrittedQuery).build().get().getResponse());
-				} catch (WCSRequestException e) {
-					logger.error(e.getMessage(), e);
-
-					throw new ParseCancellationException(e);
-				}
+					
+					//TODO: add processCoverages to wcs adapter.
+//					wcpsQuery.evaluated().setValue(
+//							wcsRequestBuilder.processCoverages().query(rewrittedQuery).build().get().getResponse();
+						
+					return wcpsQuery;
+//				} catch (WCSRequestException e) {
+//					logger.error(e.getMessage(), e);
+//
+//					throw new ParseCancellationException(e);
+//				}
 			}
 
 		} else {
@@ -525,8 +552,21 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 			xpath = xpath.substring(0, matcher.start()) + replacement + xpath.substring(matcher.end());
 		}
 
-		XPathEvaluator xPathEvaluator = new XPathEvaluator(XMLConverter.stringToNode(node, true), true, false);
-		List<String> xpathResults = xPathEvaluator.evaluate(xpath);
+		XPathEvaluator xPathEvaluator = null;
+		try {
+			xPathEvaluator = new XPathEvaluator(XMLConverter.stringToNode(node, true), true, false);
+		} catch (XMLConversionException e) {
+			e.printStackTrace();
+			XWCPSEvalVisitor.logger.info("XPathEvaluator error with message " + e.getMessage());
+		}
+		
+		List<String> xpathResults = null;
+		try {
+			xpathResults = xPathEvaluator.evaluate(xpath);
+		} catch (XPathEvaluationException e) {
+			e.printStackTrace();
+			XWCPSEvalVisitor.logger.info("XPathEvaluationException error with message " + e.getMessage());
+		}
 
 		return xpathResults == null ? "" : xpathResults.stream().collect(Collectors.joining(" "));
 	}

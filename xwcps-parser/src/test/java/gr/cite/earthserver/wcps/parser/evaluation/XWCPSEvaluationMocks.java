@@ -11,21 +11,28 @@ import org.mockito.Matchers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import gr.cite.earthserver.metadata.core.Coverage;
+//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
+import gr.cite.earthserver.wcs.core.Coverage;
+import gr.cite.earthserver.wcs.core.WCSRequest;
+import gr.cite.earthserver.wcs.core.WCSRequestBuilder;
+import gr.cite.earthserver.wcs.core.WCSRequestBuilder.DescribeCoverage;
+import gr.cite.earthserver.wcs.core.WCSRequestBuilder.ProcessCoverages;
+import gr.cite.earthserver.wcs.core.WCSRequestException;
+import gr.cite.earthserver.wcs.core.WCSResponse;
+import gr.cite.earthserver.query.CriteriaQuery;
+import gr.cite.earthserver.query.UnsupportedQueryOperationException;
+import gr.cite.earthserver.query.Where;
+import gr.cite.earthserver.query.WhereBuilder;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
-import gr.cite.earthserver.wcs.client.WCSRequest;
-import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
-import gr.cite.earthserver.wcs.client.WCSRequestBuilder.DescribeCoverage;
-import gr.cite.earthserver.wcs.client.WCSRequestBuilder.ProcessCoverages;
-import gr.cite.earthserver.wcs.client.WCSRequestException;
-import gr.cite.earthserver.wcs.client.WCSResponse;
-import gr.cite.femme.core.DataElement;
-import gr.cite.femme.core.Metadatum;
-import gr.cite.femme.query.criteria.CriteriaQuery;
-import gr.cite.femme.query.criteria.UnsupportedQueryOperationException;
-import gr.cite.femme.query.criteria.Where;
-import gr.cite.femme.query.criteria.WhereBuilder;
+//import gr.cite.earthserver.wcs.client.WCSRequest;
+//import gr.cite.earthserver.wcs.client.WCSRequestBuilder;
+//import gr.cite.earthserver.wcs.client.WCSRequestBuilder.DescribeCoverage;
+//import gr.cite.earthserver.wcs.client.WCSRequestBuilder.ProcessCoverages;
+//import gr.cite.earthserver.wcs.client.WCSRequestException;
+//import gr.cite.earthserver.wcs.client.WCSResponse;
+import gr.cite.femme.model.DataElement;
+import gr.cite.femme.model.Metadatum;
 
 public class XWCPSEvaluationMocks {
 	public static WCSRequestBuilder mockWCSRequestBuilder() {
@@ -53,7 +60,7 @@ public class XWCPSEvaluationMocks {
 		try {
 			when(wcsRequest.get()).thenReturn(new WCSResponse() {
 				{
-					setResponse(XWCPSQueryMockedResponses.AVGLANDTEMP_DESCRIBE_COVERAGE);
+					//setResponse(XWCPSQueryMockedResponses.AVGLANDTEMP_DESCRIBE_COVERAGE);
 				}
 			});
 		} catch (WCSRequestException e) {
@@ -105,7 +112,7 @@ public class XWCPSEvaluationMocks {
 
 		return requestBuilder;
 	}
-
+	
 	public static CriteriaQuery<Coverage> mockCriteriaQuery() {
 		CriteriaQuery<Coverage> query = mock(CriteriaQuery.class);
 		Where<Coverage> where = mock(Where.class);

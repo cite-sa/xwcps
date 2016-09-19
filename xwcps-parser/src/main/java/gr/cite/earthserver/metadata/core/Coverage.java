@@ -1,9 +1,12 @@
 package gr.cite.earthserver.metadata.core;
 
 import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
-import gr.cite.femme.core.Collection;
-import gr.cite.femme.core.DataElement;
-import gr.cite.femme.core.Metadatum;
+//import gr.cite.femme.core.Collection;
+//import gr.cite.femme.core.DataElement;
+//import gr.cite.femme.core.Metadatum;
+import gr.cite.femme.model.Collection;
+import gr.cite.femme.model.DataElement;
+import gr.cite.femme.model.Metadatum;
 
 public class Coverage extends DataElement {
 
@@ -87,5 +90,4 @@ public class Coverage extends DataElement {
 			return false;
 		return true;
 	}
-
 }

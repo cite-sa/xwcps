@@ -9,16 +9,24 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import com.google.common.collect.Lists;
 
-import gr.cite.earthserver.metadata.core.Coverage;
+import gr.cite.earthserver.query.CriteriaQuery;
+import gr.cite.earthserver.query.UnsupportedQueryOperationException;
+import gr.cite.earthserver.query.Where;
+import gr.cite.earthserver.query.WhereBuilder;
+//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.parser.XWCPSQueryParser;
 import gr.cite.earthserver.wcps.parser.application.config.XWCPSParserConfiguration;
 import gr.cite.earthserver.wcps.parser.application.resource.ParserResource;
-import gr.cite.femme.core.Element;
-import gr.cite.femme.core.Metadatum;
-import gr.cite.femme.query.criteria.CriteriaQuery;
-import gr.cite.femme.query.criteria.UnsupportedQueryOperationException;
-import gr.cite.femme.query.criteria.Where;
-import gr.cite.femme.query.criteria.WhereBuilder;
+import gr.cite.earthserver.wcs.adapter.WCSAdapter;
+import gr.cite.earthserver.wcs.core.Coverage;
+import gr.cite.femme.model.Element;
+import gr.cite.femme.model.Metadatum;
+//import gr.cite.femme.core.Element;
+//import gr.cite.femme.core.Metadatum;
+//import gr.cite.femme.query.criteria.CriteriaQuery;
+//import gr.cite.femme.query.criteria.UnsupportedQueryOperationException;
+//import gr.cite.femme.query.criteria.Where;
+//import gr.cite.femme.query.criteria.WhereBuilder;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
 
@@ -30,8 +38,9 @@ public class XWCPSParserApplication extends Application<XWCPSParserConfiguration
 		CriteriaQuery<Coverage> criteriaQuery = mock();
 
 		environment.jersey().register(MultiPartFeature.class);
-
-		environment.jersey().register(new ParserResource(new XWCPSQueryParser(criteriaQuery)));
+		
+		//environment.jersey().register(new ParserResource(new XWCPSQueryParser(criteriaQuery)));
+		environment.jersey().register(new ParserResource(new XWCPSQueryParser(new WCSAdapter("http://localhost:8080/femme-application/femme"), criteriaQuery)));
 	}
 
 	private CriteriaQuery<Coverage> mock() {
@@ -48,9 +57,9 @@ public class XWCPSParserApplication extends Application<XWCPSParserConfiguration
 		for (String coverage : coverages) {
 			MyCriteriaQuery.COVERAGE_MAPS.put(coverage, new Coverage() {
 				{
-					setLocalId(coverage);
+					//setLocalId(coverage);
 					setId(coverage);
-					setName(coverage);
+					setCoverageId(coverage);
 				}
 			});
 		}
@@ -158,7 +167,7 @@ class MyWhere implements Where<Coverage> {
 	}
 
 	@Override
-	public <S extends Element> WhereBuilder<Coverage> isParentOf(S dataElement)
+	public <S> WhereBuilder<Coverage> isParentOf(S dataElement)
 			throws UnsupportedQueryOperationException {
 		return builder;
 	}
@@ -171,15 +180,14 @@ class MyWhere implements Where<Coverage> {
 	}
 
 	@Override
-	public <S extends Element> WhereBuilder<Coverage> isChildOf(WhereBuilder<S> where) {
+	public <S> WhereBuilder<Coverage> isChildOf(WhereBuilder<S> where) {
 		return builder;
 
 	}
 
 	@Override
-	public <S extends Element> WhereBuilder<Coverage> isChildOf(S dataElement) {
+	public <S> WhereBuilder<Coverage> isChildOf(S dataElement) {
 		return builder;
-
 	}
 
 	@Override

@@ -8,10 +8,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import gr.cite.earthserver.metadata.core.Coverage;
+//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.parser.core.Error;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
+import gr.cite.earthserver.wcs.core.Coverage;
 
 public class Query extends XwcpsQueryResult {
 	private String query;
@@ -77,7 +78,7 @@ public class Query extends XwcpsQueryResult {
 	}
 
 	public String getValue() {
-		return aggregatedValue;
+		return "<results>" + aggregatedValue + "</results>";
 	}
 
 	public Query setError(String error) {

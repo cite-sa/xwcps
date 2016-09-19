@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import gr.cite.earthserver.metadata.core.Coverage;
+//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
 import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
+import gr.cite.earthserver.wcs.core.Coverage;
 
 public class XWCPSEvalUtils {
 	public static final String DEFAULT_XML_RETURN_ELEMENT = "results";
@@ -35,7 +36,7 @@ public class XWCPSEvalUtils {
 			Map<Coverage, XwcpsReturnValue> coverageMap = new HashMap<>();
 			coverageMap.put(c, null);
 
-			Query q = new Query().setQuery("for " + variable + " in ( " + c.getLocalId() + " ) ");
+			Query q = new Query().setQuery("for " + variable + " in ( " + c.getCoverageId() + " ) ");
 			q.getCoverageValueMap().putAll(coverageMap);
 
 			return q;

@@ -7,13 +7,17 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import gr.cite.earthserver.metadata.core.Coverage;
+import gr.cite.earthserver.query.CriteriaQuery;
+//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSLexer;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
-import gr.cite.femme.query.criteria.CriteriaQuery;
+import gr.cite.earthserver.wcs.adaper.api.WCSAdapterAPI;
+//import gr.cite.femme.query.criteria.CriteriaQuery;
+import gr.cite.earthserver.wcs.adapter.WCSAdapter;
+import gr.cite.earthserver.wcs.core.Coverage;
 
 public class XWCPSQueryParser {
 
@@ -23,8 +27,16 @@ public class XWCPSQueryParser {
 	
 	private CriteriaQuery<Coverage> criteriaQuery;
 
+//	@Inject
+//	public XWCPSQueryParser(CriteriaQuery<Coverage> criteriaQuery) {
+//		this.criteriaQuery = criteriaQuery;
+//	}
+	
+	private WCSAdapterAPI wcsAdapter;
+	
 	@Inject
-	public XWCPSQueryParser(CriteriaQuery<Coverage> criteriaQuery) {
+	public XWCPSQueryParser(WCSAdapterAPI wcsAdapter, CriteriaQuery<Coverage> criteriaQuery) {
+		this.wcsAdapter = wcsAdapter;
 		this.criteriaQuery = criteriaQuery;
 	}
 
@@ -57,7 +69,10 @@ public class XWCPSQueryParser {
 		// System.out.println(tokenStream.getTokens());
 		// System.out.println(tree.toStringTree(parser));
 
-		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(XWCPSQueryParser.WCS_ENDPOINT, this.criteriaQuery);
+		//XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(XWCPSQueryParser.WCS_ENDPOINT, this.criteriaQuery);
+//		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(XWCPSQueryParser.WCS_ENDPOINT, this.wcsAdapter);
+		
+		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(this.wcsAdapter, this.criteriaQuery);
 		Query result = visitor.visit(tree);
 
 		return result;

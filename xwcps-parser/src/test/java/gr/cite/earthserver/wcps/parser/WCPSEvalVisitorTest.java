@@ -1,5 +1,6 @@
 package gr.cite.earthserver.wcps.parser;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -9,13 +10,17 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import gr.cite.earthserver.metadata.core.Coverage;
+//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSLexer;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.XWCPSEvaluationMocks;
 import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
+import gr.cite.earthserver.wcs.adaper.api.WCSAdapterAPI;
+import gr.cite.earthserver.wcs.adapter.WCSAdapter;
+import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
+import gr.cite.scarabaues.utils.xml.exceptions.XMLConversionException;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 public class WCPSEvalVisitorTest {
@@ -24,7 +29,7 @@ public class WCPSEvalVisitorTest {
 	private static final String WCS_ENDPOINT = "http://access.planetserver.eu:8080/rasdaman/ows";
 
 	
-//	@Test
+	@Test
 	public void test() {
 		String query =
 //				"for data in ( frt00003590_07_if164l_trr3 , frt0000b1bd_07_if166l_trr3 ) "
@@ -35,9 +40,23 @@ public class WCPSEvalVisitorTest {
 //				"blue: (int)(255/ (0.5 * (1 - (1.930 / ((1 - ((data.band_142 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_142 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))) * 0.5 * (1 - (1.985 / ((1 - ((data.band_151 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_151 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))))); \n" + 
 //				"alpha: (data.band_100 != 65535) * 255 }, \"png\", \"nodata=null\")";
 		
-		//"for data in ( frt00003590_07_if164l_trr3 ) return <div> describeCoverage(data)//gml:cat_solar_longitude </div>";
+		//"for data in ( frt00014174_07_if166s_trr3 ) return <div> describeCoverage(data)//gml:cat_solar_longitude </div>";
 				
-		"for c in ( frt00003590_07_if164l_trr3 ) return mixed(encode(1, \"csv\"), describeCoverage(c)//gml:cat_solar_longitude)";
+		//"for c in ( frt00003590_07_if164l_trr3 ) return mixed(encode(1, \"csv\"), describeCoverage(c)//gml:cat_solar_longitude)";
+		
+		//"for c in ( frt00014174_07_if166s_trr3 ) return describeCoverage(c)//gml:cat_solar_longitude";
+				
+		//"for c in ( frt00014174_07_if166s_trr3 ) return describeCoverage(c)";
+		
+		/*"for c in ( frt00014174_07_if166s_trr3 ) "
+		+ "where describeCoverage(c)//gml:cat_solar_longitude[text()<86.0122] "
+		+ "return describeCoverage(c)//gml:cat_solar_longitude";*/
+		
+		//"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage "
+		//+ "where describeCoverage(c)//gml:cat_solar_longitude[text()<86.0122] "
+		//+ "return describeCoverage(c)//gml:cat_solar_longitude";
+				
+		//"for c in /server/coverage return describeCoverage(c)";
 		
 		// TODO
 		// "for c in (AvgLandTemp) return <a attr=min(c[Lat(53.08), Long(8.80),
@@ -57,6 +76,33 @@ public class WCPSEvalVisitorTest {
 		// "/server//coverage/@*[local-name()='test']";
 		// "/server";
 		
+		
+		//////////////////////
+		//My Working Queries//
+		//////////////////////	
+				
+//		"for c in ( CCI_V2_monthly_rrs_670 ) return describeCoverage(c)";
+				
+//		"for c in /server/coverage return describeCoverage(c)";
+				
+//		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage"
+//		+ " return describeCoverage(c)";
+				
+//		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage"
+//		+ " return describeCoverage(c)//gml:cat_solar_longitude";
+				
+//		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage "
+//		+ "where describeCoverage(c)//gml:cat_solar_longitude[text()<86.0122] " 
+//		+ "return describeCoverage(c)";
+		
+//		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage "
+//		+ "where describeCoverage(c)//gml:cat_solar_longitude[text()<86.0122] " 
+//		+ "return describeCoverage(c)//gml:cat_solar_longitude";
+				
+		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows' or @endpoint='https://rsg.pml.ac.uk/rasdaman/ows']/coverage"
+		+ " where describeCoverage(c)//gml:cat_solar_longitude[text()<86.0122] "
+		+ " return describeCoverage(c)";
+										
 		System.out.println(query);
 
 		CharStream stream = new ANTLRInputStream(query);
@@ -67,26 +113,32 @@ public class WCPSEvalVisitorTest {
 		ParseTree tree = parser.xwcps();
 
 		printInfo(tokenStream, parser, tree);
+		
+		WCSAdapterAPI wcsAdapter = new WCSAdapter("http://localhost:8080/femme-application");
 
-		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(WCS_ENDPOINT,
+		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(wcsAdapter,
 				XWCPSEvaluationMocks.mockCriteriaQuery(Lists.newArrayList(/*new Coverage() {
 					{
 						setLocalId("NIR");
 					}
 				},*/ new Coverage() {
 					{
-						setLocalId("AvgLandTemp");
+						setCoverageId("AvgLandTemp");
 					}
 				}))
 				);
 		Query result = visitor.visit(tree);
 
-		System.out.println(result.getQuery());
+		//System.out.println(result.getQuery());
+		System.out.println("Results:");
 		System.out.println(result.getValue());
-		System.out.println(XMLConverter.nodeToString(XMLConverter.stringToNode(result.getValue(), true), true));
+		//try {
+			//System.out.println(XMLConverter.nodeToString(XMLConverter.stringToNode(result.getValue(), true), true));
+		/*} catch (XMLConversionException e) {
+			e.printStackTrace();
+		}*/
 
 	}
-
 
 	private void printInfo(CommonTokenStream tokenStream, XWCPSParser parser, ParseTree tree) {
 		System.out.println(tokenStream.getTokens().stream().map(token -> {

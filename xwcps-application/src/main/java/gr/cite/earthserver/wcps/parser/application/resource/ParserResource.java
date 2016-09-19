@@ -23,10 +23,11 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 
 import com.fasterxml.jackson.databind.util.JSONPObject;
 
-import gr.cite.earthserver.metadata.core.Coverage;
+//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.parser.XWCPSQueryParser;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
+import gr.cite.earthserver.wcs.core.Coverage;
 
 @Path("parser")
 @Produces(MediaType.APPLICATION_JSON)
