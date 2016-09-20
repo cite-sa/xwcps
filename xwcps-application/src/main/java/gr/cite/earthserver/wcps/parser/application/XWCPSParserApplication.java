@@ -40,7 +40,8 @@ public class XWCPSParserApplication extends Application<XWCPSParserConfiguration
 		environment.jersey().register(MultiPartFeature.class);
 		
 		//environment.jersey().register(new ParserResource(new XWCPSQueryParser(criteriaQuery)));
-		environment.jersey().register(new ParserResource(new XWCPSQueryParser(new WCSAdapter("http://localhost:8080/femme-application/femme"), criteriaQuery)));
+		//environment.jersey().register(new ParserResource(new XWCPSQueryParser(new WCSAdapter("http://localhost:8080/femme-application/femme"), criteriaQuery)));
+		environment.jersey().register(new ParserResource(new XWCPSQueryParser(new WCSAdapter("http://es-devel1.local.cite.gr:8080/femme-application-0.0.1-SNAPSHOT/"), criteriaQuery)));
 	}
 
 	private CriteriaQuery<Coverage> mock() {

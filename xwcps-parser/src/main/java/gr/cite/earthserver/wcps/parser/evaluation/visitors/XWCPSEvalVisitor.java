@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -48,6 +49,7 @@ import gr.cite.earthserver.wcs.adaper.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.earthserver.wcs.core.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.core.WCSRequestException;
+import gr.cite.femme.client.FemmeDatastoreException;
 //import gr.cite.femme.query.criteria.CriteriaQuery;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
@@ -488,7 +490,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
 		return whereClause;
 	}
-
+	
 	@Override
 	public Query visitMixedClause(MixedClauseContext ctx) {
 		Query encodedCoverageExpressionQuery = visit(ctx.encodedCoverageExpression());

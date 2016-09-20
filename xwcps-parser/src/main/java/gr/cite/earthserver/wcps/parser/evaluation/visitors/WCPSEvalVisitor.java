@@ -22,6 +22,7 @@ import com.google.common.collect.Sets;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.DescribeCoverageExpressionLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.EncodedCoverageExpressionLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ForClauseLabelContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.MetadataExpressionLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WcpsQueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
@@ -73,7 +74,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	public void setWcsAdapter(WCSAdapterAPI wcsAdapter) {
 		this.wcsAdapter = wcsAdapter;
 	}
-
+	
 	/**
 	 * 
 	 * @param wcsRequestBuilder
@@ -174,6 +175,40 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		// .setValue("<coverages>" +
 		// describeCoverages.stream().collect(Collectors.joining()) +
 		// "</coverages>");
+	}
+	
+	@Override
+	public Query visitMetadataExpressionLabel(MetadataExpressionLabelContext ctx) {
+		Query query = super.visitMetadataExpressionLabel(ctx);
+		
+		String variable = ctx.coverageVariableName().getText();
+		Map<Coverage, XwcpsReturnValue> metadataCoverages = variables.get(variable).stream().map(coverage -> {
+			try {
+				//TODO: Return all coverages, not just the first one
+				List<Coverage> coverages = wcsAdapter.getCoveragesByCoverageId(coverage.getCoverageId());
+				String describeCoverage = "";
+				XwcpsReturnValue result = new XwcpsReturnValue();
+				
+				if (coverages.size() > 0) {
+					describeCoverage = coverages.get(0).getMetadata();
+					
+					result.setXwcpsValue("<coverage id='" + coverage.getCoverageId() + "'>"
+							+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
+				}
+
+				Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
+
+				return entry;
+			} catch (FemmeDatastoreException e) {
+				logger.error(e.getMessage(), e);
+				
+				throw new ParseCancellationException(e);
+			}
+		}).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+
+		query.getCoverageValueMap().clear();
+		query.getCoverageValueMap().putAll(metadataCoverages);
+		return query.evaluated();
 	}
 
 	@Override

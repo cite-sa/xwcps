@@ -151,6 +151,7 @@ wcpsHotWords:  FOR
 	|  LOG
 	|  MAX
 	|  MIN
+	|  METADATA
 	|  MOD
 	|  NOT
 	|  OR

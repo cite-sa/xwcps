@@ -76,32 +76,30 @@ public class WCPSEvalVisitorTest {
 		// "/server//coverage/@*[local-name()='test']";
 		// "/server";
 		
+//		"for c in ( CCI_V2_monthly_rrs_670 ) return c";
 		
 		//////////////////////
 		//My Working Queries//
 		//////////////////////	
 				
-//		"for c in ( CCI_V2_monthly_rrs_670 ) return describeCoverage(c)";
-				
+		"for c in ( CCI_V2_monthly_rrs_670 ) return metadata(c)";
+		
 //		"for c in /server/coverage return describeCoverage(c)";
 				
 //		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage"
-//		+ " return describeCoverage(c)";
-				
-//		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage"
-//		+ " return describeCoverage(c)//gml:cat_solar_longitude";
+//		+ " return metadata(c)//gml:cat_solar_longitude";
 				
 //		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage "
-//		+ "where describeCoverage(c)//gml:cat_solar_longitude[text()<86.0122] " 
-//		+ "return describeCoverage(c)";
+//		+ "where metadata(c)//gml:cat_solar_longitude[text()<86.0122] " 
+//		+ "return metadata(c)";
 		
 //		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage "
-//		+ "where describeCoverage(c)//gml:cat_solar_longitude[text()<86.0122] " 
-//		+ "return describeCoverage(c)//gml:cat_solar_longitude";
+//		+ "where metadata(c)//gml:cat_solar_longitude[text()<86.0122] " 
+//		+ "return metadata(c)//gml:cat_solar_longitude";
 				
-		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows' or @endpoint='https://rsg.pml.ac.uk/rasdaman/ows']/coverage"
-		+ " where describeCoverage(c)//gml:cat_solar_longitude[text()<86.0122] "
-		+ " return describeCoverage(c)";
+//		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows' or @endpoint='https://rsg.pml.ac.uk/rasdaman/ows']/coverage"
+//		+ " where metadata(c)//gml:cat_solar_longitude[text()<86.0122] "
+//		+ " return metadata(c)";
 										
 		System.out.println(query);
 
@@ -114,7 +112,8 @@ public class WCPSEvalVisitorTest {
 
 		printInfo(tokenStream, parser, tree);
 		
-		WCSAdapterAPI wcsAdapter = new WCSAdapter("http://localhost:8080/femme-application");
+		//WCSAdapterAPI wcsAdapter = new WCSAdapter("http://localhost:8080/femme-application");
+		WCSAdapterAPI wcsAdapter = new WCSAdapter("http://es-devel1.local.cite.gr:8080/femme-application-0.0.1-SNAPSHOT");
 
 		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(wcsAdapter,
 				XWCPSEvaluationMocks.mockCriteriaQuery(Lists.newArrayList(/*new Coverage() {

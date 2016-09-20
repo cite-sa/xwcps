@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import gr.cite.earthserver.query.CriteriaQuery;
 import gr.cite.earthserver.query.Where;
-import gr.cite.earthserver.query.WhereBuilder;
+//import gr.cite.earthserver.query.WhereBuilder;
 //import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSBaseVisitor;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.AndExprContext;
@@ -78,7 +78,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		
 		List<Coverage> coverages = null;
 		try {
-			coverages = this.wcsAdapter.findCoverages(request.mapToQuery(), null, null, null);
+			coverages = this.wcsAdapter.findCoverages(request.mapToQuery(), 5, null, null);
 		} catch (FemmeDatastoreException e) {
 			e.printStackTrace();
 			XpathForClauseEvalVisitor.logger.debug("query has fucked everything: " + e.getMessage());
