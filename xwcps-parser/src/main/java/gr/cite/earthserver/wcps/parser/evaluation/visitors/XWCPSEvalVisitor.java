@@ -58,23 +58,16 @@ import gr.cite.scarabaues.utils.xml.exceptions.XMLConversionException;
 import gr.cite.scarabaues.utils.xml.exceptions.XPathEvaluationException;
 
 public class XWCPSEvalVisitor extends WCPSEvalVisitor {
+	
 	private static final Logger logger = LoggerFactory.getLogger(XWCPSEvalVisitor.class);
-
-	private Stack<Pair<Query, Query>> xmlReturnElementsStack = new Stack<>();
-
-	private CriteriaQuery<Coverage> exmmsQuery;
 
 	private String forClauseDefaultXpath = null;
 
 	private Stack<Scope> scopes = new Stack<>();
 	
-//	public XWCPSEvalVisitor(String wcsEndpoint) {
-//		super(wcsEndpoint);
-//	}
 	
-	public XWCPSEvalVisitor(WCSAdapterAPI wcsAdapter, CriteriaQuery<Coverage> exmmsQuery) {
+	public XWCPSEvalVisitor(WCSAdapterAPI wcsAdapter) {
 		super(wcsAdapter);
-		this.exmmsQuery = exmmsQuery;
 	}
 
 	/**
@@ -127,7 +120,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	public Query visitXpathForClause(XpathForClauseContext ctx) {
 		Query q = visit(ctx.coverageVariableName());
 
-		XpathForClauseEvalVisitor xpathForClauseEvalVisitor = new XpathForClauseEvalVisitor(exmmsQuery, this.getWcsAdapter());
+		XpathForClauseEvalVisitor xpathForClauseEvalVisitor = new XpathForClauseEvalVisitor(this.getWcsAdapter());
 		XpathForClause xpathForClause = xpathForClauseEvalVisitor.visit(ctx);
 
 		List<Coverage> coverageList = xpathForClause.getCoverages();

@@ -23,21 +23,13 @@ public class XWCPSQueryParser {
 
 //	private static final String WCS_ENDPOINT = "http://flanche.com:9090/rasdaman/ows";
 
-	private static final String WCS_ENDPOINT = "http://access.planetserver.eu:8080/rasdaman/ows";
-	
-	private CriteriaQuery<Coverage> criteriaQuery;
-
-//	@Inject
-//	public XWCPSQueryParser(CriteriaQuery<Coverage> criteriaQuery) {
-//		this.criteriaQuery = criteriaQuery;
-//	}
+//	private static final String WCS_ENDPOINT = "http://access.planetserver.eu:8080/rasdaman/ows";
 	
 	private WCSAdapterAPI wcsAdapter;
 	
 	@Inject
-	public XWCPSQueryParser(WCSAdapterAPI wcsAdapter, CriteriaQuery<Coverage> criteriaQuery) {
+	public XWCPSQueryParser(WCSAdapterAPI wcsAdapter) {
 		this.wcsAdapter = wcsAdapter;
-		this.criteriaQuery = criteriaQuery;
 	}
 
 	public Query parse(String query) {
@@ -72,7 +64,7 @@ public class XWCPSQueryParser {
 		//XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(XWCPSQueryParser.WCS_ENDPOINT, this.criteriaQuery);
 //		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(XWCPSQueryParser.WCS_ENDPOINT, this.wcsAdapter);
 		
-		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(this.wcsAdapter, this.criteriaQuery);
+		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(this.wcsAdapter);
 		Query result = visitor.visit(tree);
 
 		return result;

@@ -43,10 +43,6 @@ import gr.cite.femme.utils.Pair;
 public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> {
 	private static final Logger logger = LoggerFactory.getLogger(XpathForClauseEvalVisitor.class);
 
-	//XpathForClauseEvalVisitorStack stack = new XpathForClauseEvalVisitorStack();
-
-	private CriteriaQuery<Coverage> query;
-
 	private boolean isSimpleXpath = false;
 
 	private WCSAdapterServers myServers = WCSAdapterRequestBuilder.request().servers();
@@ -61,10 +57,9 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 	private State currentState = XpathForClauseEvalVisitor.State.SERVER;
 
-	public XpathForClauseEvalVisitor(CriteriaQuery<Coverage> query, WCSAdapterAPI wcsAdapter) {
+	public XpathForClauseEvalVisitor(WCSAdapterAPI wcsAdapter) {
 		super();
 		this.wcsAdapter = wcsAdapter;
-		this.query = query;
 	}
 
 	public XpathForClause executeQuery() {
@@ -200,7 +195,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 		if (ctx.equalityExpr().size() > 1) {
 
-			Where<Coverage> andWhere = this.query.expressionFactory();
+//			Where<Coverage> andWhere = this.query.expressionFactory();
 			//this.stack.pushWhereStack(andWhere);
 
 			int i = 0;

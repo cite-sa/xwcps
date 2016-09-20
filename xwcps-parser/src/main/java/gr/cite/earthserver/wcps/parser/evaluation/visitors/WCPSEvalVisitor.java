@@ -51,8 +51,6 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	Query forWhereClauseQuery;
 	
 	private WCSAdapterAPI wcsAdapter;
-	
-	
 
 	/**
 	 * 

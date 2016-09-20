@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -20,25 +21,33 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.MultiPart;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.util.JSONPObject;
 
-//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.parser.XWCPSQueryParser;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcs.core.Coverage;
 
+@Component
 @Path("parser")
 @Produces(MediaType.APPLICATION_JSON)
 public class ParserResource {
 
 	private XWCPSQueryParser xwcpsQueryParser;
 
+	@Inject
 	public ParserResource(XWCPSQueryParser xwcpsQueryParser) {
 		this.xwcpsQueryParser = xwcpsQueryParser;
 	}
 
+	@GET
+	@Path("ping")
+	public Response ping() {
+		return Response.ok("pong").build();
+	}
+	
 	@GET
 	@Path("QueryXwcps")
 	//@Produces("multipart/mixed")

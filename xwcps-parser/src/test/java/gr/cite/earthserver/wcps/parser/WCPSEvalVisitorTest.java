@@ -24,10 +24,6 @@ import gr.cite.scarabaues.utils.xml.exceptions.XMLConversionException;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 public class WCPSEvalVisitorTest {
-//	private static final String WCS_ENDPOINT = "http://flanche.com:9090/rasdaman/ows";
-
-	private static final String WCS_ENDPOINT = "http://access.planetserver.eu:8080/rasdaman/ows";
-
 	
 	@Test
 	public void test() {
@@ -115,17 +111,7 @@ public class WCPSEvalVisitorTest {
 		//WCSAdapterAPI wcsAdapter = new WCSAdapter("http://localhost:8080/femme-application");
 		WCSAdapterAPI wcsAdapter = new WCSAdapter("http://es-devel1.local.cite.gr:8080/femme-application-0.0.1-SNAPSHOT");
 
-		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(wcsAdapter,
-				XWCPSEvaluationMocks.mockCriteriaQuery(Lists.newArrayList(/*new Coverage() {
-					{
-						setLocalId("NIR");
-					}
-				},*/ new Coverage() {
-					{
-						setCoverageId("AvgLandTemp");
-					}
-				}))
-				);
+		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(wcsAdapter);
 		Query result = visitor.visit(tree);
 
 		//System.out.println(result.getQuery());
