@@ -25,6 +25,7 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.BooleanXpathClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.IdentifierContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.LetClauseContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.MetadataClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.MixedClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlWithCloseContext;
@@ -147,12 +148,21 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	@Override
 	public Query visitXpathClause(XpathClauseContext ctx) {
 
-		Query wcpsQuery = visit(ctx.scalarExpression());
+		//Query wcpsQuery = visit(ctx.scalarExpression());
+		
+		Query wcpsQuery = null;
+		if (ctx.scalarExpression() != null) {
+			wcpsQuery = visit(ctx.scalarExpression());
+		} else if (ctx.metadataClause() != null) {
+			wcpsQuery = visit(ctx.metadataClause());
+		}
 
 		// if there is no xquery in the query
 		if (ctx.xpath() == null && forClauseDefaultXpath == null) {
-
-			if (ctx.scalarExpression().getComponentExpression() != null) {
+				
+			if (ctx.scalarExpression() != null && ctx.scalarExpression().getComponentExpression() != null) {
+				return wcpsQuery;
+			} else if (ctx.metadataClause() != null) {
 				return wcpsQuery;
 			} else {
 				/*
@@ -523,6 +533,40 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		result.evaluated();
 
 		return result;
+	}
+	
+	@Override
+	public Query visitMetadataClause(MetadataClauseContext ctx) {
+		Query query = super.visitMetadataClause(ctx);
+		
+		String variable = ctx.coverageVariableName().getText();
+		Map<Coverage, XwcpsReturnValue> metadataCoverages = variables.get(variable).stream().map(coverage -> {
+			try {
+				//TODO: Return all coverages, not just the first one
+				List<Coverage> coverages = this.getWcsAdapter().getCoveragesByCoverageId(coverage.getCoverageId());
+				String describeCoverage = "";
+				XwcpsReturnValue result = new XwcpsReturnValue();
+				
+				if (coverages.size() > 0) {
+					describeCoverage = coverages.get(0).getMetadata();
+					
+					result.setXwcpsValue("<coverage id='" + coverage.getCoverageId() + "'>"
+							+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
+				}
+
+				Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
+
+				return entry;
+			} catch (FemmeDatastoreException e) {
+				logger.error(e.getMessage(), e);
+				
+				throw new ParseCancellationException(e);
+			}
+		}).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+
+		query.getCoverageValueMap().clear();
+		query.getCoverageValueMap().putAll(metadataCoverages);
+		return query.evaluated();
 	}
 	
 	private static Query evaluateXpath(Query wcpsQuery, Query xpathQuery) throws XPathFactoryConfigurationException {

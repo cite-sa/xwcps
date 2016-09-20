@@ -143,8 +143,7 @@ trigonometricOperator: SIN | COS | TAN | SINH | COSH | TANH | ARCSIN | ARCCOS | 
  *  See the rules below;
  */
 getComponentExpression: coverageIdExpression
-                      | describeCoverageExpression
-                      | metadataExpression;
+                      | describeCoverageExpression;
 
 /**
  * Example:
@@ -163,8 +162,6 @@ coverageIdExpression: ID LEFT_PARANTHESIS coverageVariableName RIGHT_PARANTHESIS
  * for $c in (someCov) return describeCoverage($c)
  */
 describeCoverageExpression: DESCRIBE_COVERAGE LEFT_PARANTHESIS coverageVariableName RIGHT_PARANTHESIS                   #DescribeCoverageExpressionLabel;
-
-metadataExpression: METADATA LEFT_PARANTHESIS coverageVariableName RIGHT_PARANTHESIS                   #MetadataExpressionLabel;
 
 /**
  * Example:
