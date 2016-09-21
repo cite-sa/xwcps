@@ -52,7 +52,7 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 		$scope.response.result = undefined;
 		$scope.response.error = undefined;
 
-		$http.jsonp("http://192.168.32.87:9292/parser/queryP", {
+		$http.jsonp("http://es-devel1.local.cite.gr:8080/xwcps-application-0.1-SNAPSHOT/parser/queryP", {
 			params: {
 				q: $scope.queries.default.query,
 				callback: "JSON_CALLBACK"

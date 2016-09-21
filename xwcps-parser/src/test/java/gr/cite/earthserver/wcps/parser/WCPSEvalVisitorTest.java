@@ -79,6 +79,7 @@ public class WCPSEvalVisitorTest {
 		//////////////////////	
 				
 		"for c in ( CCI_V2_monthly_rrs_670 ) return metadata(c)";
+//		"for c in ( CCI_V2_monthly_rrs_670 ) return mixed(encode(1, \"csv\"), metadata(c))";
 		
 //		"for c in /server/coverage return describeCoverage(c)";
 				
