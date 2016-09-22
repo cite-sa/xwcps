@@ -90,9 +90,19 @@ public class ParserResource {
 				}
 
 				bodyParts.add(bodyPart);
-
-				break;
 			}
+			
+			if (result.getCoverageValueMap().get(c).getXwcpsValue() != null) {
+				BodyPart bodyPart = new BodyPart(result.getCoverageValueMap().get(c).getXwcpsValue(), MediaType.APPLICATION_XML_TYPE);
+				try {
+					bodyPart.setContentDisposition(new ContentDisposition("aggregation_value"));
+				} catch (ParseException e) {
+					throw new WebApplicationException();
+				}
+				bodyParts.add(bodyPart);
+			}
+			
+			break;
 		}
 		
 		try {

@@ -1,6 +1,7 @@
 package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.io.ByteArrayInputStream;
+import java.net.PasswordAuthentication;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.antlr.v4.codegen.model.chunk.ThisRulePropertyRef_start;
 import org.antlr.v4.parse.ANTLRParser.id_return;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
@@ -30,12 +32,14 @@ import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.adaper.api.WCSAdapterAPI;
+import gr.cite.earthserver.wcs.adapter.request.WCSAdapterRequest;
 import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.earthserver.wcs.core.WCSRequest;
 import gr.cite.earthserver.wcs.core.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.core.WCSRequestException;
 import gr.cite.earthserver.wcs.core.WCSResponse;
 import gr.cite.femme.client.FemmeDatastoreException;
+import gr.cite.femme.utils.Pair;
 
 public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	private static final Logger logger = LoggerFactory.getLogger(WCPSEvalVisitor.class);
@@ -88,8 +92,24 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		List<Coverage> coverages = ctx.identifier().stream().map(identifier -> {
 			/*Coverage c = new Coverage();
 			c.setLocalId(identifier.getText());*/
-			Coverage coverage = new Coverage();
-			coverage.setCoverageId(identifier.getText());
+//			Coverage coverage = new Coverage();
+//			coverage.setCoverageId(identifier.getText());
+//			return coverage;
+			
+			List<Coverage> femmeCoverages = null;
+			try {
+				femmeCoverages = this.wcsAdapter.getCoveragesByCoverageId(identifier.getText());
+			} catch (FemmeDatastoreException e) {
+				e.printStackTrace();
+			}
+			Coverage coverage = null;
+			if (femmeCoverages.size() == 0) {
+				coverage = new Coverage();
+				coverage.setCoverageId(identifier.getText());
+			}
+			else {
+				coverage = femmeCoverages.get(0);
+			}
 			return coverage;
 		}).collect(Collectors.toList());
 
@@ -101,40 +121,6 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 
 		return query;
 	}
-
-//	@Override
-//	public Query visitDescribeCoverageExpressionLabel(DescribeCoverageExpressionLabelContext ctx) {
-//		Query query = super.visitDescribeCoverageExpressionLabel(ctx);
-//		
-//		String variable = ctx.coverageVariableName().getText();
-//		Map<Coverage, XwcpsReturnValue> describeCoverages = variables.get(variable).stream().map(coverage -> {
-//			try {
-//				String describeCoverage = wcsRequestBuilder.describeCoverage().coverageId(coverage.getLocalId()).build()
-//						.get().getResponse();
-//
-//				XwcpsReturnValue result = new XwcpsReturnValue();
-//				result.setXwcpsValue("<coverage id='" + coverage + "'>"
-//						+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
-//
-//				Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
-//
-//				return entry;
-//			} catch (WCSRequestException e) {
-//				logger.error(e.getMessage(), e);
-//
-//				throw new ParseCancellationException(e);
-//			}
-//		}).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
-//
-//		query.getCoverageValueMap().clear();
-//		query.getCoverageValueMap().putAll(describeCoverages);
-//		return query.evaluated();
-//
-//		// return query.evaluated().setCoverageValueMap(describeCoverages);
-//		// .setValue("<coverages>" +
-//		// describeCoverages.stream().collect(Collectors.joining()) +
-//		// "</coverages>");
-//	}
 	
 	@Override
 	public Query visitDescribeCoverageExpressionLabel(DescribeCoverageExpressionLabelContext ctx) {
@@ -175,40 +161,6 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		// "</coverages>");
 	}
 	
-//	@Override
-//	public Query visitMetadataExpressionLabel(MetadataExpressionLabelContext ctx) {
-//		Query query = super.visitMetadataExpressionLabel(ctx);
-//		
-//		String variable = ctx.coverageVariableName().getText();
-//		Map<Coverage, XwcpsReturnValue> metadataCoverages = variables.get(variable).stream().map(coverage -> {
-//			try {
-//				//TODO: Return all coverages, not just the first one
-//				List<Coverage> coverages = wcsAdapter.getCoveragesByCoverageId(coverage.getCoverageId());
-//				String describeCoverage = "";
-//				XwcpsReturnValue result = new XwcpsReturnValue();
-//				
-//				if (coverages.size() > 0) {
-//					describeCoverage = coverages.get(0).getMetadata();
-//					
-//					result.setXwcpsValue("<coverage id='" + coverage.getCoverageId() + "'>"
-//							+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
-//				}
-//
-//				Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
-//
-//				return entry;
-//			} catch (FemmeDatastoreException e) {
-//				logger.error(e.getMessage(), e);
-//				
-//				throw new ParseCancellationException(e);
-//			}
-//		}).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
-//
-//		query.getCoverageValueMap().clear();
-//		query.getCoverageValueMap().putAll(metadataCoverages);
-//		return query.evaluated();
-//	}
-
 	@Override
 	public Query visitWcpsQuery(WcpsQueryContext ctx) {
 		this.forWhereClauseQuery = visit(ctx.forClauseList());
@@ -262,14 +214,23 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 				Map<Coverage, XwcpsReturnValue> resultByCoverage = null;
 				//try {
 					resultByCoverage = new HashMap<Coverage, XwcpsReturnValue>();
-
-					//TODO: add processCoverages to wcs adapter.
-					//WCSResponse wcsResponce = wcsRequestBuilder.processCoverages().query(rewrittenQuery).build().get();
-					WCSResponse wcsResponce = null;
-
+					
 					for (Entry<Coverage, XwcpsReturnValue> coverageEntry : forWhereClauseQuery.getCoverageValueMap()
 							.entrySet()) {
 						XwcpsReturnValue encodedResult = new XwcpsReturnValue();
+						
+						//if (coverageEntry.getKey().getServers().size() == 0) continue;
+						
+						//TODO: add processCoverages to wcs adapter.
+						WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder().endpoint("http://access.planetserver.eu:8080/rasdaman/ows");
+						//WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder().endpoint(coverageEntry.getKey().getServers().get(0).getEndpoint());
+						WCSResponse wcsResponce = null;
+						try {
+							wcsResponce = wcsRequestBuilder.processCoverages().query(rewrittenQuery).build().get();
+						} catch (WCSRequestException e) {
+							e.printStackTrace();
+							WCPSEvalVisitor.logger.error(e.getMessage(), e);
+						}
 
 						encodedResult.setWcpsValue(
 								new ByteArrayInputStream(wcsResponce.getResponse().getBytes(StandardCharsets.UTF_8)));

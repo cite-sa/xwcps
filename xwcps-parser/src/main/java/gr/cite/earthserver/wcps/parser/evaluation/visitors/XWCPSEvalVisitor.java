@@ -536,6 +536,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		Map<Coverage, XwcpsReturnValue> metadataCoverages = variables.get(variable).stream().map(coverage -> {
 			try {
 				//TODO: Return all coverages, not just the first one
+				//TODO: change it because we have already done the query to femme
 				List<Coverage> coverages = this.getWcsAdapter().getCoveragesByCoverageId(coverage.getCoverageId());
 				String describeCoverage = "";
 				XwcpsReturnValue result = new XwcpsReturnValue();

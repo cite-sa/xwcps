@@ -70,7 +70,7 @@ public class WCPSEvalVisitorTest {
 //		"for c in (AvgLandTemp) return <b> <c attr='test' /> \"some text\" <c>'some text'</c> <a> min(c[Lat(53.08), Long(8.80), ansi(\"2014-01\":\"2014-12\")]) </a></b>";
 
 		// "/server//coverage/@*[local-name()='test']";
-		// "/server";
+		//"/server/coverage";
 		
 //		"for c in ( CCI_V2_monthly_rrs_670 ) return c";
 		
@@ -78,7 +78,22 @@ public class WCPSEvalVisitorTest {
 		//My Working Queries//
 		//////////////////////	
 				
-		"for c in ( CCI_V2_monthly_rrs_670 ) return metadata(c)";
+		"for data in (frt0000cc22_07_if165l_trr3) return encode( { red: (int)(255 / (max((data.band_233 != 65535) * data.band_233) - min(data.band_233))) * (data.band_233 - min(data.band_233)); green: (int)(255 / (max((data.band_13 != 65535) * data.band_13) - min(data.band_13))) * (data.band_13 - min(data.band_13)); blue: (int)(255 / (max((data.band_78 != 65535) * data.band_78) - min(data.band_78))) * (data.band_78 - min(data.band_78)) ; alpha: (data.band_100 != 65535) * 255}, \"png\", \"nodata=null\")";
+				
+//		"for data in ( frt00009d2f_07_if168s_trr3) "
+//		+ " where describeCoverage(data)//*[local-name()='cat_solar_longitude' and text()>86.0122]  " // TODO
+//		+ " return encode( \n" + 
+//		"{ red:(int)(255 / (1 - (1.395 / ((1 - ((data.band_61 - data.band_57)/(data.band_72 - data.band_57))) * 1.370 + ((data.band_61 - data.band_57)/(data.band_72 - data.band_57)) * 1.470)))); \n" + 
+//		"green: (int)(255 / (1 - (1.525 / ((1 - ((data.band_80 - data.band_57)/(data.band_124 - data.band_57))) * 1.367 + ((data.band_80 - data.band_57)/(data.band_124 - data.band_57)) * 1.808)))); \n" + 
+//		"blue: (int)(255/ (0.5 * (1 - (1.930 / ((1 - ((data.band_142 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_142 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))) * 0.5 * (1 - (1.985 / ((1 - ((data.band_151 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_151 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))))); \n" + 
+//		"alpha: (data.band_100 != 65535) * 255 }, \"png\", \"nodata=null\")";
+				
+		//"for c in ( frt00009d2f_07_if168s_trr3 ) return encode(c, \"csv\")";
+		
+		//"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage return encode(c, \"png\")";
+				
+		//"for c in ( CCI_V2_monthly_rrs_670 ) return metadata(c)";
+		
 //		"for c in ( CCI_V2_monthly_rrs_670 ) return mixed(encode(1, \"csv\"), metadata(c))";
 		
 //		"for c in /server/coverage return describeCoverage(c)";
