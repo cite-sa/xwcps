@@ -222,8 +222,8 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 						//if (coverageEntry.getKey().getServers().size() == 0) continue;
 						
 						//TODO: add processCoverages to wcs adapter.
-						WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder().endpoint("http://access.planetserver.eu:8080/rasdaman/ows");
-						//WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder().endpoint(coverageEntry.getKey().getServers().get(0).getEndpoint());
+						//WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder().endpoint("http://access.planetserver.eu:8080/rasdaman/ows");
+						WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder().endpoint(coverageEntry.getKey().getServers().get(0).getEndpoint());
 						WCSResponse wcsResponce = null;
 						try {
 							wcsResponce = wcsRequestBuilder.processCoverages().query(rewrittenQuery).build().get();
@@ -232,8 +232,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 							WCPSEvalVisitor.logger.error(e.getMessage(), e);
 						}
 
-						encodedResult.setWcpsValue(
-								new ByteArrayInputStream(wcsResponce.getResponse().getBytes(StandardCharsets.UTF_8)));
+						encodedResult.setWcpsValue(wcsResponce.getResponse());
 						encodedResult.setWcpsMediaType(wcsResponce.getContentType());
 						encodedResult.setSubQuery(rewrittenQuery);
 

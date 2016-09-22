@@ -52,10 +52,13 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 		$scope.response.result = undefined;
 		$scope.response.error = undefined;
 
-		$http.jsonp("http://es-devel1.local.cite.gr:8080/xwcps-application-0.1-SNAPSHOT/parser/queryP", {
+		$http.get("http://localhost:8083/xwcps-application/parser/query", {
 			params: {
-				q: $scope.queries.default.query,
-				callback: "JSON_CALLBACK"
+				q: $scope.queries.default.query
+				//callback: "JSON_CALLBACK"
+			},
+			headers: {
+				accept: "application/json"
 			}
 		}).then(function (data) {
 			console.log(data);
@@ -97,7 +100,7 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 
 	$scope.queries = {};
 
-	$scope.queries.all = [
+	/*$scope.queries.all = [
 		{
 			description: "Retrieve coverages, with solar longitude greater than 86.0122, " +
 			"and band combination of BD1435,BD1500_2 and BD1900_2 for ICE detection",
@@ -132,7 +135,41 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 
 			query: "for data in //coverage \n return <div><p>describeCoverage(data)//gml:adding_target/text()</p> " +
 			"<p>describeCoverage(data)//gml:cat_solar_longitude/text()</p></div>"
-		}];
+		}];*/
+	
+	$scope.queries.all = [
+	              		{
+	              			description: "Retrieve coverages, with solar longitude greater than 86.0122, " +
+	              			"and band combination of BD1435,BD1500_2 and BD1900_2 for ICE detection",
+
+	              			query: "for $c in ( CCI_V2_monthly_rrs_670 ) return metadata($c)"
+	              		},
+	              		{
+	              			description: "List the coverage descriptions from http://access.planetserver.eu:8080/rasdaman/ows",
+
+	              			query: " for $c in /server/coverage return metadata($c)"
+	              		},
+	              		{
+	              			description: "List the coverage descriptions from http://access.planetserver.eu:8080/rasdaman/ows," +
+	              			" where solar longitude greater than 86.0122 ",
+
+	              			query: "for $c in /server[@endpoint='https://rsg.pml.ac.uk/rasdaman/ows']/coverage return metadata($c)"
+	              		},
+	              		{
+	              			description: "List the solar longitudes greater than 86.0122, wrapped by 'p' element",
+
+	              			query: " for $c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage where metadata($c)//gml:cat_solar_longitude[text()<86.0122] return metadata($c)"
+	              		},
+	              		{
+	              			description: "An example of HTML-like result formatting",
+
+	              			query: "for $c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage where metadata($c)//gml:cat_solar_longitude[text()<86.0122] return metadata($c)//gml:cat_solar_longitude"
+	              		},
+	              		{
+	              			description: "An example of HTML-like result formatting",
+
+	              			query: "for data in (frt0000cc22_07_if165l_trr3) return mixed(encode( { red: (int)(255 / (max((data.band_233 != 65535) * data.band_233) - min(data.band_233))) * (data.band_233 - min(data.band_233)); green: (int)(255 / (max((data.band_13 != 65535) * data.band_13) - min(data.band_13))) * (data.band_13 - min(data.band_13)); blue: (int)(255 / (max((data.band_78 != 65535) * data.band_78) - min(data.band_78))) * (data.band_78 - min(data.band_78)) ; alpha: (data.band_100 != 65535) * 255}, \"png\", \"nodata=null\"), metadata(data))"
+	              		}];
 
 	$scope.queries.default = {};
 	$scope.queries.default.query = $scope.queries.all[0].query;

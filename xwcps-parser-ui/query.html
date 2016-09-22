@@ -84,7 +84,7 @@
 
         <div class="col-xs-12 results-info" ng-show="response.result">
             <div class="results-info-body">
-                {{ getSize(response.result) }} result(s) were found
+                {{ response.result.length }} result(s) were found
             </div>
         </div>
 
@@ -94,20 +94,20 @@
             </div>
         </div>
 
-        <div class="col-xs-12 mixedValue" ng-repeat="mixedValue in response.result.mixedValues">
+        <div class="col-xs-12 mixedValue" ng-repeat="result in response.result">
             <div class="panel panel-info">
 
-                <div class="panel-heading">{{mixedValue.subQuery}}</div>
+                <div class="panel-heading">{{result.coverageId}}</div>
 
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-xs-12">
-                            <img ng-show="mixedValue.wcpsValue"
-                                 ng-src="{{'data:image/png;base64,' + mixedValue.wcpsValue}}">
+                            <img ng-show="result.wcpsValue"
+                                 ng-src="{{'data:image/png;base64,' + result.wcpsValue}}">
                         </div>
-                        <div class="col-xs-12" ng-show="mixedValue.xwcpsValue">
+                        <div class="col-xs-12" ng-show="result.xwcpsValue">
                             <div class="query-result">
-                                <div hljs hljs-source="prettifyXml(mixedValue.xwcpsValue)"></div>
+                                <div hljs hljs-source="prettifyXml(result.xwcpsValue)"></div>
                             </div>
                         </div>
                     </div>

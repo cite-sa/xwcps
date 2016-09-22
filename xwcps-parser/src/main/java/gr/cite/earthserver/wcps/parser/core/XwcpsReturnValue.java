@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class XwcpsReturnValue {
 	@JsonSerialize(using = InputStreamBase64Serializer.class)
-	private InputStream wcpsValue;
+	private String wcpsValue;
 
 	private MediaType wcpsMediaType;
 
@@ -32,11 +32,11 @@ public class XwcpsReturnValue {
 		this.xwcpsValue = xwcpsValue;
 	}
 
-	public InputStream getWcpsValue() {
+	public String getWcpsValue() {
 		return wcpsValue;
 	}
 
-	public void setWcpsValue(InputStream wcpsValue) {
+	public void setWcpsValue(String wcpsValue) {
 		this.wcpsValue = wcpsValue;
 	}
 
