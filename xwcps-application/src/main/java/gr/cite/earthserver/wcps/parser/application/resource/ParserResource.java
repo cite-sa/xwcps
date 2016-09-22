@@ -50,24 +50,14 @@ public class ParserResource {
 	
 	@GET
 	@Path("QueryXwcps")
-	//@Produces("multipart/mixed")
-	public XwcpsQueryResult query(@QueryParam("q") String query) {
-		// return "blakas";
-
+	@Produces("multipart/mixed")
+	public Response query(@QueryParam("q") String query) {
 		Query result = xwcpsQueryParser.parse(query);
 		
-		return result;
-
-		// gr.cite.earthserver.wcps.parser.core.Error error = new
-		// gr.cite.earthserver.wcps.parser.core.Error();
-		// error.setMessage("gamw pio poli tin java");
-		// List<gr.cite.earthserver.wcps.parser.core.Error> tErrors = new
-		// ArrayList<>();
-		// tErrors.add(error);
-		// result.setErrors(tErrors);
+		MultiPart multiPart = this.GenerateMultiPartResponse(result);
+		return Response.ok(multiPart).build();
 		
-		//MultiPart multiPart = this.GenerateMultiPartResponse(result);
-		//return Response.ok(multiPart).build();
+		//return result;
 	}
 	
 	private MultiPart GenerateMultiPartResponse(Query result){
