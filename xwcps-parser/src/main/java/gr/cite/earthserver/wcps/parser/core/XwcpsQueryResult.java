@@ -17,19 +17,19 @@ public class XwcpsQueryResult {
 	@JsonProperty
 	protected List<Error> errors;
 
-	@JsonProperty
-	protected Set<XwcpsReturnValue> mixedValues;
+//	@JsonProperty
+//	protected Set<XwcpsReturnValue> mixedValues;
 	
 	@JsonProperty
 	protected String aggregatedValue;
 
-	public Set<XwcpsReturnValue> getMixedValues() {
-		return mixedValues;
-	}
-
-	public void setMixedValues(Set<XwcpsReturnValue> mixedValues) {
-		this.mixedValues = mixedValues;
-	}
+//	public Set<XwcpsReturnValue> getMixedValues() {
+//		return mixedValues;
+//	}
+//
+//	public void setMixedValues(Set<XwcpsReturnValue> mixedValues) {
+//		this.mixedValues = mixedValues;
+//	}
 	
 	public String getAggregatedValue() {
 		return aggregatedValue;

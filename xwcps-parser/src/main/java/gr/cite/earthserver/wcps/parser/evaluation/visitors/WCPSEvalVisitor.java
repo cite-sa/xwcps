@@ -181,9 +181,9 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 //				xwcpsQueryResult.setAggregatedValue(
 //						wcsRequestBuilder.processCoverages().query(query.getQuery()).build().get().getResponse());
 
-				if (xwcpsQueryResult.getMixedValues() != null) {
-					query.getMixedValues().addAll(xwcpsQueryResult.getMixedValues());
-				}
+//				if (xwcpsQueryResult.getMixedValues() != null) {
+//					query.getMixedValues().addAll(xwcpsQueryResult.getMixedValues());
+//				}
 
 				return query.setValue(xwcpsQueryResult.getAggregatedValue());
 			} else {
