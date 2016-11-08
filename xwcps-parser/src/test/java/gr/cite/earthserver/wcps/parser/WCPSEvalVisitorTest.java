@@ -16,7 +16,7 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.XWCPSEvaluationMocks;
 import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
-import gr.cite.earthserver.wcs.adaper.api.WCSAdapterAPI;
+import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.adapter.WCSAdapter;
 import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;

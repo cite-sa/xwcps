@@ -27,6 +27,8 @@ AxisNameXpath:  'ancestor'
   |  'preceding-sibling'
   |  'self'
   ;
+  
+//ENDPOINT_LITERAL: START_CHARS* ENDPOINT_PART*;
 
 /**
  * This file contains all the tokens needed in the wcps grammar.
@@ -41,6 +43,7 @@ ABSOLUTE_VALUE: ('a'|'A')('b'|'B')('s'|'S');
 ADD: ('a'|'A')('d'|'D')('d'|'D');
 ALL: ('a'|'A')('l'|'L')('l'|'L');
 AND: ('a'|'A')('n'|'N')('d'|'D');
+AT: '@';
 ARCSIN: ('a'|'A')('r'|'R')('c'|'C')('s'|'S')('i'|'I')('n'|'N');
 ARCCOS: ('a'|'A')('r'|'R')('c'|'C')('c'|'C')('o'|'O')('s'|'S');
 ARCTAN: ('a'|'A')('r'|'R')('c'|'C')('t'|'T')('a'|'A')('n'|'N');
@@ -60,6 +63,7 @@ DESCRIBE_COVERAGE: ('d' | 'D')('e' | 'E')('s' | 'S')('c' | 'C')('r' | 'R')('i' |
 DIV: ('d' | 'D')('i' | 'I')('v' | 'V');
 DIVISION: '/';
 DOT: '.';
+DOUBLE_COLON: '::';
 ENCODE: ('e' | 'E')('n' | 'N')('c' | 'C')('o' | 'O')('d' | 'D')('e' | 'E');
 EQUAL: '=';
 EXP: ('e'|'E')('x'|'X')('p'|'P');
@@ -121,7 +125,7 @@ WHERE: ('w'|'W')('h'|'H')('e'|'E')('r'|'R')('e'|'E');
 WRAP_RESULT: ('w'|'W')('r'|'R')('a'|'A')('p'|'P')'-'('r'|'R')('e'|'E')('s'|'S')('u'|'U')('l'|'L')('t'|'T');
 XOR: ('x'|'X')('o'|'O')('r'|'R');
 REAL_NUMBER_CONSTANT:'-'?NUMBERS+('.'NUMBERS*)?;
-
+GGG: ('g'|'G')('g'|'G')('g'|'G');
 
 SIMPLE_IDENTIFIER: START_CHARS + ;
 
@@ -137,7 +141,7 @@ WS: [ \n\t\r]+ -> skip;
 XPATH_LITERAL  :  '"' ~'"'* '"'
   |  '\'' ~'\''* '\''
   ;
-
+    
 // xpath 
 //NCName  :  NCNameStartChar NCNameChar*; 
 NCName  :  START_CHARS [a-zA-Z0-9_\-]*; // removed '.' -- START_CHARS [a-zA-Z0-9_\-.]*

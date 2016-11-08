@@ -59,7 +59,10 @@ closeXmlElement: LOWER_THAN_SLASH qName GREATER_THAN;
  */
 xpathClause: scalarExpression (xpath)?
 			| metadataClause (xpath)?
+			| metadataExpression (xpath)?
 			| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
+			
+metadataExpression: (coverageVariableName '/');
 
 wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
 					processingExpression COMMA  openXmlElement ( wrapResultSubElement )*
@@ -75,20 +78,20 @@ mixedClause: MIXED LEFT_PARANTHESIS encodedCoverageExpression COMMA (xmlClause |
 
 metadataClause: METADATA LEFT_PARANTHESIS coverageVariableName RIGHT_PARANTHESIS;
 
-/*
- * overrided wcps rules
- */
+//////overrided wcps rules//////
 
 whereClause: WHERE (booleanScalarExpression | booleanXpathClause );
 
 booleanXpathClause : xpathClause;
 
 // on return
-processingExpression: xmlClause
+processingExpression: 
+ 					xmlClause
 					| xpathClause
 					| wrapResultClause
                     | encodedCoverageExpression
-                    | mixedClause;
+                    | mixedClause
+                    ;
 
 wcpsQuery : (forClauseList) (letClause)* (whereClause)? (returnClause) ;
 
@@ -97,4 +100,14 @@ forClauseList: FOR (xwcpsforClause) (COMMA xwcpsforClause)*;
 xwcpsforClause: forClause
 			| xpathForClause
 			;
-
+			
+endpointIdentifier: identifier | STRING_LITERAL | XPATH_LITERAL;
+						
+extendedIdentifier: identifier (AT) endpointIdentifier			#specificIdInServerLabel
+			| (MULTIPLICATION) (AT) endpointIdentifier			#allCoveragesInServerLabel
+			| (MULTIPLICATION)									#allCoveragesLabel
+			| identifier										#specificIdLabel
+			;
+			
+forClause:  coverageVariableName IN
+           (LEFT_PARANTHESIS)? (extendedIdentifier) (COMMA (extendedIdentifier))* (RIGHT_PARANTHESIS)?;

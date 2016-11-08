@@ -1,10 +1,6 @@
 package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
-import java.awt.print.PrinterAbortException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -12,10 +8,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gr.cite.earthserver.query.CriteriaQuery;
-import gr.cite.earthserver.query.Where;
-//import gr.cite.earthserver.query.WhereBuilder;
-//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSBaseVisitor;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.AndExprContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.EqualityExprContext;
@@ -24,12 +16,11 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.OrExprContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.PredicateContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.RelativeLocationPathContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.StepContext;
-import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
 import gr.cite.earthserver.wcps.parser.evaluation.XpathForClause;
 import gr.cite.earthserver.wcps.parser.utils.PrintVisitor;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
-import gr.cite.earthserver.wcs.adaper.api.WCSAdapterAPI;
+import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.adapter.request.WCSAdapterCoverages;
 import gr.cite.earthserver.wcs.adapter.request.WCSAdapterRequest;
 import gr.cite.earthserver.wcs.adapter.request.WCSAdapterRequestBuilder;
@@ -37,7 +28,6 @@ import gr.cite.earthserver.wcs.adapter.request.WCSAdapterServers;
 import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.femme.client.FemmeDatastoreException;
 import gr.cite.femme.model.Metadatum;
-import gr.cite.femme.query.api.Criterion;
 import gr.cite.femme.utils.Pair;
 
 public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> {

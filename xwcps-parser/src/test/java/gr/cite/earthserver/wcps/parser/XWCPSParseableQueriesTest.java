@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -130,8 +131,7 @@ public class XWCPSParseableQueriesTest {
 
 	@Test
 	public void query21() {
-		parseQuery(
-				"for c in (AvgLandTemp) return <div> describeCoverage(c) </div>");
+		parseQuery("for c in (AvgLandTemp) return <div> describeCoverage(c) </div>");
 	}
 
 	@Test
@@ -220,10 +220,70 @@ public class XWCPSParseableQueriesTest {
 				+ "blue:  (int)(255/ (0.5 * (1 - (1.930 / ((1 - ((data.band_142 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_142 - data.band_130)/(data.band_163 - data.band_130)) * 2.067))) * 0.5 * (1 - (1.985 / ((1 - ((data.band_151 - data.band_130)/(data.band_163 - data.band_130))) * 1.850 + ((data.band_151 - data.band_130)/(data.band_163 - data.band_130)) * 2.067)))));  \n"
 				+ "alpha: (data.band_100 != 65535) * 255 }, \"png\", \"nodata=null\")");
 	}
-	
+
 	@Test
 	public void mixedQuery1() {
 		parseQuery("for c in ( AvgLandTemp ) return mixed(encode(1, \"csv\"), describeCoverage(c))");
+	}
+	
+	@Test
+	public void metadataExpression1() {
+		parseQuery("for $c in ( AvgLandTemp ) return $c/)");
+	}
+	
+	@Test
+	public void metadataExpression2() {
+		parseQuery("for $c in ( AvgLandTemp ) return $c)");
+	}
+	
+	@Test
+	public void metadataExpression3() {
+		parseQuery("for $c in ( AvgLandTemp ) return describeCoverage(c)//gml:cat_solar_longitude)");
+	}
+	
+	@Test
+	public void metadataExpression4() {
+		parseQuery("for $c in ( AvgLandTemp ) return $c//gml:cat_solar_longitude)");
+	}
+	
+	@Test
+	public void serverQuery1() {
+		parseQuery("for c in ( AvgLandTemp@pml ) return describeCoverage(c)");
+	}
+	
+	@Test
+	public void serverQuery2() {
+		parseQuery("for c in ( AvgLandTemp@pml.co.uk ) return describeCoverage(c)");
+	}
+
+	@Test
+	public void serverQuery3() {
+		parseQuery("for c in ( AvgLandTemp@\"http://www.pml.co.uk\" ) return describeCoverage(c)");
+	}
+	
+	@Test
+	public void serverQuery4() {
+		parseQuery("for c in ( AvgLandTemp@\"alias alias\" ) return describeCoverage(c)");
+	}
+
+	@Test
+	public void serverQuery5() {
+		parseQuery("for c in ( AvgLandTemp@pml, AvgLandTemp@planetServer, cov1@\"http://www.pml.co.uk\" ) return describeCoverage(c)");
+	}
+
+	@Test
+	public void serverQuery6() {
+		parseQuery("for c in ( *@pml ) return describeCoverage(c)");
+	}
+
+	@Test
+	public void serverQuery7() {
+		parseQuery("for c in ( * ) return describeCoverage(c)");
+	}
+
+	@Test
+	public void serverQuery8() {
+		parseQuery("for c in ( \"AvgLandTemp1 AvgLandTemp2\"@pml ) return describeCoverage(c)");
 	}
 
 	public static void parseQuery(String query) {
@@ -243,7 +303,27 @@ public class XWCPSParseableQueriesTest {
 			}
 		});
 
-		parser.xwcps();
+		ParseTree tree = parser.xwcps();
+		
+		System.out.println(query);
+		System.out.println(tokenStream.getTokens().stream().map(token -> {
+			String channelStr = "";
+			String txt = token.getText();
+			if (txt != null) {
+				txt = txt.replace("\n", "\\n");
+				txt = txt.replace("\r", "\\r");
+				txt = txt.replace("\t", "\\t");
+			} else {
+				txt = "<no text>";
+			}
+			return "[@" + token.getTokenIndex() + "," + token.getStartIndex() + ":" + token.getStopIndex() + "='" + txt
+					+ "',<" + (token.getType() >= 0 ? XWCPSLexer.ruleNames[token.getType() - 1] : "-1") + ">"
+					+ channelStr + "," + token.getLine() + ":" + token.getCharPositionInLine() + "]";
+		}).collect(Collectors.toList()).toString());
+
+		System.out.println(tokenStream.getTokens());
+		System.out.println(tree.toStringTree(parser));
+		
 		if (parser.getNumberOfSyntaxErrors() > 0) {
 			Assert.fail("failed query: '" + query + "' -- " + errors.stream().collect(Collectors.joining(", ")));
 		}
