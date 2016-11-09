@@ -102,7 +102,7 @@ PLUS: '+';
 POWER: ('p'|'P')('o'|'O')('w'|'W');
 REAL_PART: ('r'|'R')('e'|'E');
 ROUND: ('r'|'R')('o'|'O')('u'|'U')('n'|'N')('d'|'D');
-RETURN: ('r'|'R')('e'|'E')('t'|'T')('u'|'U')('r'|'R')('n'|'N');
+RETURN: ('r'|'R')('e'|'E')('t'|'T')('u'|'U')('r'|'R')('n'|'N'); 
 RIGHT_BRACE: '}';
 RIGHT_BRACKET: ']';
 RIGHT_PARANTHESIS: ')';
@@ -125,14 +125,17 @@ WHERE: ('w'|'W')('h'|'H')('e'|'E')('r'|'R')('e'|'E');
 WRAP_RESULT: ('w'|'W')('r'|'R')('a'|'A')('p'|'P')'-'('r'|'R')('e'|'E')('s'|'S')('u'|'U')('l'|'L')('t'|'T');
 XOR: ('x'|'X')('o'|'O')('r'|'R');
 REAL_NUMBER_CONSTANT:'-'?NUMBERS+('.'NUMBERS*)?;
-GGG: ('g'|'G')('g'|'G')('g'|'G');
+
 
 SIMPLE_IDENTIFIER: START_CHARS + ;
 
 SIMPLE_IDENTIFIER_WITH_NUMBERS: (START_CHARS | NUMBERS)+;
 
+//SIMPLE_IDENTIFIER_STARTING_LETTER: START_CHARS (START_CHARS | NUMBERS)*;
+
 //COVERAGE_VARIABLE_NAME: '$'[a-zA-Z0-9_]+; disabled for backwards compatibility with WCPS1
 IDENTIFIER: '$' SIMPLE_IDENTIFIER_WITH_NUMBERS; // added $ for backwards compatibility with WCPS1
+
 NAME: [a-z|A-Z]+;
 //FORMAT_NAME: replaced with STRING_LITERAL for backward compatibility with WCPS1. The regex for a valid mime type is: '"'[a-zA-Z0-9!#$&.+-^_]+'/'[a-zA-Z0-9!#$&.+-^_]+'"'
 STRING_LITERAL: '"'[a-zA-Z0-9!#$&.+-^_]+'"';
@@ -149,4 +152,3 @@ NCName  :  START_CHARS [a-zA-Z0-9_\-]*; // removed '.' -- START_CHARS [a-zA-Z0-9
 fragment NUMBERS: [0-9];
 
 fragment START_CHARS: [a-zA-Z_];
-

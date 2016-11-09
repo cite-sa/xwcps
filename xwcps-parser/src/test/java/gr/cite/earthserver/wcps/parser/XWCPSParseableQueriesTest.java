@@ -52,25 +52,25 @@ public class XWCPSParseableQueriesTest {
 				"for c in (NIR, AvgLandTemp ) return <a><b atr=\"yannis\">describeCoverage(c)//*[local-name()='domainSet']</b></a>");
 	}
 
-	@Test
-	public void query7() {
-		parseQuery("/server//coverage/@*[local-name()='test']");
-	}
-
-	@Test
-	public void query8() {
-		parseQuery("/server");
-	}
-
-	@Test
-	public void query9() {
-		parseQuery("for c in /server/coverage return describeCoverage(c)");
-	}
-
-	@Test
-	public void query10() {
-		parseQuery("for c in /server[endpoint='a']/coverage return describeCoverage(c)");
-	}
+//	@Test
+//	public void query7() {
+//		parseQuery("/server//coverage/@*[local-name()='test']");
+//	}
+//
+//	@Test
+//	public void query8() {
+//		parseQuery("/server");
+//	}
+//
+//	@Test
+//	public void query9() {
+//		parseQuery("for c in /server/coverage return describeCoverage(c)");
+//	}
+//
+//	@Test
+//	public void query10() {
+//		parseQuery("for c in /server[endpoint='a']/coverage return describeCoverage(c)");
+//	}
 
 	@Test
 	public void query11() {
@@ -134,76 +134,76 @@ public class XWCPSParseableQueriesTest {
 		parseQuery("for c in (AvgLandTemp) return <div> describeCoverage(c) </div>");
 	}
 
-	@Test
-	public void letQuery1() {
-		parseQuery("let d:= 10 for c in /server/coverage return describeCoverage(c)");
-	}
-
-	@Test
-	public void letQuery2() {
-		parseQuery("let d:= 10 for c in /server/coverage return <r> <b>d</b> <a> describeCoverage(c)</a> </r>");
-	}
-
-	@Test
-	public void letQuery3() {
-		parseQuery("let v1:= 1 " + "let v2:= 2 " + "for c in /server/coverage return <r> <b> v1 </b> <a> v2 </a> </r>");
-	}
-
-	@Test
-	public void letQuery4() {
-		parseQuery("let v1:= 1 " + "for c in /server/coverage " + "let v3:= 3 " + "return <r> " + "<b> v1 </b> "
-				+ "<a> v3 </a> " + "</r>");
-	}
-
-	@Test
-	public void letQuery5() {
-		parseQuery("let v1:= 1 "
-
-				+ "for c in /server/coverage "
-
-				+ "let v3:= 3 + v1 "
-
-				+ "return <r> " + "<b> v1 </b> " + "<a> v3 </a> " + "</r>");
-	}
-
-	@Test
-	public void letQuery6() {
-		parseQuery("let v1 := 1 "
-
-				+ "for c in /server/coverage "
-
-				+ "let v3 := 3 + v1 "
-
-				+ "let v4 := <e> v3 </e> "
-
-				+ "return <r> v4 + 1 </r>");
-	}
-
-	@Test
-	public void letQuery7() {
-		parseQuery("let v1 := 1 "
-
-				+ "for c in /server/coverage "
-
-				+ "let v3 := v1 + describeCoverage(c)/somePath/@someValue "
-
-				+ "let v4 := <e> v3 </e> "
-
-				+ "return <r> v4 + 5 </r>");
-	}
-
-	@Test
-	public void letQuery8() {
-		parseQuery("let v1 := 1 "
-
-				+ "for c in /server/coverage "
-
-				+ "let v3 := v1 + describeCoverage(c)/somePath/@someValue "
-
-				+ "let v4 := <e> v3 </e> "
-
-				+ "return <r> v4 + describeCoverage(c)/somePath/@someValue </r>");
-	}
+//	@Test
+//	public void letQuery1() {
+//		parseQuery("let d:= 10 for c in /server/coverage return describeCoverage(c)");
+//	}
+//
+//	@Test
+//	public void letQuery2() {
+//		parseQuery("let d:= 10 for c in /server/coverage return <r> <b>d</b> <a> describeCoverage(c)</a> </r>");
+//	}
+//
+//	@Test
+//	public void letQuery3() {
+//		parseQuery("let v1:= 1 " + "let v2:= 2 " + "for c in /server/coverage return <r> <b> v1 </b> <a> v2 </a> </r>");
+//	}
+//
+//	@Test
+//	public void letQuery4() {
+//		parseQuery("let v1:= 1 " + "for c in /server/coverage " + "let v3:= 3 " + "return <r> " + "<b> v1 </b> "
+//				+ "<a> v3 </a> " + "</r>");
+//	}
+//
+//	@Test
+//	public void letQuery5() {
+//		parseQuery("let v1:= 1 "
+//
+//				+ "for c in /server/coverage "
+//
+//				+ "let v3:= 3 + v1 "
+//
+//				+ "return <r> " + "<b> v1 </b> " + "<a> v3 </a> " + "</r>");
+//	}
+//
+//	@Test
+//	public void letQuery6() {
+//		parseQuery("let v1 := 1 "
+//
+//				+ "for c in /server/coverage "
+//
+//				+ "let v3 := 3 + v1 "
+//
+//				+ "let v4 := <e> v3 </e> "
+//
+//				+ "return <r> v4 + 1 </r>");
+//	}
+//
+//	@Test
+//	public void letQuery7() {
+//		parseQuery("let v1 := 1 "
+//
+//				+ "for c in /server/coverage "
+//
+//				+ "let v3 := v1 + describeCoverage(c)/somePath/@someValue "
+//
+//				+ "let v4 := <e> v3 </e> "
+//
+//				+ "return <r> v4 + 5 </r>");
+//	}
+//
+//	@Test
+//	public void letQuery8() {
+//		parseQuery("let v1 := 1 "
+//
+//				+ "for c in /server/coverage "
+//
+//				+ "let v3 := v1 + describeCoverage(c)/somePath/@someValue "
+//
+//				+ "let v4 := <e> v3 </e> "
+//
+//				+ "return <r> v4 + describeCoverage(c)/somePath/@someValue </r>");
+//	}
 
 	@Test
 	public void wcpsQuery1() {
@@ -223,27 +223,32 @@ public class XWCPSParseableQueriesTest {
 
 	@Test
 	public void mixedQuery1() {
-		parseQuery("for c in ( AvgLandTemp ) return mixed(encode(1, \"csv\"), describeCoverage(c))");
+		parseQuery("for c in ( AvgLandTemp ) return mixed(encode(1, \"csv\"), $c::)");
+	}
+	
+	@Test
+	public void xpathExpression1() {
+		parseQuery("for $c in ( AvgLandTemp ) return describeCoverage(c)//gml:cat_solar_longitude");
+	}
+	
+	@Test
+	public void xpathExpression2() {
+		parseQuery("for $c in ( AvgLandTemp ) return $c//gml:cat_solar_longitude");
+	}
+	
+	@Test
+	public void xpathExpression3() {
+		parseQuery("for $c in ( AvgLandTemp ) return $c:://gml:cat_solar_longitude");
 	}
 	
 	@Test
 	public void metadataExpression1() {
-		parseQuery("for $c in ( AvgLandTemp ) return $c/)");
+		parseQuery("for $c in ( AvgLandTemp ) return $c::");
 	}
 	
 	@Test
 	public void metadataExpression2() {
-		parseQuery("for $c in ( AvgLandTemp ) return $c)");
-	}
-	
-	@Test
-	public void metadataExpression3() {
-		parseQuery("for $c in ( AvgLandTemp ) return describeCoverage(c)//gml:cat_solar_longitude)");
-	}
-	
-	@Test
-	public void metadataExpression4() {
-		parseQuery("for $c in ( AvgLandTemp ) return $c//gml:cat_solar_longitude)");
+		parseQuery("for $c in ( AvgLandTemp ) return $c");
 	}
 	
 	@Test

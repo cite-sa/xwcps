@@ -57,13 +57,11 @@ closeXmlElement: LOWER_THAN_SLASH qName GREATER_THAN;
  * for c in ( AvgLandTemp ) return describeCoverage(c)//*[local-name()='domainSet']
  * for c in ( AvgLandTemp ) return min(describeCoverage(c)//*[local-name()='domainSet']//@anyattr)
  */
-xpathClause: scalarExpression (xpath)?
-			| metadataClause (xpath)?
-			| metadataExpression (xpath)?
+xpathClause: metadataExpression (xpath)?
+			| scalarExpression (xpath)?
+			//| metadataClause (xpath)?
 			| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
 			
-metadataExpression: (coverageVariableName '/');
-
 wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
 					processingExpression COMMA  openXmlElement ( wrapResultSubElement )*
 					RIGHT_PARANTHESIS;
@@ -77,6 +75,8 @@ xwcpsCoveragesClause: xpath;
 mixedClause: MIXED LEFT_PARANTHESIS encodedCoverageExpression COMMA (xmlClause | xpathClause) RIGHT_PARANTHESIS;
 
 metadataClause: METADATA LEFT_PARANTHESIS coverageVariableName RIGHT_PARANTHESIS;
+
+metadataExpression: coverageVariableName DOUBLE_COLON;
 
 //////overrided wcps rules//////
 

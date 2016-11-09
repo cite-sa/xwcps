@@ -15,6 +15,7 @@
  * @author Vlad Merticariu <vlad@flanche.net>
  */
 grammar WCPS;
+
 import WCPSLexerTokens;
 
 wcpsQuery : (forClauseList) (whereClause)? (returnClause)                                                               #WcpsQueryLabel;
