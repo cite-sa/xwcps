@@ -695,18 +695,19 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	
 	@Override
 	public Query visitForClause(ForClauseContext ctx) {
+		Query query = super.visitForClause(ctx);
 		
 		List<Coverage> coverages = new ArrayList<>();
-		for (ExtendedIdentifierContext extendedIdentifierContext : ctx.extendedIdentifier()) {
-			Query temp = this.visit(extendedIdentifierContext);
-			coverages.addAll(temp.getCoverageValueMap().keySet());
-		}
+		coverages.addAll(query.getCoverageValueMap().keySet());
+		
+		query.setSplittedQuery(XWCPSEvalUtils.constructForQueries(ctx.coverageVariableName().getText(), coverages));
 		
 		this.variables.put(ctx.coverageVariableName().getText(), coverages);
-
-		Query query = super.visitForClause(ctx);
-
-		query.setSplittedQuery(XWCPSEvalUtils.constructForQueries(ctx.coverageVariableName().getText(), coverages));
+		
+//		for (ExtendedIdentifierContext extendedIdentifierContext : ctx.extendedIdentifier()) {
+//			Query temp = this.visit(extendedIdentifierContext);
+//			coverages.addAll(temp.getCoverageValueMap().keySet());
+//		}
 
 		return query;
 	}

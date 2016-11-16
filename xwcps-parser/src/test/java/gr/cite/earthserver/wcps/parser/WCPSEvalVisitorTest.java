@@ -107,11 +107,11 @@ public class WCPSEvalVisitorTest {
 //		+ " where metadata(c)//gml:cat_solar_longitude[text()<86.0122] "
 //		+ " return metadata(c)";
 				
-//		"for c in ( arsf_test_subset_bands_hmm ) return c::";
+		"for c in ( arsf_test_subset_bands_hmm, CCI_V2_monthly_rrs_670 ) return c::";
 //		"for c in ( arsf_test_subset_bands_hmm ) return c:://wcs:CoverageId/text()";
 //		"for c in ( * ) return c::";
 //		"for c in ( arsf_test_subset_bands_hmm@\"https://rsg.pml.ac.uk/rasdaman/ows\" ) return c::";
-		"for c in ( *@\"https://rsg.pml.ac.uk/rasdaman/ows\" ) return c::";
+//		"for c in ( *@\"https://rsg.pml.ac.uk/rasdaman/ows\" ) return c::";
 										
 		System.out.println(query);
 
