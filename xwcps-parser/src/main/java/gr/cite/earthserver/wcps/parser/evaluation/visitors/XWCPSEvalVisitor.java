@@ -1,6 +1,7 @@
 package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.ExtendedIdentifierContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.ForClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.IdentifierContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.LetClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.MetadataClauseContext;
+//import gr.cite.earthserver.wcps.grammar.XWCPSParser.MetadataClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.MetadataExpressionContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.MixedClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
@@ -54,6 +55,7 @@ import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.earthserver.wcs.core.Server;
+import gr.cite.femme.client.FemmeClientException;
 import gr.cite.femme.client.FemmeDatastoreException;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
@@ -117,16 +119,16 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		Query wcpsQuery = null;
 		if (ctx.scalarExpression() != null) {
 			wcpsQuery = visit(ctx.scalarExpression());
-		} else if (ctx.metadataClause() != null) {
-			wcpsQuery = visit(ctx.metadataClause());
-		}
+		} else if (ctx.metadataExpression() != null) {
+			wcpsQuery = visit(ctx.metadataExpression());
+		} 
 
 		// if there is no xquery in the query
 		if (ctx.xpath() == null && forClauseDefaultXpath == null) {
 				
 			if (ctx.scalarExpression() != null && ctx.scalarExpression().getComponentExpression() != null) {
 				return wcpsQuery;
-			} else if (ctx.metadataClause() != null) {
+			} else if (ctx.metadataExpression() != null) {
 				return wcpsQuery;
 			} else {
 				/*
@@ -423,11 +425,6 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	public Query visitBooleanXpathClause(BooleanXpathClauseContext ctx) {
 		Query xpathQuery = visit(ctx.xpathClause());
 
-		// xpathQuery.setCoverageValueMap(xpathQuery.getCoverageValueMap().entrySet().stream()
-		// .filter(e ->
-		// !e.getValue().getXwcpsValue().isEmpty()).collect(Collectors.toMap(Entry::getKey,
-		// Entry::getValue)));
-
 		Map<Coverage, XwcpsReturnValue> filteredResult = xpathQuery.getCoverageValueMap().entrySet().stream()
 				.filter(e -> !e.getValue().getXwcpsValue().isEmpty())
 				.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
@@ -499,104 +496,114 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		return result;
 	}
 	
-	@Override
-	public Query visitMetadataClause(MetadataClauseContext ctx) {
-		Query query = super.visitMetadataClause(ctx);
-		
-		String variable = ctx.coverageVariableName().getText();
-		Map<Coverage, XwcpsReturnValue> metadataCoverages = variables.get(variable).stream().map(coverage -> {
-			try {
-				//TODO: Return all coverages, not just the first one
-				//TODO: change it because we have already done the query to femme
-				List<Coverage> coverages = this.getWcsAdapter().getCoveragesByCoverageId(coverage.getCoverageId());
-				String describeCoverage = "";
-				XwcpsReturnValue result = new XwcpsReturnValue();
-				
-				if (coverages.size() > 0) {
-					describeCoverage = coverages.get(0).getMetadata();
-					
-					result.setXwcpsValue("<coverage id='" + coverage.getCoverageId() + "'>"
-							+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
-				}
-
-				Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
-
-				return entry;
-			} catch (FemmeDatastoreException e) {
-				logger.error(e.getMessage(), e);
-				
-				throw new ParseCancellationException(e);
-			}
-		}).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
-
-		query.getCoverageValueMap().clear();
-		query.getCoverageValueMap().putAll(metadataCoverages);
-		return query.evaluated();
-	}
+//	@Override
+//	public Query visitMetadataClause(MetadataClauseContext ctx) {
+//		Query query = super.visitMetadataClause(ctx);
+//		
+//		String variable = ctx.coverageVariableName().getText();
+//		Map<Coverage, XwcpsReturnValue> metadataCoverages = variables.get(variable).stream().map(coverage -> {
+//			//TODO: Return all coverages, not just the first one
+//			//TODO: change it because we have already done the query to femme
+//			List<Coverage> coverages = new ArrayList<>();
+//			try {
+//				coverages = this.getWcsAdapter().getCoveragesByCoverageId(coverage.getCoverageId());
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			String describeCoverage = "";
+//			XwcpsReturnValue result = new XwcpsReturnValue();
+//			
+//			if (coverages.size() > 0) {
+//				describeCoverage = coverages.get(0).getMetadata();
+//				
+//				result.setXwcpsValue("<coverage id='" + coverage.getCoverageId() + "'>"
+//						+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
+//			}
+//
+//			Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
+//
+//			return entry;
+//		}).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+//
+//		query.getCoverageValueMap().clear();
+//		query.getCoverageValueMap().putAll(metadataCoverages);
+//		return query.evaluated();
+//	}
 	
 	@Override
 	public Query visitMetadataExpression(MetadataExpressionContext ctx) {
 		Query query = super.visitMetadataExpression(ctx);
 		
-//		String variable = ctx.coverageVariableName().getText();
-//		Map<Coverage, XwcpsReturnValue> metadataCoverages = variables.get(variable).stream().map(coverage -> {
-//			try {
-//				//TODO: Return all coverages, not just the first one
-//				//TODO: change it because we have already done the query to femme
-//				List<Coverage> coverages = this.getWcsAdapter().getCoveragesByCoverageId(coverage.getCoverageId());
-//				String describeCoverage = "";
-//				XwcpsReturnValue result = new XwcpsReturnValue();
-//				
-//				if (coverages.size() > 0) {
-//					describeCoverage = coverages.get(0).getMetadata();
+		String variable = ctx.coverageVariableName().getText();
+		Map<Coverage, XwcpsReturnValue> metadataCoverages = variables.get(variable).stream().map(coverage -> {
+			//TODO: Return all coverages, not just the first one
+			//TODO: change it because we have already done the query to femme
+
+//			List<Coverage> coverages = this.getWcsAdapter().getCoveragesByCoverageId(coverage.getCoverageId());
+//			String describeCoverage = "";
+//			if (coverages.size() > 0) {
+//				describeCoverage = coverages.get(0).getMetadata();
 //					
-//					result.setXwcpsValue("<coverage id='" + coverage.getCoverageId() + "'>"
-//							+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
-//				}
-//
-//				Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
-//
-//				return entry;
-//			} catch (FemmeDatastoreException e) {
-//				logger.error(e.getMessage(), e);
-//				
-//				throw new ParseCancellationException(e);
+//				result.setXwcpsValue("<coverage id='" + coverage.getCoverageId() + "'>"
+//						+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
 //			}
-//		}).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
-//
-//		query.getCoverageValueMap().clear();
-//		query.getCoverageValueMap().putAll(metadataCoverages);
+				
+			XwcpsReturnValue result = new XwcpsReturnValue();
+			
+			String describeCoverage = coverage.getMetadata();
+			result.setXwcpsValue("<coverage id='" + coverage.getCoverageId() + "'>"
+					+ describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
+
+			Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
+
+			return entry;
+		}).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+
+		query.getCoverageValueMap().clear();
+		query.getCoverageValueMap().putAll(metadataCoverages);
+		
 		return query.evaluated();
 	}
 	
 	@Override
 	public Query visitSpecificIdInServerLabel(SpecificIdInServerLabelContext ctx) {
 		Query query = super.visitSpecificIdInServerLabel(ctx);
-		
-		EndpointIdentifierContext endpointContext = ctx.endpointIdentifier();
+
+		String coverageId = ctx.identifier().getText();
 		String endpoint = "";
+		EndpointIdentifierContext endpointContext = ctx.endpointIdentifier();
 		if (endpointContext.identifier() != null) {
 			endpoint = endpointContext.identifier().getText();
 		}
 		else if (endpointContext.STRING_LITERAL() != null) {
 			endpoint = endpointContext.STRING_LITERAL().getText();
+			endpoint = endpoint.replace("\"", "");
 		}
 		else if (endpointContext.XPATH_LITERAL() != null) {
 			endpoint = endpointContext.XPATH_LITERAL().getText();
 		}
 		
+//		Coverage coverage = null;
+//		try {
+//			coverage = this.getWcsAdapter().getCoverageByCoverageIdInServer(endpoint, coverageId);
+//		} catch (FemmeDatastoreException | FemmeClientException e) {
+//			e.printStackTrace();
+//		}
+//		if (coverage == null) {
+//			coverage = new Coverage();
+//			coverage.setCoverageId(coverageId);
+//		}
+		
 		Coverage coverage = null;
 		try {
-			coverage = this.getWcsAdapter().getCoverageInServerByCoverageId(ctx.identifier().getText(), endpoint);
-		} catch (FemmeDatastoreException e) {
+			coverage = this.getWcsAdapter().getCoverageByCoverageIdInServer(endpoint, coverageId);
+		} catch (FemmeDatastoreException | FemmeClientException e) {
 			e.printStackTrace();
 		}
-		if (coverage == null) {
-			coverage = new Coverage();
-			coverage.setCoverageId(ctx.identifier().getText());
+		if (coverage != null) {
+			query.getCoverageValueMap().put(coverage, new XwcpsReturnValue());
 		}
-		
-		query.getCoverageValueMap().put(coverage, new XwcpsReturnValue());
 		
 		return query.evaluated();
 	}
@@ -612,6 +619,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		}
 		else if (endpointContext.STRING_LITERAL() != null) {
 			endpoint = endpointContext.STRING_LITERAL().getText();
+			endpoint = endpoint.replace("\"", "");
 		}
 		else if (endpointContext.XPATH_LITERAL() != null) {
 			endpoint = endpointContext.XPATH_LITERAL().getText();
@@ -619,8 +627,8 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		
 		List<Coverage> femmeCoverages = new ArrayList<>();
 		try {
-			femmeCoverages.addAll(this.getWcsAdapter().getCoveragesInServer(endpoint));
-		} catch (FemmeDatastoreException e) {
+			femmeCoverages.addAll(this.getWcsAdapter().getCoveragesInServer(new ArrayList<>(Arrays.asList(endpoint))));
+		} catch (FemmeDatastoreException | FemmeClientException e) {
 			e.printStackTrace();
 		}
 		
@@ -637,11 +645,8 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		
 		List<Coverage> femmeCoverages = new ArrayList<>();
 		try {
-			List<Server> servers = this.getWcsAdapter().getServers();
-			for(Server server: servers) {
-				femmeCoverages.addAll(this.getWcsAdapter().getCoveragesInServer(server.getEndpoint()));
-			}
-		} catch (FemmeDatastoreException e) {
+			femmeCoverages.addAll(this.getWcsAdapter().getCoverages());
+		} catch (FemmeDatastoreException | FemmeClientException e) {
 			e.printStackTrace();
 		}
 		
@@ -667,18 +672,23 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		List<Coverage> femmeCoverages = null;
 		try {
 			femmeCoverages = this.getWcsAdapter().getCoveragesByCoverageId(ctx.identifier().getText());
-		} catch (FemmeDatastoreException e) {
+		} catch (FemmeDatastoreException | FemmeClientException e) {
 			e.printStackTrace();
 		}
-		Coverage coverage = null;
-		if (femmeCoverages.size() == 0) {
-			coverage = new Coverage();
-			coverage.setCoverageId(ctx.identifier().getText());
-		} else {
-			coverage = femmeCoverages.get(0);
-		}
 		
-		query.getCoverageValueMap().put(coverage, new XwcpsReturnValue());
+//		Coverage coverage = null;
+//		if (femmeCoverages.size() == 0) {
+//			coverage = new Coverage();
+//			coverage.setCoverageId(ctx.identifier().getText());
+//		} else {
+//			coverage = femmeCoverages.get(0);
+//		}
+//		
+//		query.getCoverageValueMap().put(coverage, new XwcpsReturnValue());
+		
+		if (femmeCoverages.size() > 0) {
+			query.getCoverageValueMap().put(femmeCoverages.get(0), new XwcpsReturnValue());
+		}
 		
 		return query.evaluated();
 	}

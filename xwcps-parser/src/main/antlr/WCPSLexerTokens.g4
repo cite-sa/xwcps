@@ -126,12 +126,9 @@ WRAP_RESULT: ('w'|'W')('r'|'R')('a'|'A')('p'|'P')'-'('r'|'R')('e'|'E')('s'|'S')(
 XOR: ('x'|'X')('o'|'O')('r'|'R');
 REAL_NUMBER_CONSTANT:'-'?NUMBERS+('.'NUMBERS*)?;
 
-
 SIMPLE_IDENTIFIER: START_CHARS + ;
 
 SIMPLE_IDENTIFIER_WITH_NUMBERS: (START_CHARS | NUMBERS)+;
-
-//SIMPLE_IDENTIFIER_STARTING_LETTER: START_CHARS (START_CHARS | NUMBERS)*;
 
 //COVERAGE_VARIABLE_NAME: '$'[a-zA-Z0-9_]+; disabled for backwards compatibility with WCPS1
 IDENTIFIER: '$' SIMPLE_IDENTIFIER_WITH_NUMBERS; // added $ for backwards compatibility with WCPS1

@@ -74,7 +74,7 @@ xwcpsCoveragesClause: xpath;
 
 mixedClause: MIXED LEFT_PARANTHESIS encodedCoverageExpression COMMA (xmlClause | xpathClause) RIGHT_PARANTHESIS;
 
-metadataClause: METADATA LEFT_PARANTHESIS coverageVariableName RIGHT_PARANTHESIS;
+//metadataClause: METADATA LEFT_PARANTHESIS coverageVariableName RIGHT_PARANTHESIS;
 
 metadataExpression: coverageVariableName DOUBLE_COLON;
 

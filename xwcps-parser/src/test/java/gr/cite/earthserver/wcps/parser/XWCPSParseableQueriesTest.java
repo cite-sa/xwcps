@@ -232,7 +232,7 @@ public class XWCPSParseableQueriesTest {
 	}
 	
 	@Test
-	public void xpathExpression2() {
+	public void xpathExpression2_ShouldBeError() {
 		parseQuery("for $c in ( AvgLandTemp ) return $c//gml:cat_solar_longitude");
 	}
 	
@@ -247,7 +247,7 @@ public class XWCPSParseableQueriesTest {
 	}
 	
 	@Test
-	public void metadataExpression2() {
+	public void metadataExpression2_ShouldBeError() {
 		parseQuery("for $c in ( AvgLandTemp ) return $c");
 	}
 	
@@ -257,7 +257,7 @@ public class XWCPSParseableQueriesTest {
 	}
 	
 	@Test
-	public void serverQuery2() {
+	public void serverQuery2_ShouldBeError() {
 		parseQuery("for c in ( AvgLandTemp@pml.co.uk ) return describeCoverage(c)");
 	}
 
@@ -286,10 +286,10 @@ public class XWCPSParseableQueriesTest {
 		parseQuery("for c in ( * ) return describeCoverage(c)");
 	}
 
-	@Test
-	public void serverQuery8() {
-		parseQuery("for c in ( \"AvgLandTemp1 AvgLandTemp2\"@pml ) return describeCoverage(c)");
-	}
+//	@Test
+//	public void serverQuery8() {
+//		parseQuery("for c in ( \"AvgLandTemp1 AvgLandTemp2\"@pml ) return describeCoverage(c)");
+//	}
 
 	public static void parseQuery(String query) {
 		CharStream stream = new ANTLRInputStream(query);

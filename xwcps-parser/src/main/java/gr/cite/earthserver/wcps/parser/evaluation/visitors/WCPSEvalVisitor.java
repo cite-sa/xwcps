@@ -28,6 +28,7 @@ import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.earthserver.wcs.core.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.core.WCSRequestException;
 import gr.cite.earthserver.wcs.core.WCSResponse;
+import gr.cite.femme.client.FemmeClientException;
 import gr.cite.femme.client.FemmeDatastoreException;
 
 public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
@@ -107,7 +108,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 				Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
 
 				return entry;
-			} catch (FemmeDatastoreException e) {
+			} catch (FemmeDatastoreException | FemmeClientException e) {
 				logger.error(e.getMessage(), e);
 				
 				throw new ParseCancellationException(e);
