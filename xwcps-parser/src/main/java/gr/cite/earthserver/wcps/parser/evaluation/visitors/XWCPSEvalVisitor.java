@@ -449,9 +449,9 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		}
 
 		// clear coverage values
-		for (Entry<Coverage, XwcpsReturnValue> coverageEntry : whereClause.getCoverageValueMap().entrySet()) {
-			coverageEntry.setValue(null);
-		}
+		//for (Entry<Coverage, XwcpsReturnValue> coverageEntry : whereClause.getCoverageValueMap().entrySet()) {
+		//	coverageEntry.setValue(null);
+		//}
 
 		if (!whereClause.getCoverageValueMap().isEmpty()) {
 			for (String key : this.variables.keySet()) {
@@ -650,14 +650,6 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 			e.printStackTrace();
 		}
 		
-//		Coverage coverage = null;
-//		if (femmeCoverages.size() == 0) {
-//			coverage = new Coverage();
-//			coverage.setCoverageId(ctx.identifier().getText());
-//		} else {
-//			coverage = femmeCoverages.get(0);
-//		}
-		
 		for(Coverage coverage: femmeCoverages) {
 			query.getCoverageValueMap().put(coverage, new XwcpsReturnValue());
 		}
@@ -697,18 +689,12 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	public Query visitForClause(ForClauseContext ctx) {
 		Query query = super.visitForClause(ctx);
 		
-		List<Coverage> coverages = new ArrayList<>();
-		coverages.addAll(query.getCoverageValueMap().keySet());
+		List<Coverage> coverages = new ArrayList<>(query.getCoverageValueMap().keySet());
 		
 		query.setSplittedQuery(XWCPSEvalUtils.constructForQueries(ctx.coverageVariableName().getText(), coverages));
 		
 		this.variables.put(ctx.coverageVariableName().getText(), coverages);
 		
-//		for (ExtendedIdentifierContext extendedIdentifierContext : ctx.extendedIdentifier()) {
-//			Query temp = this.visit(extendedIdentifierContext);
-//			coverages.addAll(temp.getCoverageValueMap().keySet());
-//		}
-
 		return query;
 	}
 	
