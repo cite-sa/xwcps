@@ -26,7 +26,6 @@ public class Query extends XwcpsQueryResult {
 	private Map<Coverage, XwcpsReturnValue> coverageValueMap;
 
 	public Query() {
-		//setMixedValues(new HashSet<>());
 		setErrors(new ArrayList<>());
 	}
 
@@ -66,11 +65,6 @@ public class Query extends XwcpsQueryResult {
 		setAggregatedValue(prependValue + getAggregatedValue());
 		return this;
 	}
-
-//	public Query addMixedValue(XwcpsReturnValue mixedValue) {
-//		this.getMixedValues().add(mixedValue);
-//		return this;
-//	}
 
 	public Query appendValue(String prependValue) {
 		this.aggregatedValue += prependValue;

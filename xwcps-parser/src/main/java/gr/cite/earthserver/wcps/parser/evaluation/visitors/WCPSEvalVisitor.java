@@ -118,18 +118,24 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		query.getCoverageValueMap().clear();
 		query.getCoverageValueMap().putAll(describeCoverages);
 		return query.evaluated();
-
-		// return query.evaluated().setCoverageValueMap(describeCoverages);
-		// .setValue("<coverages>" +
-		// describeCoverages.stream().collect(Collectors.joining()) +
-		// "</coverages>");
 	}
 	
 	@Override
 	public Query visitWcpsQuery(WcpsQueryContext ctx) {
 		this.forWhereClauseQuery = visit(ctx.forClauseList());
+		
 		if (ctx.whereClause() != null) {
-			this.forWhereClauseQuery.aggregate(visit(ctx.whereClause()));
+			Query whereClauseQuery = visit(ctx.whereClause());
+			
+			Map<Coverage, XwcpsReturnValue> whereResults =  new HashMap<Coverage, XwcpsReturnValue>();
+			for (Coverage key : this.forWhereClauseQuery.getCoverageValueMap().keySet()) {
+				if (whereClauseQuery.getCoverageValueMap().containsKey(key)) {
+					whereResults.put(key, this.forWhereClauseQuery.getCoverageValueMap().get(key));
+				}
+			}
+			
+			this.forWhereClauseQuery.getCoverageValueMap().clear();
+			this.forWhereClauseQuery.getCoverageValueMap().putAll(whereResults);
 		}
 
 		Query query = this.forWhereClauseQuery;
@@ -184,7 +190,6 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 						
 						//if (coverageEntry.getKey().getServers().size() == 0) continue;
 						
-						//TODO: add processCoverages to wcs adapter.
 						WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder().endpoint(coverageEntry.getKey().getServers().get(0).getEndpoint());
 						WCSResponse wcsResponce = null;
 						try {
@@ -206,10 +211,6 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 				}
 				return resultByCoverage;
 			}).collect(Collectors.toList());
-
-			// if (encodedCoverageExpressionLabel.getCoverageValueMap() == null)
-			// encodedCoverageExpressionLabel.setCoverageValueMap(new
-			// HashMap<Coverage, XwcpsReturnValue>());
 
 			for (Map<Coverage, XwcpsReturnValue> resultPerCoverage : resultsPerCoverageList) {
 				for (Entry<Coverage, XwcpsReturnValue> coverageEntry : resultPerCoverage.entrySet()) {
