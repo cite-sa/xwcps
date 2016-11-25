@@ -196,19 +196,14 @@ public class ParserResource {
 		return Response.ok("YANNIS").build();
 	}
 
-	@GET
+	/*@GET
 	@Path("queryP")
 	@JSONP("callback")
-	//@Produces("application/x-javascript")
 	@Produces({"application/javascript", "application/x-javascript"})
 	public JSONPObject query(@QueryParam("callback") String callack, @QueryParam("q") String query) {
-		
-//		Query result = xwcpsQueryParser.parse(query);
-//		MultiPart multiPart = this.generateMultiPartResponse(result);
-		
 		Response response = query(query);
 		return new JSONPObject(callack, response);
-	}
+	}*/
 	
 	
 

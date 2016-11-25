@@ -14,7 +14,7 @@ import gr.cite.earthserver.wcps.parser.application.resource.ParserResource;
 public class XWCPSParserApplication extends ResourceConfig {
 	
 	public XWCPSParserApplication() {
-		register(CORSFilter.class);
+		register(CORSResponseFilter.class);
 		register(JacksonFeature.class);
 		register(MultiPartFeature.class);
 //		register(JsonProcessingFeature.class);

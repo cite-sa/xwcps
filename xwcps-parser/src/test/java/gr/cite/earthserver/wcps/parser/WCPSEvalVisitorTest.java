@@ -25,7 +25,7 @@ import jersey.repackaged.com.google.common.collect.Lists;
 
 public class WCPSEvalVisitorTest {
 	
-	@Test
+//	@Test
 	public void test() {
 		String query =
 //				"for data in ( frt00003590_07_if164l_trr3 , frt0000b1bd_07_if166l_trr3 ) "
