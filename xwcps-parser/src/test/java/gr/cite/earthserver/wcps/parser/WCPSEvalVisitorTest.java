@@ -16,7 +16,7 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.XWCPSEvaluationMocks;
 import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
-import gr.cite.earthserver.wcs.adaper.api.WCSAdapterAPI;
+import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.adapter.WCSAdapter;
 import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
@@ -25,7 +25,7 @@ import jersey.repackaged.com.google.common.collect.Lists;
 
 public class WCPSEvalVisitorTest {
 	
-	@Test
+//	@Test
 	public void test() {
 		String query =
 //				"for data in ( frt00003590_07_if164l_trr3 , frt0000b1bd_07_if166l_trr3 ) "
@@ -80,7 +80,7 @@ public class WCPSEvalVisitorTest {
 				
 //		"for data in (frt0000cc22_07_if165l_trr3) return encode( { red: (int)(255 / (max((data.band_233 != 65535) * data.band_233) - min(data.band_233))) * (data.band_233 - min(data.band_233)); green: (int)(255 / (max((data.band_13 != 65535) * data.band_13) - min(data.band_13))) * (data.band_13 - min(data.band_13)); blue: (int)(255 / (max((data.band_78 != 65535) * data.band_78) - min(data.band_78))) * (data.band_78 - min(data.band_78)) ; alpha: (data.band_100 != 65535) * 255}, \"png\", \"nodata=null\")";
 		
-		"for data in (frt0000cc22_07_if165l_trr3) return mixed(encode( { red: (int)(255 / (max((data.band_233 != 65535) * data.band_233) - min(data.band_233))) * (data.band_233 - min(data.band_233)); green: (int)(255 / (max((data.band_13 != 65535) * data.band_13) - min(data.band_13))) * (data.band_13 - min(data.band_13)); blue: (int)(255 / (max((data.band_78 != 65535) * data.band_78) - min(data.band_78))) * (data.band_78 - min(data.band_78)) ; alpha: (data.band_100 != 65535) * 255}, \"png\", \"nodata=null\"), metadata(data))";
+//		"for data in (frt0000cc22_07_if165l_trr3) return mixed(encode( { red: (int)(255 / (max((data.band_233 != 65535) * data.band_233) - min(data.band_233))) * (data.band_233 - min(data.band_233)); green: (int)(255 / (max((data.band_13 != 65535) * data.band_13) - min(data.band_13))) * (data.band_13 - min(data.band_13)); blue: (int)(255 / (max((data.band_78 != 65535) * data.band_78) - min(data.band_78))) * (data.band_78 - min(data.band_78)) ; alpha: (data.band_100 != 65535) * 255}, \"png\", \"nodata=null\"), metadata(data))";
 								
 //		"for c in ( frt00009d2f_07_if168s_trr3 ) return encode(c, \"csv\")";
 		
@@ -106,6 +106,18 @@ public class WCPSEvalVisitorTest {
 //		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows' or @endpoint='https://rsg.pml.ac.uk/rasdaman/ows']/coverage"
 //		+ " where metadata(c)//gml:cat_solar_longitude[text()<86.0122] "
 //		+ " return metadata(c)";
+		
+				
+
+		//New grammar queries
+				
+//		"for c in ( arsf_test_subset_bands_hmm ) return c::";
+//		"for c in ( arsf_test_subset_bands_hmm, CCI_V2_monthly_rrs_670 ) return c::";
+//		"for c in ( arsf_test_subset_bands_hmm ) return c:://wcs:CoverageId/text()";
+		"for c in ( * ) return c::";
+//		"for c in ( arsf_test_subset_bands_hmm@\"https://rsg.pml.ac.uk/rasdaman/ows\" ) return c::";
+//		"for c in ( *@\"https://rsg.pml.ac.uk/rasdaman/ows\" ) return c::";
+//		"for c in ( * ) where c:://*[local-name()='RectifiedGrid'][@dimension=2] return c::";
 										
 		System.out.println(query);
 
@@ -118,8 +130,9 @@ public class WCPSEvalVisitorTest {
 
 		printInfo(tokenStream, parser, tree);
 		
-		//WCSAdapterAPI wcsAdapter = new WCSAdapter("http://localhost:8080/femme-application");
-		WCSAdapterAPI wcsAdapter = new WCSAdapter("http://es-devel1.local.cite.gr:8080/femme-application-0.0.1-SNAPSHOT");
+		WCSAdapterAPI wcsAdapter = new WCSAdapter("http://localhost:8080/femme-application");
+		//WCSAdapterAPI wcsAdapter = new WCSAdapter("http://es-devel1.local.cite.gr:8080/femme-application-0.0.1-SNAPSHOT");
+		//WCSAdapterAPI wcsAdapter = new WCSAdapter("http://es-devel1.local.cite.gr:8080/femme-application-devel");
 
 		XWCPSEvalVisitor visitor = new XWCPSEvalVisitor(wcsAdapter);
 		Query result = visitor.visit(tree);

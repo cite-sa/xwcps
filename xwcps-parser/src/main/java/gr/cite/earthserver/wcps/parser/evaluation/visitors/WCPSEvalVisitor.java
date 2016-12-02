@@ -1,45 +1,35 @@
 package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
-import java.io.ByteArrayInputStream;
-import java.net.PasswordAuthentication;
-import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.antlr.v4.codegen.model.chunk.ThisRulePropertyRef_start;
-import org.antlr.v4.parse.ANTLRParser.id_return;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
-//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.DescribeCoverageExpressionLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.EncodedCoverageExpressionLabelContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.ForClauseLabelContext;
-//import gr.cite.earthserver.wcps.grammar.XWCPSParser.MetadataExpressionLabelContext;
+//import gr.cite.earthserver.wcps.grammar.XWCPSParser.ForClauseLabelContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.WcpsQueryContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
 import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
-import gr.cite.earthserver.wcs.adaper.api.WCSAdapterAPI;
-import gr.cite.earthserver.wcs.adapter.request.WCSAdapterRequest;
+import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.core.Coverage;
-import gr.cite.earthserver.wcs.core.WCSRequest;
 import gr.cite.earthserver.wcs.core.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.core.WCSRequestException;
 import gr.cite.earthserver.wcs.core.WCSResponse;
+import gr.cite.femme.client.FemmeClientException;
 import gr.cite.femme.client.FemmeDatastoreException;
-import gr.cite.femme.utils.Pair;
 
 public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	private static final Logger logger = LoggerFactory.getLogger(WCPSEvalVisitor.class);
@@ -48,22 +38,11 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 	 * expecting a link on the federated rasdaman
 	 */
 
-	//WCSRequestBuilder wcsRequestBuilder;
-
-	Map<String, List<Coverage>> variables = new HashMap<>();
-
-	Query forWhereClauseQuery;
+	protected Map<String, List<Coverage>> variables = new HashMap<>();
+	
+	protected Query forWhereClauseQuery;
 	
 	private WCSAdapterAPI wcsAdapter;
-
-	/**
-	 * 
-	 * @param wcsEndpoint
-	 *            url on the federated rasdaman
-	 */
-//	public WCPSEvalVisitor(String wcsEndpoint) {
-//		this.wcsRequestBuilder = WCSRequest.newBuilder().endpoint(wcsEndpoint);
-//	}
 	
 	public WCPSEvalVisitor(WCSAdapterAPI wcsAdapter) {
 		this.wcsAdapter = wcsAdapter;
@@ -77,50 +56,35 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		this.wcsAdapter = wcsAdapter;
 	}
 	
-	/**
-	 * 
-	 * @param wcsRequestBuilder
-	 *            wcs request builder with url on the federated rasdaman
-	 */
-//	public WCPSEvalVisitor(WCSRequestBuilder wcsRequestBuilder) {
-//		this.wcsRequestBuilder = wcsRequestBuilder;
-//	}
-
-	@Override
-	public Query visitForClauseLabel(ForClauseLabelContext ctx) {
-
-		List<Coverage> coverages = ctx.identifier().stream().map(identifier -> {
-			/*Coverage c = new Coverage();
-			c.setLocalId(identifier.getText());*/
-//			Coverage coverage = new Coverage();
-//			coverage.setCoverageId(identifier.getText());
+//	@Override
+//	public Query visitForClauseLabel(ForClauseLabelContext ctx) {
+//
+//		List<Coverage> coverages = ctx.identifier().stream().map(identifier -> {
+//			List<Coverage> femmeCoverages = null;
+//			try {
+//				femmeCoverages = this.wcsAdapter.getCoveragesByCoverageId(identifier.getText());
+//			} catch (FemmeDatastoreException e) {
+//				e.printStackTrace();
+//			}
+//			Coverage coverage = null;
+//			if (femmeCoverages.size() == 0) {
+//				coverage = new Coverage();
+//				coverage.setCoverageId(identifier.getText());
+//			}
+//			else {
+//				coverage = femmeCoverages.get(0);
+//			}
 //			return coverage;
-			
-			List<Coverage> femmeCoverages = null;
-			try {
-				femmeCoverages = this.wcsAdapter.getCoveragesByCoverageId(identifier.getText());
-			} catch (FemmeDatastoreException e) {
-				e.printStackTrace();
-			}
-			Coverage coverage = null;
-			if (femmeCoverages.size() == 0) {
-				coverage = new Coverage();
-				coverage.setCoverageId(identifier.getText());
-			}
-			else {
-				coverage = femmeCoverages.get(0);
-			}
-			return coverage;
-		}).collect(Collectors.toList());
-
-		variables.put(ctx.coverageVariableName().getText(), coverages);
-
-		Query query = super.visitForClauseLabel(ctx);
-
-		query.setSplittedQuery(XWCPSEvalUtils.constructForQueries(ctx.coverageVariableName().getText(), coverages));
-
-		return query;
-	}
+//		}).collect(Collectors.toList());
+//
+//		variables.put(ctx.coverageVariableName().getText(), coverages);
+//
+//		Query query = super.visitForClauseLabel(ctx);
+//
+//		query.setSplittedQuery(XWCPSEvalUtils.constructForQueries(ctx.coverageVariableName().getText(), coverages));
+//
+//		return query;
+//	}
 	
 	@Override
 	public Query visitDescribeCoverageExpressionLabel(DescribeCoverageExpressionLabelContext ctx) {
@@ -144,7 +108,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 				Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
 
 				return entry;
-			} catch (FemmeDatastoreException e) {
+			} catch (FemmeDatastoreException | FemmeClientException e) {
 				logger.error(e.getMessage(), e);
 				
 				throw new ParseCancellationException(e);
@@ -154,18 +118,24 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 		query.getCoverageValueMap().clear();
 		query.getCoverageValueMap().putAll(describeCoverages);
 		return query.evaluated();
-
-		// return query.evaluated().setCoverageValueMap(describeCoverages);
-		// .setValue("<coverages>" +
-		// describeCoverages.stream().collect(Collectors.joining()) +
-		// "</coverages>");
 	}
 	
 	@Override
 	public Query visitWcpsQuery(WcpsQueryContext ctx) {
 		this.forWhereClauseQuery = visit(ctx.forClauseList());
+		
 		if (ctx.whereClause() != null) {
-			this.forWhereClauseQuery.aggregate(visit(ctx.whereClause()));
+			Query whereClauseQuery = visit(ctx.whereClause());
+			
+			Map<Coverage, XwcpsReturnValue> whereResults =  new HashMap<Coverage, XwcpsReturnValue>();
+			for (Coverage key : this.forWhereClauseQuery.getCoverageValueMap().keySet()) {
+				if (whereClauseQuery.getCoverageValueMap().containsKey(key)) {
+					whereResults.put(key, this.forWhereClauseQuery.getCoverageValueMap().get(key));
+				}
+			}
+			
+			this.forWhereClauseQuery.getCoverageValueMap().clear();
+			this.forWhereClauseQuery.getCoverageValueMap().putAll(whereResults);
 		}
 
 		Query query = this.forWhereClauseQuery;
@@ -180,11 +150,10 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 				//TODO: add processCoverages to wcs adapter.
 //				xwcpsQueryResult.setAggregatedValue(
 //						wcsRequestBuilder.processCoverages().query(query.getQuery()).build().get().getResponse());
-
 //				if (xwcpsQueryResult.getMixedValues() != null) {
 //					query.getMixedValues().addAll(xwcpsQueryResult.getMixedValues());
 //				}
-
+				
 				return query.setValue(xwcpsQueryResult.getAggregatedValue());
 			} else {
 				return query;
@@ -212,7 +181,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 						+ encodedCoverageExpressionLabel.getQuery();
 
 				Map<Coverage, XwcpsReturnValue> resultByCoverage = null;
-				//try {
+				try {
 					resultByCoverage = new HashMap<Coverage, XwcpsReturnValue>();
 					
 					for (Entry<Coverage, XwcpsReturnValue> coverageEntry : forWhereClauseQuery.getCoverageValueMap()
@@ -221,8 +190,6 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 						
 						//if (coverageEntry.getKey().getServers().size() == 0) continue;
 						
-						//TODO: add processCoverages to wcs adapter.
-						//WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder().endpoint("http://access.planetserver.eu:8080/rasdaman/ows");
 						WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder().endpoint(coverageEntry.getKey().getServers().get(0).getEndpoint());
 						WCSResponse wcsResponce = null;
 						try {
@@ -239,17 +206,11 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 						resultByCoverage.put(coverageEntry.getKey(), encodedResult);
 					}
 
-//				} catch (Exception e) {
-//					logger.error(e.getMessage(), e);
-//					// mixedValue = new XwcpsReturnValue();
-//					// mixedValue.setXwcpsValue(e.getMessage());
-//				}
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
 				return resultByCoverage;
 			}).collect(Collectors.toList());
-
-			// if (encodedCoverageExpressionLabel.getCoverageValueMap() == null)
-			// encodedCoverageExpressionLabel.setCoverageValueMap(new
-			// HashMap<Coverage, XwcpsReturnValue>());
 
 			for (Map<Coverage, XwcpsReturnValue> resultPerCoverage : resultsPerCoverageList) {
 				for (Entry<Coverage, XwcpsReturnValue> coverageEntry : resultPerCoverage.entrySet()) {

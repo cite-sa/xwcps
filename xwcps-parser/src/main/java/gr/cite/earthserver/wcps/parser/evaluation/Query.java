@@ -26,7 +26,6 @@ public class Query extends XwcpsQueryResult {
 	private Map<Coverage, XwcpsReturnValue> coverageValueMap;
 
 	public Query() {
-		//setMixedValues(new HashSet<>());
 		setErrors(new ArrayList<>());
 	}
 
@@ -66,11 +65,6 @@ public class Query extends XwcpsQueryResult {
 		setAggregatedValue(prependValue + getAggregatedValue());
 		return this;
 	}
-
-//	public Query addMixedValue(XwcpsReturnValue mixedValue) {
-//		this.getMixedValues().add(mixedValue);
-//		return this;
-//	}
 
 	public Query appendValue(String prependValue) {
 		this.aggregatedValue += prependValue;
@@ -139,12 +133,16 @@ public class Query extends XwcpsQueryResult {
 
 						if (currentValue == null)
 							this.getCoverageValueMap().put(coverageEntry.getKey(), coverageEntry.getValue());
-						else if (coverageEntry.getValue().getXwcpsValue() == null)
-							continue;
 						else {
 							XwcpsReturnValue returnValue = new XwcpsReturnValue();
-							returnValue.setXwcpsValue(
-									currentValue.getXwcpsValue() + coverageEntry.getValue().getXwcpsValue());
+							
+							StringBuilder stringBuilder = new StringBuilder();
+							if (currentValue.getXwcpsValue() != null) stringBuilder.append(currentValue.getXwcpsValue());
+							if (coverageEntry.getValue().getXwcpsValue() != null) stringBuilder.append(coverageEntry.getValue().getXwcpsValue());
+							returnValue.setXwcpsValue(stringBuilder.toString());
+							
+							if (coverageEntry.getValue().getWcpsValue() != null) returnValue.setWcpsValue(coverageEntry.getValue().getWcpsValue());
+							
 							this.getCoverageValueMap().put(coverageEntry.getKey(), returnValue);
 						}
 					} else {
@@ -231,7 +229,7 @@ public class Query extends XwcpsQueryResult {
 
 	public String serializeValue() {
 		if (!this.getCoverageValueMap().isEmpty()) {
-			return this.getCoverageValueMap().values().stream().filter(v -> v != null).map(x -> x.getXwcpsValue())
+			return this.getCoverageValueMap().values().stream().filter(v -> v.getXwcpsValue() != null).map(x -> x.getXwcpsValue())
 					.collect(Collectors.joining());
 		} else if (this.aggregatedValue != null) {
 			return this.aggregatedValue;

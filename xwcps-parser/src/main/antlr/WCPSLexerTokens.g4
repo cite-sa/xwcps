@@ -27,6 +27,8 @@ AxisNameXpath:  'ancestor'
   |  'preceding-sibling'
   |  'self'
   ;
+  
+//ENDPOINT_LITERAL: START_CHARS* ENDPOINT_PART*;
 
 /**
  * This file contains all the tokens needed in the wcps grammar.
@@ -41,6 +43,7 @@ ABSOLUTE_VALUE: ('a'|'A')('b'|'B')('s'|'S');
 ADD: ('a'|'A')('d'|'D')('d'|'D');
 ALL: ('a'|'A')('l'|'L')('l'|'L');
 AND: ('a'|'A')('n'|'N')('d'|'D');
+AT: '@';
 ARCSIN: ('a'|'A')('r'|'R')('c'|'C')('s'|'S')('i'|'I')('n'|'N');
 ARCCOS: ('a'|'A')('r'|'R')('c'|'C')('c'|'C')('o'|'O')('s'|'S');
 ARCTAN: ('a'|'A')('r'|'R')('c'|'C')('t'|'T')('a'|'A')('n'|'N');
@@ -60,6 +63,7 @@ DESCRIBE_COVERAGE: ('d' | 'D')('e' | 'E')('s' | 'S')('c' | 'C')('r' | 'R')('i' |
 DIV: ('d' | 'D')('i' | 'I')('v' | 'V');
 DIVISION: '/';
 DOT: '.';
+DOUBLE_COLON: '::';
 ENCODE: ('e' | 'E')('n' | 'N')('c' | 'C')('o' | 'O')('d' | 'D')('e' | 'E');
 EQUAL: '=';
 EXP: ('e'|'E')('x'|'X')('p'|'P');
@@ -98,7 +102,7 @@ PLUS: '+';
 POWER: ('p'|'P')('o'|'O')('w'|'W');
 REAL_PART: ('r'|'R')('e'|'E');
 ROUND: ('r'|'R')('o'|'O')('u'|'U')('n'|'N')('d'|'D');
-RETURN: ('r'|'R')('e'|'E')('t'|'T')('u'|'U')('r'|'R')('n'|'N');
+RETURN: ('r'|'R')('e'|'E')('t'|'T')('u'|'U')('r'|'R')('n'|'N'); 
 RIGHT_BRACE: '}';
 RIGHT_BRACKET: ']';
 RIGHT_PARANTHESIS: ')';
@@ -122,13 +126,13 @@ WRAP_RESULT: ('w'|'W')('r'|'R')('a'|'A')('p'|'P')'-'('r'|'R')('e'|'E')('s'|'S')(
 XOR: ('x'|'X')('o'|'O')('r'|'R');
 REAL_NUMBER_CONSTANT:'-'?NUMBERS+('.'NUMBERS*)?;
 
-
 SIMPLE_IDENTIFIER: START_CHARS + ;
 
 SIMPLE_IDENTIFIER_WITH_NUMBERS: (START_CHARS | NUMBERS)+;
 
 //COVERAGE_VARIABLE_NAME: '$'[a-zA-Z0-9_]+; disabled for backwards compatibility with WCPS1
 IDENTIFIER: '$' SIMPLE_IDENTIFIER_WITH_NUMBERS; // added $ for backwards compatibility with WCPS1
+
 NAME: [a-z|A-Z]+;
 //FORMAT_NAME: replaced with STRING_LITERAL for backward compatibility with WCPS1. The regex for a valid mime type is: '"'[a-zA-Z0-9!#$&.+-^_]+'/'[a-zA-Z0-9!#$&.+-^_]+'"'
 STRING_LITERAL: '"'[a-zA-Z0-9!#$&.+-^_]+'"';
@@ -137,7 +141,7 @@ WS: [ \n\t\r]+ -> skip;
 XPATH_LITERAL  :  '"' ~'"'* '"'
   |  '\'' ~'\''* '\''
   ;
-
+    
 // xpath 
 //NCName  :  NCNameStartChar NCNameChar*; 
 NCName  :  START_CHARS [a-zA-Z0-9_\-]*; // removed '.' -- START_CHARS [a-zA-Z0-9_\-.]*
@@ -145,4 +149,3 @@ NCName  :  START_CHARS [a-zA-Z0-9_\-]*; // removed '.' -- START_CHARS [a-zA-Z0-9
 fragment NUMBERS: [0-9];
 
 fragment START_CHARS: [a-zA-Z_];
-

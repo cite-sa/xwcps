@@ -57,10 +57,11 @@ closeXmlElement: LOWER_THAN_SLASH qName GREATER_THAN;
  * for c in ( AvgLandTemp ) return describeCoverage(c)//*[local-name()='domainSet']
  * for c in ( AvgLandTemp ) return min(describeCoverage(c)//*[local-name()='domainSet']//@anyattr)
  */
-xpathClause: scalarExpression (xpath)?
-			| metadataClause (xpath)?
+xpathClause: metadataExpression (xpath)?
+			| scalarExpression (xpath)?
+			//| metadataClause (xpath)?
 			| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
-
+			
 wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
 					processingExpression COMMA  openXmlElement ( wrapResultSubElement )*
 					RIGHT_PARANTHESIS;
@@ -73,22 +74,24 @@ xwcpsCoveragesClause: xpath;
 
 mixedClause: MIXED LEFT_PARANTHESIS encodedCoverageExpression COMMA (xmlClause | xpathClause) RIGHT_PARANTHESIS;
 
-metadataClause: METADATA LEFT_PARANTHESIS coverageVariableName RIGHT_PARANTHESIS;
+//metadataClause: METADATA LEFT_PARANTHESIS coverageVariableName RIGHT_PARANTHESIS;
 
-/*
- * overrided wcps rules
- */
+metadataExpression: coverageVariableName DOUBLE_COLON;
+
+//////overrided wcps rules//////
 
 whereClause: WHERE (booleanScalarExpression | booleanXpathClause );
 
 booleanXpathClause : xpathClause;
 
 // on return
-processingExpression: xmlClause
+processingExpression: 
+ 					xmlClause
 					| xpathClause
 					| wrapResultClause
                     | encodedCoverageExpression
-                    | mixedClause;
+                    | mixedClause
+                    ;
 
 wcpsQuery : (forClauseList) (letClause)* (whereClause)? (returnClause) ;
 
@@ -97,4 +100,14 @@ forClauseList: FOR (xwcpsforClause) (COMMA xwcpsforClause)*;
 xwcpsforClause: forClause
 			| xpathForClause
 			;
-
+			
+endpointIdentifier: identifier | STRING_LITERAL | XPATH_LITERAL;
+						
+extendedIdentifier: identifier (AT) endpointIdentifier			#specificIdInServerLabel
+			| (MULTIPLICATION) (AT) endpointIdentifier			#allCoveragesInServerLabel
+			| (MULTIPLICATION)									#allCoveragesLabel
+			| identifier										#specificIdLabel
+			;
+			
+forClause:  coverageVariableName IN
+           (LEFT_PARANTHESIS)? (extendedIdentifier) (COMMA (extendedIdentifier))* (RIGHT_PARANTHESIS)?;

@@ -7,17 +7,11 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import gr.cite.earthserver.query.CriteriaQuery;
-//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSLexer;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser;
-import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
-import gr.cite.earthserver.wcs.adaper.api.WCSAdapterAPI;
-//import gr.cite.femme.query.criteria.CriteriaQuery;
-import gr.cite.earthserver.wcs.adapter.WCSAdapter;
-import gr.cite.earthserver.wcs.core.Coverage;
+import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 
 public class XWCPSQueryParser {
 
