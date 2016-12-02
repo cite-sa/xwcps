@@ -204,5 +204,5 @@ In the context of xWCPS, XPath is mostly employed for the following use cases
 
 * Retrieve specific metadata from coverages:
 
-      		for $cov in * 
-     	 	return $c:://*[local-name()='lowerCorner']
+      	for $cov in * 
+	return $c:://*[local-name()='lowerCorner']
