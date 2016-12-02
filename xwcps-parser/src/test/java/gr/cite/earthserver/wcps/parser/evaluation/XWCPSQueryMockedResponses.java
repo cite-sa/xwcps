@@ -127,7 +127,7 @@ public final class XWCPSQueryMockedResponses {
 			+ "            </wcs:ServiceParameters>\n" + "         </wcs:CoverageDescription>\n"
 			+ "      </wcs:CoverageDescriptions>\n" + "   </coverage>\n" + "</results>";
 
-	public static final String DOUBLE_DESCRIBE_COVERAGE_RESULT = "<results>\n" + "   <coverage id=\"NIR\">\n"
+	public static final String DOUBLE_DESCRIBE_COVERAGE_RESULT = "<results>\n" + "   <coverage id=\"AvgLandTemp\">\n"
 			+ "      <wcs:CoverageDescriptions xmlns:wcs=\"http://www.opengis.net/wcs/2.0\"\n"
 			+ "                                xmlns:crs=\"http://www.opengis.net/wcs/service-extension/crs/1.0\"\n"
 			+ "                                xmlns:gml=\"http://www.opengis.net/gml/3.2\"\n"
@@ -205,7 +205,7 @@ public final class XWCPSQueryMockedResponses {
 			+ "                  </CoverageSubtypeParent>\n" + "               </CoverageSubtypeParent>\n"
 			+ "               <wcs:nativeFormat>application/octet-stream</wcs:nativeFormat>\n"
 			+ "            </wcs:ServiceParameters>\n" + "         </wcs:CoverageDescription>\n"
-			+ "      </wcs:CoverageDescriptions>\n" + "   </coverage>\n" + "   <coverage id=\"AvgLandTemp\">\n"
+			+ "      </wcs:CoverageDescriptions>\n" + "   </coverage>\n" + "   <coverage id=\"NIR\">\n"
 			+ "      <wcs:CoverageDescriptions xmlns:wcs=\"http://www.opengis.net/wcs/2.0\"\n"
 			+ "                                xmlns:crs=\"http://www.opengis.net/wcs/service-extension/crs/1.0\"\n"
 			+ "                                xmlns:gml=\"http://www.opengis.net/gml/3.2\"\n"

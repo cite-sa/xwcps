@@ -9,8 +9,9 @@
 
 apply plugin: 'java'
 apply plugin: 'antlr'
-apply plugin: 'eclipse'
+apply plugin: 'eclipse-wtp'
 apply plugin: 'maven'
+
 
 group = 'gr.cite.earthserver'
 version = '0.1-SNAPSHOT'
@@ -44,8 +45,8 @@ dependencies {
 	antlr "org.antlr:antlr4:4.5"
 
     compile 'org.slf4j:slf4j-api:1.7.13',
-    		'org.glassfish.jersey.core:jersey-client:2.22.1',
-    		'org.glassfish.jersey.media:jersey-media-multipart:2.22.1',
+    		'org.glassfish.jersey.core:jersey-client:2.23.1',
+    		'org.glassfish.jersey.media:jersey-media-multipart:2.23.1',
     		
     		'commons-io:commons-io:2.4',
     		'com.google.guava:guava:19.0',
@@ -53,9 +54,9 @@ dependencies {
     		
     		
     		// @maven.local.cite.gr
-    		'gr.cite.scarabaeus:xml-utils:1.1.1',
-    		
-			'gr.cite.exmms:exmms-commons:0.0.1-SNAPSHOT'
+    		'gr.cite.scarabaeus:xml-utils:1.2.1',
+    					
+			'gr.cite.earthserver:wcs-adapter:0.0.1-SNAPSHOT'
     		
 
     runtime 'ch.qos.logback:logback-classic:1.1.3'

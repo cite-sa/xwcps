@@ -1,21 +1,6 @@
 grammar XPath;
 
-/*
-XPath 1.0 grammar. Should conform to the official spec at
-http://www.w3.org/TR/1999/REC-xpath-19991116. The grammar
-rules have been kept as close as possible to those in the
-spec, but some adjustmewnts were unavoidable. These were
-mainly removing left recursion (spec seems to be based on
-LR), and to deal with the double nature of the '*' token
-(node wildcard and multiplication operator). See also
-section 3.7 in the spec. These rule changes should make
-no difference to the strings accepted by the grammar.
-
-Written by Jan-Willem van den Broek
-Version 1.0
-
-Do with this code as you will.
-*/
+import WCPSLexerTokens;
 
 main  :  expr
   ;
@@ -45,7 +30,7 @@ axisSpecifier
 
 nodeTest:  nameTest
   |  NodeType '(' ')'
-  |  'processing-instruction' '(' Literal ')'
+  |  'processing-instruction' '(' ( XPATH_LITERAL | STRING_LITERAL) ')'
   ;
 
 predicate
@@ -63,8 +48,8 @@ expr  :  orExpr
 primaryExpr
   :  variableReference
   |  '(' expr ')'
-  |  Literal
-  |  Number  
+  |  ( XPATH_LITERAL | STRING_LITERAL)
+  |  REAL_NUMBER_CONSTANT
   |  functionCall
   ;
 
@@ -86,10 +71,10 @@ filterExpr
   :  primaryExpr predicate*
   ;
 
-orExpr  :  andExpr ('or' andExpr)*
+orExpr  :  andExpr (OR andExpr)*
   ;
 
-andExpr  :  equalityExpr ('and' equalityExpr)*
+andExpr  :  equalityExpr (AND equalityExpr)*
   ;
 
 equalityExpr
@@ -97,7 +82,7 @@ equalityExpr
   ;
 
 relationalExpr
-  :  additiveExpr (('<'|'>'|'<='|'>=') additiveExpr)*
+  :  additiveExpr ((LOWER_THAN | GREATER_THAN | LOWER_OR_EQUAL_THAN | GREATER_OR_EQUAL_THAN) additiveExpr)*
   ;
 
 additiveExpr
@@ -105,8 +90,8 @@ additiveExpr
   ;
 
 multiplicativeExpr
-  :  unaryExprNoRoot (('*'|'div'|'mod') multiplicativeExpr)?
-  |  '/' (('div'|'mod') multiplicativeExpr)?
+  :  unaryExprNoRoot (( '*' | DIV | MOD ) multiplicativeExpr)?
+  |  '/' (( DIV | MOD ) multiplicativeExpr)?
   ;
 
 unaryExprNoRoot
@@ -129,74 +114,67 @@ nameTest:  '*'
   |  qName
   ;
 
-nCName  :  NCName
+nCName  :  NCName | SIMPLE_IDENTIFIER_WITH_NUMBERS | SIMPLE_IDENTIFIER
   |  AxisNameXpath
+  |  wcpsHotWords
   ;
 
-NodeType:  'comment'
-  |  'text'
-  |  'processing-instruction'
-  |  'node'
-  ;
-  
-Number  :  Digits ('.' Digits?)?
-  |  '.' Digits
-  ;
-
-fragment
-Digits  :  ('0'..'9')+
-  ;
-
-AxisNameXpath:  'ancestor'
-  |  'ancestor-or-self'
-  |  'attribute'
-  |  'child'
-  |  'descendant'
-  |  'descendant-or-self'
-  |  'following'
-  |  'following-sibling'
-  |  'namespace'
-  |  'parent'
-  |  'preceding'
-  |  'preceding-sibling'
-  |  'self'
-  ;
-
-Literal  :  '"' ~'"'* '"'
-  |  '\'' ~'\''* '\''
-  ;
-
-Whitespace
-  :  (' '|'\t'|'\n'|'\r')+ -> channel(HIDDEN)
-  ;
-
-NCName  :  NCNameStartChar NCNameChar*
-  ;
-
-fragment
-NCNameStartChar
-  :  'A'..'Z'
-  |   '_'
-  |  'a'..'z'
-  |  '\u00C0'..'\u00D6'
-  |  '\u00D8'..'\u00F6'
-  |  '\u00F8'..'\u02FF'
-  |  '\u0370'..'\u037D'
-  |  '\u037F'..'\u1FFF'
-  |  '\u200C'..'\u200D'
-  |  '\u2070'..'\u218F'
-  |  '\u2C00'..'\u2FEF'
-  |  '\u3001'..'\uD7FF'
-  |  '\uF900'..'\uFDCF'
-  |  '\uFDF0'..'\uFFFD'
-// Unfortunately, java escapes can't handle this conveniently,
-// as they're limited to 4 hex digits. TODO.
-//  |  '\U010000'..'\U0EFFFF'
-  ;
-
-fragment
-NCNameChar
-  :  NCNameStartChar | '-' | '.' | '0'..'9'
-  |  '\u00B7' | '\u0300'..'\u036F'
-  |  '\u203F'..'\u2040'
-  ;
+wcpsHotWords:  FOR
+	|  ABSOLUTE_VALUE
+	|  ADD
+	|  ALL
+	|  AND
+	|  ARCSIN
+	|  ARCCOS
+	|  ARCTAN
+	|  AVG
+	|  BIT
+	|  CONDENSE
+	|  COS
+	|  COSH
+	|  COUNT
+	|  COVERAGE
+	|  CRS_TRANSFORM
+	|  DECODE
+	|  DESCRIBE_COVERAGE
+	|  DIV
+	|  ENCODE
+	|  EXP
+	|  EXTEND
+	|  FALSE 
+	|  IMAGINARY_PART
+	|  ID
+	|  IMGCRSDOMAIN
+	|  IN
+	|  LN
+	|  LIST
+	|  LOG
+	|  MAX
+	|  MIN
+	|  METADATA
+	|  MOD
+	|  NOT
+	|  OR
+	|  OVER
+	|  OVERLAY
+	|  POWER
+	|  REAL_PART
+	|  ROUND
+	|  RETURN
+	|  SCALE
+	|  SIN
+	|  SINH
+	|  SLICE
+	|  SOME
+	|  SQUARE_ROOT
+	|  STRUCT
+	|  TAN
+	|  TANH
+	|  TRIM
+	|  TRUE
+	|  USING
+	|  VALUE
+	|  VALUES
+	|  WHERE
+	|  XOR
+	;

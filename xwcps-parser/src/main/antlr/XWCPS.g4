@@ -1,22 +1,42 @@
 grammar XWCPS;
 
-import WCPS, WCPSLexerTokens;
+import WCPS, XPath, WCPSLexerTokens;
 
-xwcps : wcpsQuery
-	| xquery
+xwcps : (letClause)* wcpsQuery
+	| xpath
 	; 
 	
-xquery: main;
+xpath: main;
 
+letClause: LET identifier ':=' letClauseExpression; 
+
+letClauseExpression : arithmeticExpression 
+					| processingExpression // TODO can I remove this from here?
+					;
 
 /**
  * Example: 
  * for c in ( AvgLandTemp ) return <a>describeCoverage(c)//*[local-name()='domainSet']</a>
  */
-xmlReturnClause: openXmlElement xwcpsReturnClause closeXmlElement
-				| openXmlElement (quated)? (xmlReturnClause (quated)?) * closeXmlElement 
+xmlClause: openXmlElement xmlPayload closeXmlElement
+				| openXmlElement (quated)? (xmlClauseWithQuate)* closeXmlElement 
 				| (openXmlWithClose) + 
 				;
+
+xmlPayload: 
+		  arithmeticExpression
+		;
+
+arithmeticExpression :  
+				  arithmeticExpression booleanOperator arithmeticExpression
+				| arithmeticExpression coverageArithmeticOperator arithmeticExpression
+				| arithmeticExpression numericalComparissonOperator arithmeticExpression
+				| LEFT_PARANTHESIS arithmeticExpression RIGHT_PARANTHESIS 
+				| xpathClause
+				| coverageExpression
+				;
+
+xmlClauseWithQuate: xmlClause (quated)?;
 
 openXmlElement: xmlElement GREATER_THAN; 
 
@@ -25,7 +45,7 @@ openXmlWithClose: xmlElement GREATER_THAN_SLASH;
 xmlElement: LOWER_THAN (qName) (attribute)*;
 
 attribute: qName EQUAL quated 
-		 | qName EQUAL xwcpsReturnClause
+		 | qName EQUAL xpathClause
 		 ;
 
 quated: ( XPATH_LITERAL | STRING_LITERAL);
@@ -37,207 +57,57 @@ closeXmlElement: LOWER_THAN_SLASH qName GREATER_THAN;
  * for c in ( AvgLandTemp ) return describeCoverage(c)//*[local-name()='domainSet']
  * for c in ( AvgLandTemp ) return min(describeCoverage(c)//*[local-name()='domainSet']//@anyattr)
  */
-xwcpsReturnClause: scalarExpression (xquery)?
-				| functionName LEFT_PARANTHESIS scalarExpression xquery RIGHT_PARANTHESIS;
-
+xpathClause: metadataExpression (xpath)?
+			| scalarExpression (xpath)?
+			//| metadataClause (xpath)?
+			| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
+			
 wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
-					processingExpression COMMA  openXmlElement ( openXmlElement | xmlReturnClause )*
+					processingExpression COMMA  openXmlElement ( wrapResultSubElement )*
 					RIGHT_PARANTHESIS;
 					
+wrapResultSubElement: openXmlElement | xmlClause ;
+
 xpathForClause:  coverageVariableName IN xwcpsCoveragesClause;
 
-xwcpsCoveragesClause: xquery;
+xwcpsCoveragesClause: xpath;
 
-/*
- * overrided wcps rules
- */
- 
+mixedClause: MIXED LEFT_PARANTHESIS encodedCoverageExpression COMMA (xmlClause | xpathClause) RIGHT_PARANTHESIS;
+
+//metadataClause: METADATA LEFT_PARANTHESIS coverageVariableName RIGHT_PARANTHESIS;
+
+metadataExpression: coverageVariableName DOUBLE_COLON;
+
+//////overrided wcps rules//////
+
+whereClause: WHERE (booleanScalarExpression | booleanXpathClause );
+
+booleanXpathClause : xpathClause;
+
 // on return
-processingExpression: xmlReturnClause
-					| xwcpsReturnClause
+processingExpression: 
+ 					xmlClause
+					| xpathClause
 					| wrapResultClause
-                    | encodedCoverageExpression;
+                    | encodedCoverageExpression
+                    | mixedClause
+                    ;
+
+wcpsQuery : (forClauseList) (letClause)* (whereClause)? (returnClause) ;
 
 forClauseList: FOR (xwcpsforClause) (COMMA xwcpsforClause)*;
 
 xwcpsforClause: forClause
 			| xpathForClause
 			;
-
-/* 
- * xquery grammar pasted bellow 
- * (the current version of antlr doen't flawlessly support multi-import)
- */
-main  :  expr
-  ;
-
-locationPath 
-  :  relativeLocationPath
-  |  absoluteLocationPathNoroot
-  ;
-
-absoluteLocationPathNoroot
-  :  '/' relativeLocationPath
-  |  '//' relativeLocationPath
-  ;
-
-relativeLocationPath
-  :  step (('/'|'//') step)*
-  ;
-
-step  :  axisSpecifier nodeTest predicate*
-  |  abbreviatedStep
-  ;
-
-axisSpecifier
-  :  AxisNameXpath '::'
-  |  '@'?
-  ;
-
-nodeTest:  nameTest
-  |  NodeType '(' ')'
-  |  'processing-instruction' '(' ( XPATH_LITERAL | STRING_LITERAL) ')'
-  ;
-
-predicate
-  :  '[' expr ']'
-  ;
-
-abbreviatedStep
-  :  '.'
-  |  '..'
-  ;
-
-expr  :  orExpr
-  ;
-
-primaryExpr
-  :  variableReference
-  |  '(' expr ')'
-  |  ( XPATH_LITERAL | STRING_LITERAL)
-  |  REAL_NUMBER_CONSTANT
-  |  functionCall
-  ;
-
-functionCall
-  :  functionName '(' ( expr ( ',' expr )* )? ')'
-  ;
-
-unionExprNoRoot
-  :  pathExprNoRoot ('|' unionExprNoRoot)?
-  |  '/' '|' unionExprNoRoot
-  ;
-
-pathExprNoRoot
-  :  locationPath
-  |  filterExpr (('/'|'//') relativeLocationPath)?
-  ;
-
-filterExpr
-  :  primaryExpr predicate*
-  ;
-
-orExpr  :  andExpr ('or' andExpr)*
-  ;
-
-andExpr  :  equalityExpr ('and' equalityExpr)*
-  ;
-
-equalityExpr
-  :  relationalExpr (('='|'!=') relationalExpr)*
-  ;
-
-relationalExpr
-  :  additiveExpr ((LOWER_THAN | GREATER_THAN | LOWER_OR_EQUAL_THAN | GREATER_OR_EQUAL_THAN) additiveExpr)*
-  ;
-
-additiveExpr
-  :  multiplicativeExpr (('+'|'-') multiplicativeExpr)*
-  ;
-
-multiplicativeExpr
-  :  unaryExprNoRoot (('*'|'div'|'mod') multiplicativeExpr)?
-  |  '/' (('div'|'mod') multiplicativeExpr)?
-  ;
-
-unaryExprNoRoot
-  :  '-'* unionExprNoRoot
-  ;
-
-qName  :  nCName (':' nCName)?
-  ;
-
-functionName
-  :  qName  // Does not match nodeType, as per spec.
-  ;
-
-variableReference
-  :  '$' qName
-  ;
-
-nameTest:  '*'
-  |  nCName ':' '*'
-  |  qName
-  ;
-
-nCName  :  NCName | SIMPLE_IDENTIFIER_WITH_NUMBERS | SIMPLE_IDENTIFIER
-  |  AxisNameXpath
-  |  wcpsHotWords
-  ;
-
-wcpsHotWords:  FOR
-	|  ABSOLUTE_VALUE
-	|  ADD
-	|  ALL
-	|  AND
-	|  ARCSIN
-	|  ARCCOS
-	|  ARCTAN
-	|  AVG
-	|  BIT
-	|  CONDENSE
-	|  COS
-	|  COSH
-	|  COUNT
-	|  COVERAGE
-	|  CRS_TRANSFORM
-	|  DECODE
-	|  DESCRIBE_COVERAGE
-	|  ENCODE
-	|  EXP
-	|  EXTEND
-	|  FALSE 
-	|  IMAGINARY_PART
-	|  ID
-	|  IMGCRSDOMAIN
-	|  IN
-	|  LN
-	|  LIST
-	|  LOG
-	|  MAX
-	|  MIN
-	|  NOT
-	|  OR
-	|  OVER
-	|  OVERLAY
-	|  POWER
-	|  REAL_PART
-	|  ROUND
-	|  RETURN
-	|  SCALE
-	|  SIN
-	|  SINH
-	|  SLICE
-	|  SOME
-	|  SQUARE_ROOT
-	|  STRUCT
-	|  TAN
-	|  TANH
-	|  TRIM
-	|  TRUE
-	|  USING
-	|  VALUE
-	|  VALUES
-	|  WHERE
-	|  XOR
-	;
+			
+endpointIdentifier: identifier | STRING_LITERAL | XPATH_LITERAL;
+						
+extendedIdentifier: identifier (AT) endpointIdentifier			#specificIdInServerLabel
+			| (MULTIPLICATION) (AT) endpointIdentifier			#allCoveragesInServerLabel
+			| (MULTIPLICATION)									#allCoveragesLabel
+			| identifier										#specificIdLabel
+			;
+			
+forClause:  coverageVariableName IN
+           (LEFT_PARANTHESIS)? (extendedIdentifier) (COMMA (extendedIdentifier))* (RIGHT_PARANTHESIS)?;

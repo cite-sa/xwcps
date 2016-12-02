@@ -1,7 +1,6 @@
-package gr.cite.earthserver.wcps.parser.evaluation;
+package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.util.List;
-import java.util.Stack;
 
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -9,7 +8,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.wcps.grammar.XWCPSBaseVisitor;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.AndExprContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.EqualityExprContext;
@@ -18,34 +16,53 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.OrExprContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.PredicateContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.RelativeLocationPathContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.StepContext;
+import gr.cite.earthserver.wcps.parser.evaluation.XpathForClause;
 import gr.cite.earthserver.wcps.parser.utils.PrintVisitor;
+import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
-import gr.cite.exmms.core.DataElementMetadatum;
-import gr.cite.exmms.core.Metadatum;
-import gr.cite.exmms.criteria.CriteriaQuery;
-import gr.cite.exmms.criteria.Where;
-import gr.cite.exmms.criteria.WhereBuilder;
+import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
+import gr.cite.earthserver.wcs.adapter.request.WCSAdapterCoverages;
+import gr.cite.earthserver.wcs.adapter.request.WCSAdapterRequest;
+import gr.cite.earthserver.wcs.adapter.request.WCSAdapterRequestBuilder;
+import gr.cite.earthserver.wcs.adapter.request.WCSAdapterServers;
+import gr.cite.earthserver.wcs.core.Coverage;
+import gr.cite.femme.client.FemmeClientException;
+import gr.cite.femme.client.FemmeDatastoreException;
+import gr.cite.femme.model.Metadatum;
+import gr.cite.femme.utils.Pair;
 
 public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> {
 	private static final Logger logger = LoggerFactory.getLogger(XpathForClauseEvalVisitor.class);
 
-	XpathForClauseEvalVisitorStack stack = new XpathForClauseEvalVisitorStack();
-
-	private CriteriaQuery<Coverage> query;
-
 	private boolean isSimpleXpath = false;
 
-	public XpathForClauseEvalVisitor(CriteriaQuery<Coverage> query) {
-		super();
-		this.query = query;
+	private WCSAdapterServers myServers = WCSAdapterRequestBuilder.request().servers();
+
+	private WCSAdapterCoverages myCoverages = WCSAdapterRequestBuilder.request().coverages();
+	
+	private WCSAdapterAPI wcsAdapter;
+
+	private static enum State {
+		SERVER, COVERAGE;
 	}
 
-	XpathForClause executeQuery() {
-		if (!stack.isEmptyWhereBuilderStack()) {
-			this.query = stack.popWhereBuilderStack().build();
-		}
+	private State currentState = XpathForClauseEvalVisitor.State.SERVER;
 
-		List<Coverage> coverages = this.query.find();
+	public XpathForClauseEvalVisitor(WCSAdapterAPI wcsAdapter) {
+		super();
+		this.wcsAdapter = wcsAdapter;
+	}
+
+	public XpathForClause executeQuery() {
+		WCSAdapterRequest request = new WCSAdapterRequest(this.myServers, this.myCoverages);
+		
+		List<Coverage> coverages = null;
+		try {
+			coverages = this.wcsAdapter.findCoverages(request.mapToQuery(), null, null);
+		} catch (FemmeDatastoreException | FemmeClientException e) {
+			e.printStackTrace();
+			XpathForClauseEvalVisitor.logger.debug("query has fucked everything: " + e.getMessage());
+		}
 
 		return new XpathForClause().setCoverages(coverages);
 	}
@@ -53,15 +70,11 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 	@Override
 	public XpathForClause visitMain(MainContext ctx) {
 
-		Where<Coverage> whereRoot = query.whereBuilder();
-		stack.pushWhereStack(whereRoot);
-
 		XpathForClause visitMain = super.visitMain(ctx);
 
-		stack.popWhereStack();
+		XpathForClause executedQuery = this.executeQuery();
 
-		return visitMain.aggregate(executeQuery());
-
+		return visitMain.aggregate(executedQuery);
 	}
 
 	@Override
@@ -71,10 +84,10 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		TerminalNode xpathStartingTerminal = null;
 
 		for (ParseTree parseTree : ctx.children) {
-			if (isSimpleXpath && (parseTree instanceof TerminalNode)) {
+			if (this.isSimpleXpath && (parseTree instanceof TerminalNode)) {
 				xpathStartingTerminal = (TerminalNode) parseTree;
 				continue;
-			} else if (isSimpleXpath && (parseTree instanceof StepContext)) {
+			} else if (this.isSimpleXpath && (parseTree instanceof StepContext)) {
 				simpleXpathContext = (StepContext) parseTree;
 				break;
 			}
@@ -97,32 +110,34 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 	@Override
 	public XpathForClause visitOrExpr(OrExprContext ctx) {
-		if (isSimpleXpath) {
+		if (this.isSimpleXpath) {
 			return super.visitOrExpr(ctx);
 		}
 
+		switch (this.currentState) {
+		case COVERAGE: {
+			this.myCoverages.or();
+			break;
+		}
+		case SERVER: {
+			this.myServers.or();
+			break;
+		}
+		default:
+			break;
+		}
+
 		if (ctx.andExpr().size() > 1) {
-
-			Where<Coverage> orWhere = query.expressionFactory();
-			stack.pushWhereStack(orWhere);
-
 			int i = 0;
 			for (AndExprContext andExprContext : ctx.andExpr()) {
 
 				visit(andExprContext);
 
 				if (i + 1 < ctx.andExpr().size()) {
-					stack.popWhereStack();
-					stack.pushWhereStack(stack.popWhereBuilderStack().or());
-
 				}
 
 				++i;
 			}
-
-			stack.popWhereStack();
-			stack.pushWhereBuilderStack(stack.peekWhereStack().expression(stack.popWhereBuilderStack()));
-
 			return null;
 		} else {
 			return super.visitOrExpr(ctx);
@@ -131,30 +146,34 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 	@Override
 	public XpathForClause visitAndExpr(AndExprContext ctx) {
-		if (isSimpleXpath) {
+		if (this.isSimpleXpath) {
 			return super.visitAndExpr(ctx);
 		}
 
+		switch (this.currentState) {
+		case COVERAGE: {
+			//this.myCoverages.and();
+			break;
+		}
+		case SERVER: {
+			//this.myServers.and();
+			break;
+		}
+		default:
+			break;
+		}
+
 		if (ctx.equalityExpr().size() > 1) {
-
-			Where<Coverage> andWhere = query.expressionFactory();
-			stack.pushWhereStack(andWhere);
-
 			int i = 0;
 			for (EqualityExprContext equalityExprContext : ctx.equalityExpr()) {
 
 				visit(equalityExprContext);
 
 				if (i + 1 < ctx.equalityExpr().size()) {
-					stack.popWhereStack();
-					stack.pushWhereStack(stack.popWhereBuilderStack().and());
 				}
 
 				++i;
 			}
-
-			stack.popWhereStack();
-			stack.pushWhereBuilderStack(stack.peekWhereStack().expression(stack.popWhereBuilderStack()));
 
 			return null;
 		} else {
@@ -165,7 +184,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 	@Override
 	public XpathForClause visitStep(StepContext ctx) {
 
-		if (isSimpleXpath) {
+		if (this.isSimpleXpath) {
 			return super.visitStep(ctx);
 		}
 
@@ -179,6 +198,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 			switch (nodeName) {
 			case XWCPSReservedWords.COVERAGE:
+				this.currentState = XpathForClauseEvalVisitor.State.COVERAGE;
 				foundCoverage = true;
 
 				for (PredicateContext predicate : ctx.predicate()) {
@@ -187,20 +207,11 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 				break;
 			case XWCPSReservedWords.SERVER:
-
-				Where<Coverage> serverWhere = query.expressionFactory();
-				stack.pushWhereStack(serverWhere);
+				this.currentState = XpathForClauseEvalVisitor.State.SERVER;
 
 				for (PredicateContext predicate : ctx.predicate()) {
 					visit(predicate);
 				}
-
-				stack.popWhereStack();
-				WhereBuilder<Coverage> serverWhereBuilder = stack.peekWhereStack()
-						.isChildOf(stack.popWhereBuilderStack());
-				stack.popWhereStack();
-
-				stack.pushWhereStack(serverWhereBuilder.and());
 
 				break;
 			default:
@@ -211,7 +222,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		}
 
 		if (foundCoverage) {
-			isSimpleXpath = true;
+			this.isSimpleXpath = true;
 		}
 
 		// FIXME
@@ -221,7 +232,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 	@Override
 	public XpathForClause visitEqualityExpr(EqualityExprContext ctx) {
-		if (isSimpleXpath) {
+		if (this.isSimpleXpath) {
 			return super.visitEqualityExpr(ctx);
 		}
 
@@ -232,11 +243,22 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		String key = ctx.relationalExpr(0).getText();
 		String value = ctx.relationalExpr(1).getText();
 
-		Metadatum metadatum = new DataElementMetadatum();
+		Metadatum metadatum = new Metadatum();
 		metadatum.setName(key.replaceAll("@", ""));
-		metadatum.setValue(value);
-
-		stack.pushWhereBuilderStack(stack.peekWhereStack().expression(metadatum));
+		metadatum.setValue(XWCPSEvalUtils.removeQuates(value));
+		
+		switch (this.currentState) {
+		case COVERAGE: {
+			this.myCoverages.attribute(new Pair<String, String>(metadatum.getName(), metadatum.getValue()));
+			break;
+		}
+		case SERVER: {
+			this.myServers.attribute(new Pair<String, String>(metadatum.getName(), metadatum.getValue()));
+			break;
+		}
+		default:
+			break;
+		}
 
 		// FIXME
 		return null;
@@ -251,45 +273,4 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		}
 		return aggregate.aggregate(nextResult);
 	}
-
-}
-
-class XpathForClauseEvalVisitorStack {
-	private Stack<WhereBuilder<Coverage>> whereBuilderStack = new Stack<>();
-	private Stack<Where<Coverage>> whereStack = new Stack<>();
-
-	public void pushWhereBuilderStack(WhereBuilder<Coverage> builder) {
-		whereBuilderStack.push(builder);
-	}
-
-	public boolean isEmptyWhereStack() {
-		return whereStack.isEmpty();
-	}
-
-	public boolean isEmptyWhereBuilderStack() {
-		return whereBuilderStack.isEmpty();
-	}
-
-	public WhereBuilder<Coverage> peekWhereBuilderStack() {
-		return whereBuilderStack.peek();
-	}
-
-	public WhereBuilder<Coverage> popWhereBuilderStack() {
-		WhereBuilder<Coverage> pop = whereBuilderStack.pop();
-		return pop;
-	}
-
-	public void pushWhereStack(Where<Coverage> builder) {
-		whereStack.push(builder);
-	}
-
-	public Where<Coverage> popWhereStack() {
-		Where<Coverage> pop = whereStack.pop();
-		return pop;
-	}
-
-	public Where<Coverage> peekWhereStack() {
-		return whereStack.peek();
-	}
-
 }

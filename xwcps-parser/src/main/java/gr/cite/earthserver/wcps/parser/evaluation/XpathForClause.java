@@ -3,8 +3,9 @@ package gr.cite.earthserver.wcps.parser.evaluation;
 import java.util.ArrayList;
 import java.util.List;
 
-import gr.cite.earthserver.metadata.core.Coverage;
+//import gr.cite.earthserver.metadata.core.Coverage;
 import gr.cite.earthserver.metadata.core.PetascopeServer;
+import gr.cite.earthserver.wcs.core.Coverage;
 
 public class XpathForClause {
 	private List<Coverage> coverages = new ArrayList<>();
