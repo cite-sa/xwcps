@@ -82,19 +82,19 @@ xwcpsCoveragesClause: xpath;
 
 * WCPS like:
 
-       for $cov in (coverage1, coverage2, coverage3)
+        for $cov in (coverage1, coverage2, coverage3)
 
 * All coverages:
 
-       for $cov in (\*)
+        for $cov in (\*)
 
 * All coverages in specific endpoint:
 
-       for $cov in (\*@endpoint1)*
+        for $cov in (\*@endpoint1)*
 
 * Specific coverage in specific endpoint:
 
-       for $cov in (coverage1@endpoint1)		 
+        for $cov in (coverage1@endpoint1)		 
 
 
 #### The Where Clause
@@ -120,11 +120,11 @@ metadataExpression: coverageVariableName DOUBLE_COLON;
 
 * WCPS like:
 
-	  where avg($c.red) > 200) 
+        where avg($c.red) > 200) 
 
 * Xpath:
       
-      $c:://*[local-name()='RectifiedGrid'][@dimension=2]
+        $c:://*[local-name()='RectifiedGrid'][@dimension=2]
 
 
 #### The Return Clause
@@ -173,21 +173,21 @@ mixedClause: MIXED LEFT_PARANTHESIS encodedCoverageExpression COMMA (xmlClause |
 * WCPS like:
 
 		for $c1 in (*@endpoint1)
-         return <result>
-        			<coverageDescription>
-                		$c:://*[local-name()='lowerCorner']
+        return  <result>
+                    <coverageDescription>
+                	    $c:://*[local-name()='lowerCorner']
                 	</coverageDescription>
-               </result>
+                </result>
 
 * XPath like:
 
-      for $c1 in (coverage1, coverage2, coverage3)
-      return encode($c1, "csv")
+        for $c1 in (coverage1, coverage2, coverage3)
+        return encode($c1, "csv")
 
 * Combined:
 
-       for $c1 in (*@endpointAlias1)
-       return mixed(encode($c1, "csv"), $c1::)
+        for $c1 in (*@endpointAlias1)
+        return mixed(encode($c1, "csv"), $c1::)
 
 					   
 ## xWCPS XPath Examples
@@ -204,5 +204,5 @@ In the context of xWCPS, XPath is mostly employed for the following use cases
 
 * Retrieve specific metadata from coverages:
 
-      		for $cov in * 
+      	for $cov in * 
 		return $c:://*[local-name()='lowerCorner']
