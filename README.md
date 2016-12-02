@@ -1,6 +1,6 @@
 # xWCPS Definition
 
-EarthServer query language xWCPS (XPath Enabled WCPS), is a Query Language (QL) aiming to merge two widely adopted standards, namely XPath 2.0 because of it's potentials on XML metadata handling and WCPS's raster data processing abilities, into a new construct, which enables simultaneous search on both XML-encoded metadata and OGC coverages.
+xWCPS (XPath Enabled WCPS), is a Query Language (QL) defined in the context of EarthServer 2 Project (http://wwww.earthserver.eu/) aiming to merge two widely adopted standards, namely XPath 2.0 because of it's potentials on XML metadata handling and WCPS's raster data processing abilities, into a new construct, which enables simultaneous search on both XML-encoded metadata and OGC coverages.
 
 xWCPS enables search on both array data / coverages and metadata, allows filtering of coverages based on metadata and eliminates the WCPS requirement for explicitly declaring the
 coverages’ IDs.
