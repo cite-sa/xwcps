@@ -91,11 +91,11 @@ xwcpsCoveragesClause: xpath;
 
 * All coverages:
 
-        for $cov in (\*)
+        for $cov in (*)
 
 * All coverages in specific endpoint:
 
-        for $cov in (\*@endpoint1)*
+        for $cov in (*@endpoint1)
 
 * Specific coverage in specific endpoint:
 
