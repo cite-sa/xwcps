@@ -141,6 +141,8 @@ public class Query extends XwcpsQueryResult {
 							if (coverageEntry.getValue().getXwcpsValue() != null) stringBuilder.append(coverageEntry.getValue().getXwcpsValue());
 							returnValue.setXwcpsValue(stringBuilder.toString());
 							
+							if (coverageEntry.getValue().getWcpsValue() != null) returnValue.setWcpsValue(coverageEntry.getValue().getWcpsValue());
+							
 							this.getCoverageValueMap().put(coverageEntry.getKey(), returnValue);
 						}
 					} else {
