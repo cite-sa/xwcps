@@ -700,10 +700,22 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	
 	private static Query evaluateXpath(Query wcpsQuery, Query xpathQuery) throws XPathFactoryConfigurationException {
 		if (!wcpsQuery.getCoverageValueMap().isEmpty()) {
+			Map<Coverage, XwcpsReturnValue> results = new HashMap<>();
 			for (Entry<Coverage, XwcpsReturnValue> entry : wcpsQuery.getCoverageValueMap().entrySet()) {
-				entry.setValue(
-						new XwcpsReturnValue(XWCPSEvalVisitor.evaluateXpath(entry.getValue().getXwcpsValue(), xpathQuery.getQuery())));
+				String xPathResult = XWCPSEvalVisitor.evaluateXpath(entry.getValue().getXwcpsValue(), xpathQuery.getQuery());
+				if (!"".equals(xPathResult)) {
+					
+					XwcpsReturnValue xwcpsReturnValue = new XwcpsReturnValue();
+					xwcpsReturnValue.setXwcpsValue(xPathResult);
+					xwcpsReturnValue.setWcpsMediaType(entry.getValue().getWcpsMediaType());
+					xwcpsReturnValue.setWcpsValue(entry.getValue().getWcpsValue());
+					xwcpsReturnValue.setSubQuery(entry.getValue().getSubQuery());
+					
+					results.put(entry.getKey(), xwcpsReturnValue);
+				}
 			}
+			wcpsQuery.getCoverageValueMap().clear();
+			wcpsQuery.getCoverageValueMap().putAll(results);
 		} else {
 			String value = XWCPSEvalVisitor.evaluateXpath(wcpsQuery.getValue(), xpathQuery.getQuery());
 			wcpsQuery.aggregate(xpathQuery.setValue(value), true);
