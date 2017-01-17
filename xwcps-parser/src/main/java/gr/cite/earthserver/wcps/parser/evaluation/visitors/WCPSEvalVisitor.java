@@ -142,7 +142,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 
 		Query returnClauseQuery = visit(ctx.returnClause());
 
-		query.aggregate(returnClauseQuery);
+		query.applyReturnToWhere(returnClauseQuery, false);
 
 		//try {
 			if (!query.isEvaluated()) {

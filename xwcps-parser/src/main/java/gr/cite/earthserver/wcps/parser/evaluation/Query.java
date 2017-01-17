@@ -72,7 +72,7 @@ public class Query extends XwcpsQueryResult {
 	}
 
 	public String getValue() {
-		return "<results>" + aggregatedValue + "</results>";
+		return aggregatedValue;
 	}
 
 	public Query setError(String error) {
@@ -99,10 +99,10 @@ public class Query extends XwcpsQueryResult {
 
 	public Query aggregate(Query nextResult, boolean overrideValue) {
 
-		this.query = aggreagateQuery(this.query, nextResult);
+		this.query = aggregateQuery(this.query, nextResult);
 
 		for (Query splitted : this.splittedQuery) {
-			splitted.setAggregatedValue(aggreagateQuery(splitted.getAggregatedValue(), nextResult));
+			splitted.setAggregatedValue(aggregateQuery(splitted.getAggregatedValue(), nextResult));
 		}
 		if (this.splittedQuery.isEmpty() && !nextResult.getSplittedQuery().isEmpty()) {
 			// for (String splitted : nextResult.getSplittedQuery()) {
@@ -135,14 +135,17 @@ public class Query extends XwcpsQueryResult {
 							this.getCoverageValueMap().put(coverageEntry.getKey(), coverageEntry.getValue());
 						else {
 							XwcpsReturnValue returnValue = new XwcpsReturnValue();
-							
+
 							StringBuilder stringBuilder = new StringBuilder();
-							if (currentValue.getXwcpsValue() != null) stringBuilder.append(currentValue.getXwcpsValue());
-							if (coverageEntry.getValue().getXwcpsValue() != null) stringBuilder.append(coverageEntry.getValue().getXwcpsValue());
+							if (currentValue.getXwcpsValue() != null)
+								stringBuilder.append(currentValue.getXwcpsValue());
+							if (coverageEntry.getValue().getXwcpsValue() != null)
+								stringBuilder.append(coverageEntry.getValue().getXwcpsValue());
 							returnValue.setXwcpsValue(stringBuilder.toString());
-							
-							if (coverageEntry.getValue().getWcpsValue() != null) returnValue.setWcpsValue(coverageEntry.getValue().getWcpsValue());
-							
+
+							if (coverageEntry.getValue().getWcpsValue() != null)
+								returnValue.setWcpsValue(coverageEntry.getValue().getWcpsValue());
+
 							this.getCoverageValueMap().put(coverageEntry.getKey(), returnValue);
 						}
 					} else {
@@ -152,7 +155,7 @@ public class Query extends XwcpsQueryResult {
 			}
 		}
 
-//		getMixedValues().addAll(nextResult.getMixedValues());
+		// getMixedValues().addAll(nextResult.getMixedValues());
 
 		getErrors().addAll(nextResult.getErrors());
 
@@ -161,13 +164,81 @@ public class Query extends XwcpsQueryResult {
 		}
 		return this;
 	}
-	
+
+	public Query applyReturnToWhere(Query returnResult, boolean overrideValue) {
+
+		this.query = aggregateQuery(this.query, returnResult);
+
+		for (Query splitted : this.splittedQuery) {
+			splitted.setAggregatedValue(aggregateQuery(splitted.getAggregatedValue(), returnResult));
+		}
+		if (this.splittedQuery.isEmpty() && !returnResult.getSplittedQuery().isEmpty()) {
+			// for (String splitted : nextResult.getSplittedQuery()) {
+			// splittedQuery.add(query + " " + splitted);
+			// }
+			//
+			// FIXME the afforementioned is the correct implementation,
+			// the following is temporal
+			this.splittedQuery = returnResult.getSplittedQuery();
+		}
+
+		/*
+		 * if (this.aggregatedValue == null || overrideValue) {
+		 * this.aggregatedValue = nextResult.serializeValue(); } else {
+		 * this.aggregatedValue = serializeValue() +
+		 * nextResult.serializeValue(); }
+		 */
+
+		if (returnResult.getCoverageValueMap().isEmpty()) {
+			this.getCoverageValueMap().clear();
+		} else {
+			for (Entry<Coverage, XwcpsReturnValue> coverageEntry : returnResult.getCoverageValueMap().entrySet()) {
+				if (coverageEntry.getValue() == null)
+					continue;
+
+				if (this.getCoverageValueMap().containsKey(coverageEntry.getKey())) {
+					XwcpsReturnValue currentValue = this.getCoverageValueMap().get(coverageEntry.getKey());
+
+					if (currentValue == null)
+						this.getCoverageValueMap().put(coverageEntry.getKey(), coverageEntry.getValue());
+					else {
+						XwcpsReturnValue returnValue = new XwcpsReturnValue();
+
+						StringBuilder stringBuilder = new StringBuilder();
+						if (currentValue.getXwcpsValue() != null)
+							stringBuilder.append(currentValue.getXwcpsValue());
+						if (coverageEntry.getValue().getXwcpsValue() != null)
+							stringBuilder.append(coverageEntry.getValue().getXwcpsValue());
+						returnValue.setXwcpsValue(stringBuilder.toString());
+
+						if (coverageEntry.getValue().getWcpsValue() != null)
+							returnValue.setWcpsValue(coverageEntry.getValue().getWcpsValue());
+
+						this.getCoverageValueMap().put(coverageEntry.getKey(), returnValue);
+					}
+				} else {
+					// this.getCoverageValueMap().put(coverageEntry.getKey(),
+					// coverageEntry.getValue());
+				}
+			}
+		}
+
+		// getMixedValues().addAll(nextResult.getMixedValues());
+
+		getErrors().addAll(returnResult.getErrors());
+
+		if (!this.evaluated) {
+			this.evaluated = returnResult.isEvaluated();
+		}
+		return this;
+	}
+
 	public Query aggregateReturn(Query nextResult, boolean overrideValue) {
 
-		this.query = aggreagateQuery(this.query, nextResult);
+		this.query = aggregateQuery(this.query, nextResult);
 
 		for (Query splitted : splittedQuery) {
-			splitted.setAggregatedValue(aggreagateQuery(splitted.getAggregatedValue(), nextResult));
+			splitted.setAggregatedValue(aggregateQuery(splitted.getAggregatedValue(), nextResult));
 		}
 		if (this.splittedQuery.isEmpty() && !nextResult.getSplittedQuery().isEmpty()) {
 			// for (String splitted : nextResult.getSplittedQuery()) {
@@ -213,7 +284,7 @@ public class Query extends XwcpsQueryResult {
 			}
 		}
 
-//		getMixedValues().addAll(nextResult.getMixedValues());
+		// getMixedValues().addAll(nextResult.getMixedValues());
 
 		getErrors().addAll(nextResult.getErrors());
 
@@ -223,14 +294,30 @@ public class Query extends XwcpsQueryResult {
 		return this;
 	}
 
-	private static String aggreagateQuery(String query, Query nextResult) {
-		return query == null ? nextResult.getQuery() : query + " " + nextResult.getQuery();
+	private static String aggregateQuery(String query, Query nextResult) {
+		StringBuilder queryBuilder = new StringBuilder();
+		if (query != null) {
+			queryBuilder.append(query);
+		}
+		if (nextResult != null) {
+			if (queryBuilder.length() != 0) {
+				queryBuilder.append(" ");
+			}
+			queryBuilder.append(nextResult.getQuery());
+		}
+		return queryBuilder.toString();
 	}
 
 	public String serializeValue() {
 		if (!this.getCoverageValueMap().isEmpty()) {
-			return this.getCoverageValueMap().values().stream().filter(v -> v.getXwcpsValue() != null).map(x -> x.getXwcpsValue())
+			return this.getCoverageValueMap().values().stream().filter(
+
+					v -> v.getXwcpsValue() != null)
+					.map(
+
+							x -> x.getXwcpsValue())
 					.collect(Collectors.joining());
+
 		} else if (this.aggregatedValue != null) {
 			return this.aggregatedValue;
 		} else {
