@@ -137,6 +137,13 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 			this.forWhereClauseQuery.getCoverageValueMap().clear();
 			this.forWhereClauseQuery.getCoverageValueMap().putAll(whereResults);
 		}
+		
+		if (ctx.orderByClause() != null) {
+			Query orderByClauseQuery = visit(ctx.orderByClause());
+			
+			this.forWhereClauseQuery.getOrderedCoverages().clear();
+			this.forWhereClauseQuery.getOrderedCoverages().addAll(orderByClauseQuery.getOrderedCoverages());
+		}
 
 		Query query = this.forWhereClauseQuery;
 
