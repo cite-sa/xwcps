@@ -68,7 +68,25 @@ public class ParserResource {
 		
 		List<Result> results = new ArrayList<>();
 		
+		for (Coverage orderedCoverage : result.getOrderedCoverages()) {
+			Result newResult = new Result();
+			
+			newResult.setCoverageId(orderedCoverage.getCoverageId());
+			if (result.getCoverageValueMap().get(orderedCoverage).getWcpsValue() != null) {
+				newResult.setWcpsValue(result.getCoverageValueMap().get(orderedCoverage).getWcpsValue());
+			}
+			
+			if (result.getCoverageValueMap().get(orderedCoverage).getXwcpsValue() != null) {
+				newResult.setXwcpsValue(result.getCoverageValueMap().get(orderedCoverage).getXwcpsValue());
+			}
+			
+			results.add(newResult);
+		}
+		
+		//Add all coverages that didn't take part to the ordering - maybe xpath didn't exist - at the end of the list
 		for (Coverage c : result.getCoverageValueMap().keySet()) {
+			if (result.getOrderedCoverages().contains(c)) continue;
+			
 			Result newResult = new Result();
 			
 			newResult.setCoverageId(c.getCoverageId());
@@ -82,6 +100,21 @@ public class ParserResource {
 			
 			results.add(newResult);
 		}
+		
+//		for (Coverage c : result.getCoverageValueMap().keySet()) {
+//			Result newResult = new Result();
+//			
+//			newResult.setCoverageId(c.getCoverageId());
+//			if (result.getCoverageValueMap().get(c).getWcpsValue() != null) {
+//				newResult.setWcpsValue(result.getCoverageValueMap().get(c).getWcpsValue());
+//			}
+//			
+//			if (result.getCoverageValueMap().get(c).getXwcpsValue() != null) {
+//				newResult.setXwcpsValue(result.getCoverageValueMap().get(c).getXwcpsValue());
+//			}
+//			
+//			results.add(newResult);
+//		}
 		
 		return Response.ok(results).build();
 		
