@@ -114,11 +114,18 @@ public class WCPSEvalVisitorTest {
 //		"for c in ( arsf_test_subset_bands_hmm ) return c::";
 //		"for c in ( arsf_test_subset_bands_hmm, CCI_V2_monthly_rrs_670 ) return c::";
 //		"for c in ( arsf_test_subset_bands_hmm ) return c:://wcs:CoverageId/text()";
-		"for c in ( * ) return c::";
+//		"for c in ( * ) return c::";
 //		"for c in ( arsf_test_subset_bands_hmm@\"https://rsg.pml.ac.uk/rasdaman/ows\" ) return c::";
 //		"for c in ( *@\"https://rsg.pml.ac.uk/rasdaman/ows\" ) return c::";
 //		"for c in ( * ) where c:://*[local-name()='RectifiedGrid'][@dimension=2] return c::";
-										
+				
+		//"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) return <div> $c:://*[local-name() = 'boundedBy'] </div>";
+		//"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) return $c:://*[local-name() = 'boundedBy']";
+			
+		//"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) orderby $c:://wcs:CoverageId/text() desc return $c:://wcs:CoverageId/text()";
+		
+		"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) orderby $c:://*[local-name()='RectifiedGrid']/@dimension desc return $c::";
+		
 		System.out.println(query);
 
 		CharStream stream = new ANTLRInputStream(query);
@@ -130,7 +137,8 @@ public class WCPSEvalVisitorTest {
 
 		printInfo(tokenStream, parser, tree);
 		
-		WCSAdapterAPI wcsAdapter = new WCSAdapter("http://localhost:8080/femme-application");
+		//WCSAdapterAPI wcsAdapter = new WCSAdapter("http://localhost:8080/femme-application");
+		WCSAdapterAPI wcsAdapter = new WCSAdapter("http://earthserver-devel.vhosts.cite.gr/femme-application/");
 		//WCSAdapterAPI wcsAdapter = new WCSAdapter("http://es-devel1.local.cite.gr:8080/femme-application-0.0.1-SNAPSHOT");
 		//WCSAdapterAPI wcsAdapter = new WCSAdapter("http://es-devel1.local.cite.gr:8080/femme-application-devel");
 

@@ -3,6 +3,7 @@ package gr.cite.earthserver.wcps.parser.evaluation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,6 +25,8 @@ public class Query extends XwcpsQueryResult {
 	private boolean isSimpleWCPS;
 
 	private Map<Coverage, XwcpsReturnValue> coverageValueMap;
+	
+	private List<Coverage> orderedCoverages;
 
 	public Query() {
 		setErrors(new ArrayList<>());
@@ -158,7 +161,7 @@ public class Query extends XwcpsQueryResult {
 		// getMixedValues().addAll(nextResult.getMixedValues());
 
 		getErrors().addAll(nextResult.getErrors());
-
+		
 		if (!this.evaluated) {
 			this.evaluated = nextResult.isEvaluated();
 		}
@@ -287,7 +290,7 @@ public class Query extends XwcpsQueryResult {
 		// getMixedValues().addAll(nextResult.getMixedValues());
 
 		getErrors().addAll(nextResult.getErrors());
-
+		
 		if (!this.evaluated) {
 			this.evaluated = nextResult.isEvaluated();
 		}
@@ -352,6 +355,12 @@ public class Query extends XwcpsQueryResult {
 		if (this.coverageValueMap == null)
 			this.coverageValueMap = new HashMap<Coverage, XwcpsReturnValue>();
 		return this.coverageValueMap;
+	}
+	
+	public List<Coverage> getOrderedCoverages() {
+		if (this.orderedCoverages == null)
+			this.orderedCoverages = new ArrayList<Coverage>();
+		return this.orderedCoverages;
 	}
 
 	// public Query setCoverageValueMap(Map<Coverage, XwcpsReturnValue>

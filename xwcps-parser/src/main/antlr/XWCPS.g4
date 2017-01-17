@@ -8,6 +8,8 @@ xwcps : (letClause)* wcpsQuery
 	
 xpath: main;
 
+orderByClause: ORDERBY xpathClause (ASC|DESC)?; 
+
 letClause: LET identifier ':=' letClauseExpression; 
 
 letClauseExpression : arithmeticExpression 
@@ -93,7 +95,7 @@ processingExpression:
                     | mixedClause
                     ;
 
-wcpsQuery : (forClauseList) (letClause)* (whereClause)? (returnClause) ;
+wcpsQuery : (forClauseList) (letClause)* (whereClause)? (orderByClause)? (returnClause);
 
 forClauseList: FOR (xwcpsforClause) (COMMA xwcpsforClause)*;
 
