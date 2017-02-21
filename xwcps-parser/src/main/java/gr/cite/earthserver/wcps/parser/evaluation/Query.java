@@ -40,6 +40,7 @@ public class Query extends XwcpsQueryResult {
 	private String endpoint;
 	private String coverageId;
 	private String xpath;
+	private String variableName;
 	
 	public Query() {
 		setErrors(new ArrayList<>());
@@ -202,6 +203,12 @@ public class Query extends XwcpsQueryResult {
 				}
 			}
 		}
+		
+		this.setCoverageId(nextResult.getCoverageId());
+		this.setEndpoint(nextResult.getEndpoint());
+		this.setXpath(nextResult.getXpath());
+		this.setForType(nextResult.getForType());
+		this.setVariableName(nextResult.getVariableName());
 
 		// getMixedValues().addAll(nextResult.getMixedValues());
 
@@ -331,6 +338,11 @@ public class Query extends XwcpsQueryResult {
 				}
 			}
 		}
+		
+		this.setCoverageId(nextResult.getCoverageId());
+		this.setEndpoint(nextResult.getEndpoint());
+		this.setXpath(nextResult.getXpath());
+		this.setForType(nextResult.getForType());
 
 		// getMixedValues().addAll(nextResult.getMixedValues());
 
@@ -406,6 +418,14 @@ public class Query extends XwcpsQueryResult {
 		if (this.orderedCoverages == null)
 			this.orderedCoverages = new ArrayList<Coverage>();
 		return this.orderedCoverages;
+	}
+
+	public String getVariableName() {
+		return variableName;
+	}
+
+	public void setVariableName(String variableName) {
+		this.variableName = variableName;
 	}
 
 	// public Query setCoverageValueMap(Map<Coverage, XwcpsReturnValue>

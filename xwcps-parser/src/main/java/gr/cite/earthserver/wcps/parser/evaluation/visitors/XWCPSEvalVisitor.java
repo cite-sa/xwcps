@@ -722,7 +722,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 	public Query visitSpecificIdLabel(SpecificIdLabelContext ctx) {
 		Query query = super.visitSpecificIdLabel(ctx);
 		
-		query.setForType(ForClauseType.ALL_COVERAGES_IN_SERVER);
+		query.setForType(ForClauseType.SPECIFIC_ID);
 		query.setCoverageId(ctx.identifier().getText());
 
 //		List<Coverage> femmeCoverages = null;
@@ -758,6 +758,8 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 		query.setSplittedQuery(XWCPSEvalUtils.constructForQueries(ctx.coverageVariableName().getText(), coverages));
 
 		this.variables.put(ctx.coverageVariableName().getText(), coverages);
+		
+		query.setVariableName(ctx.coverageVariableName().getText());
 
 		return query;
 	}
