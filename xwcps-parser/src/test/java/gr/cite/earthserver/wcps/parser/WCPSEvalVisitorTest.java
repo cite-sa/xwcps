@@ -122,9 +122,9 @@ public class WCPSEvalVisitorTest {
 		//"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) return <div> $c:://*[local-name() = 'boundedBy'] </div>";
 		//"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) return $c:://*[local-name() = 'boundedBy']";
 			
-		//"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) orderby $c:://wcs:CoverageId/text() desc return $c:://wcs:CoverageId/text()";
-		
-		"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) orderby $c:://*[local-name()='RectifiedGrid']/@dimension desc return $c::";
+		"for $c in CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF orderby $c:://wcs:CoverageId/text() asc return $c:://wcs:CoverageId/text()";
+
+//		"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) orderby $c:://*[local-name()='RectifiedGrid']/@dimension desc return $c::";
 		
 		System.out.println(query);
 
