@@ -28,8 +28,21 @@ public class Query extends XwcpsQueryResult {
 	
 	private List<Coverage> orderedCoverages;
 
+	private List<ForClauseInfo> forClauseInfo;
+	
+	private String xpath;
+	private String variableName;
+	
 	public Query() {
 		setErrors(new ArrayList<>());
+	}
+	
+	public String getXpath() {
+		return xpath;
+	}
+
+	public void setXpath(String xpath) {
+		this.xpath = xpath;
 	}
 
 	public Query setQuery(String wcpsQuery) {
@@ -107,7 +120,7 @@ public class Query extends XwcpsQueryResult {
 		for (Query splitted : this.splittedQuery) {
 			splitted.setAggregatedValue(aggregateQuery(splitted.getAggregatedValue(), nextResult));
 		}
-		if (this.splittedQuery.isEmpty() && !nextResult.getSplittedQuery().isEmpty()) {
+		if (this.getSplittedQuery().isEmpty() && !nextResult.getSplittedQuery().isEmpty()) {
 			// for (String splitted : nextResult.getSplittedQuery()) {
 			// splittedQuery.add(query + " " + splitted);
 			// }
@@ -157,6 +170,20 @@ public class Query extends XwcpsQueryResult {
 				}
 			}
 		}
+		
+//		this.setCoverageId(nextResult.getCoverageId());
+//		this.setEndpoint(nextResult.getEndpoint());
+//		this.setForType(nextResult.getForType());
+
+		if (!nextResult.getForClauseInfo().isEmpty()) {
+			for (ForClauseInfo forClauseInfo : nextResult.getForClauseInfo()) {
+				if (forClauseInfo == null) continue;;
+				this.getForClauseInfo().add(forClauseInfo);
+			}
+		}
+
+		this.setXpath(nextResult.getXpath());
+		this.setVariableName(nextResult.getVariableName());
 
 		// getMixedValues().addAll(nextResult.getMixedValues());
 
@@ -286,6 +313,20 @@ public class Query extends XwcpsQueryResult {
 				}
 			}
 		}
+		
+//		this.setCoverageId(nextResult.getCoverageId());
+//		this.setEndpoint(nextResult.getEndpoint());
+//		this.setForType(nextResult.getForType());
+
+		if (!nextResult.getForClauseInfo().isEmpty()) {
+			for (ForClauseInfo forClauseInfo : nextResult.getForClauseInfo()) {
+				if (forClauseInfo == null) continue;;
+				this.getForClauseInfo().add(forClauseInfo);
+			}
+		}
+
+		this.setXpath(nextResult.getXpath());
+
 
 		// getMixedValues().addAll(nextResult.getMixedValues());
 
@@ -361,6 +402,20 @@ public class Query extends XwcpsQueryResult {
 		if (this.orderedCoverages == null)
 			this.orderedCoverages = new ArrayList<Coverage>();
 		return this.orderedCoverages;
+	}
+
+	public List<ForClauseInfo> getForClauseInfo() {
+		if (this.forClauseInfo == null)
+			this.forClauseInfo = new ArrayList<ForClauseInfo>();
+		return this.forClauseInfo;
+	}
+
+	public String getVariableName() {
+		return variableName;
+	}
+
+	public void setVariableName(String variableName) {
+		this.variableName = variableName;
 	}
 
 	// public Query setCoverageValueMap(Map<Coverage, XwcpsReturnValue>

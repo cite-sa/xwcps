@@ -61,7 +61,6 @@ closeXmlElement: LOWER_THAN_SLASH qName GREATER_THAN;
  */
 xpathClause: metadataExpression (xpath)?
 			| scalarExpression (xpath)?
-			//| metadataClause (xpath)?
 			| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
 			
 wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
