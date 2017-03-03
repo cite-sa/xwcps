@@ -106,8 +106,7 @@ public class WCPSEvalVisitorTest {
 //		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows' or @endpoint='https://rsg.pml.ac.uk/rasdaman/ows']/coverage"
 //		+ " where metadata(c)//gml:cat_solar_longitude[text()<86.0122] "
 //		+ " return metadata(c)";
-		
-				
+
 
 		//New grammar queries
 				
@@ -122,9 +121,11 @@ public class WCPSEvalVisitorTest {
 		//"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) return <div> $c:://*[local-name() = 'boundedBy'] </div>";
 		//"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) return $c:://*[local-name() = 'boundedBy']";
 			
-		"for $c in CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF orderby $c:://wcs:CoverageId/text() asc return $c:://wcs:CoverageId/text()";
+//		"for $c in CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF orderby $c:://wcs:CoverageId/text() asc return $c:://wcs:CoverageId/text()";
 
-//		"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) orderby $c:://*[local-name()='RectifiedGrid']/@dimension desc return $c::";
+		"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) orderby $c:://*[local-name()='RectifiedGrid']/@dimension desc return $c::";
+
+		//"for $c in CCI_V2_monthly_chlor_a@PML let myId:=$c::; return myId";
 		
 		System.out.println(query);
 

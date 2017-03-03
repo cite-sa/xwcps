@@ -120,7 +120,7 @@ public class Query extends XwcpsQueryResult {
 		for (Query splitted : this.splittedQuery) {
 			splitted.setAggregatedValue(aggregateQuery(splitted.getAggregatedValue(), nextResult));
 		}
-		if (this.splittedQuery.isEmpty() && !nextResult.getSplittedQuery().isEmpty()) {
+		if (this.getSplittedQuery().isEmpty() && !nextResult.getSplittedQuery().isEmpty()) {
 			// for (String splitted : nextResult.getSplittedQuery()) {
 			// splittedQuery.add(query + " " + splitted);
 			// }
