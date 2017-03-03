@@ -136,7 +136,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
         String xpathString = null;
         if (ctx.whereClause() != null) {
             Query whereClauseQuery = visit(ctx.whereClause());
-            if (whereClauseQuery.getXpath() != "") {
+            if (!whereClauseQuery.getXpath().equals("")) {
                 xpathString = whereClauseQuery.getXpath();
             }
         }
