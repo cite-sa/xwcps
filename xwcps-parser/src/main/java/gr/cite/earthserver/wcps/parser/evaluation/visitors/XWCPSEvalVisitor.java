@@ -62,8 +62,17 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
     public Query visitOrderByClause(OrderByClauseContext ctx) {
         OrderDirection direction = ctx.ASC() != null ? OrderDirection.Ascending : ctx.DESC() == null ? OrderDirection.Ascending : OrderDirection.Descending;
 
+        Query rankingClause = null;
+        if (ctx.xpathClause() != null) {
+            rankingClause =  visit(ctx.xpathClause());
+        }
+        else  if (ctx.identifier() != null) {
+            rankingClause =  visit(ctx.identifier());
+        }
+
         List<RankDefinition> rankings = new ArrayList<>();
-        RankDefinition ranking = new RankDefinition(ctx.xpathClause(), direction);
+        RankDefinition ranking = new RankDefinition(direction);
+        ranking.getRankingQueries().add(rankingClause);
         rankings.add(ranking);
 
         List<Coverage> ordered = this.sort(rankings);
@@ -772,7 +781,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
         List<Coverage> coverages = new ArrayList<>();
         for (RankDefinition rankDefinition : rankingDefinitions) {
-            Query query = visit(rankDefinition.getXpathRankClause());
+            Query query = rankDefinition.getRankingQueries().get(0);
 
             List<Object> xpathValues = new ArrayList<>();
             for (Entry<Coverage, XwcpsReturnValue> entry : query.getCoverageValueMap().entrySet()) {

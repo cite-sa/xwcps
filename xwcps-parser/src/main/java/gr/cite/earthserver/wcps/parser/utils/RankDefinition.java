@@ -1,6 +1,11 @@
 package gr.cite.earthserver.wcps.parser.utils;
 
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathClauseContext;
+import gr.cite.earthserver.wcps.parser.evaluation.Query;
+import gr.cite.earthserver.wcs.core.Coverage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RankDefinition {
 	
@@ -10,21 +15,18 @@ public class RankDefinition {
 		Descending,
 	}
 	
-	public RankDefinition(XpathClauseContext xpathRankClause, OrderDirection direction) {
+	public RankDefinition(OrderDirection direction) {
 		this.direction = direction;
-		this.xpathRankClause = xpathRankClause;
 	}
 	
 	private OrderDirection direction;
 	
-	private XpathClauseContext xpathRankClause;
+	private List<Query> rankingQueries;
 
-	public XpathClauseContext getXpathRankClause() {
-		return xpathRankClause;
-	}
-
-	public void setXpathRankClause(XpathClauseContext xpathRankClause) {
-		this.xpathRankClause = xpathRankClause;
+	public List<Query> getRankingQueries() {
+		if (this.rankingQueries == null)
+			this.rankingQueries = new ArrayList<Query>();
+		return this.rankingQueries;
 	}
 
 	public OrderDirection getDirection() {

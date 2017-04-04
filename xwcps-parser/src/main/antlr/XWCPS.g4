@@ -8,7 +8,7 @@ xwcps : (letClause)* wcpsQuery
 	
 xpath: main;
 
-orderByClause: ORDERBY xpathClause (ASC|DESC)?; 
+orderByClause: ORDERBY (identifier | xpathClause) (ASC|DESC)?;
 
 letClause: LET identifier ':=' letClauseExpression SEMICOLON;
 
