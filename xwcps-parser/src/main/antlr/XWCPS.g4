@@ -10,9 +10,9 @@ xpath: main;
 
 orderByClause: ORDERBY xpathClause (ASC|DESC)?; 
 
-letClause: LET identifier ':=' letClauseExpression; 
+letClause: LET identifier ':=' letClauseExpression SEMICOLON;
 
-letClauseExpression : arithmeticExpression 
+letClauseExpression : arithmeticExpression
 					| processingExpression // TODO can I remove this from here?
 					;
 
@@ -61,6 +61,7 @@ closeXmlElement: LOWER_THAN_SLASH qName GREATER_THAN;
  */
 xpathClause: metadataExpression (xpath)?
 			| scalarExpression (xpath)?
+			//| metadataClause (xpath)?
 			| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
 			
 wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
@@ -86,8 +87,8 @@ whereClause: WHERE (booleanScalarExpression | booleanXpathClause );
 booleanXpathClause : xpathClause;
 
 // on return
-processingExpression: 
- 					xmlClause
+processingExpression: identifier
+                    | xmlClause
 					| xpathClause
 					| wrapResultClause
                     | encodedCoverageExpression

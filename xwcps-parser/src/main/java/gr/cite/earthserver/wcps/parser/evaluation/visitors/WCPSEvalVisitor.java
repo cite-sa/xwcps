@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import gr.cite.earthserver.wcps.grammar.XWCPSParser;
 import gr.cite.earthserver.wcps.parser.evaluation.ForClauseInfo;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
@@ -145,6 +146,10 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
         List<Coverage> coverages = new ArrayList<>(forWhereClauseQuery.getCoverageValueMap().keySet());
         forWhereClauseQuery.setSplittedQuery(XWCPSEvalUtils.constructForQueries(forWhereClauseQuery.getVariableName(), coverages));
         this.variables.put(forWhereClauseQuery.getVariableName(), coverages);
+
+        for(XWCPSParser.LetClauseContext letClause: ctx.letClause()) {
+            Query letClauseQuery = visit(letClause);
+        }
 
         if (ctx.orderByClause() != null) {
             Query orderByClauseQuery = visit(ctx.orderByClause());

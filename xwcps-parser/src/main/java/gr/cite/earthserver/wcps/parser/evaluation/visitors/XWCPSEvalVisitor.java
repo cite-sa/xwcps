@@ -1,55 +1,8 @@
 package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Stack;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.xml.xpath.XPathFactoryConfigurationException;
-
-import gr.cite.earthserver.wcps.parser.evaluation.ForClauseInfo;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.AllCoveragesInServerLabelContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.AllCoveragesLabelContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.AttributeContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.BooleanXpathClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.CloseXmlElementContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.EndpointIdentifierContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.ForClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.IdentifierContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.LetClauseContext;
-//import gr.cite.earthserver.wcps.grammar.XWCPSParser.MetadataClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.MetadataExpressionContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.MixedClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlElementContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.OpenXmlWithCloseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.OrderByClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.ProcessingExpressionContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.QuatedContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.SpecificIdInServerLabelContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.SpecificIdLabelContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.WhereClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.WrapResultClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.WrapResultSubElementContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlClauseWithQuateContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XmlElementContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathForClauseContext;
-import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.*;
 import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
+import gr.cite.earthserver.wcps.parser.evaluation.ForClauseInfo;
 import gr.cite.earthserver.wcps.parser.evaluation.ForClauseInfo.ForClauseType;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.Scope;
@@ -60,12 +13,23 @@ import gr.cite.earthserver.wcps.parser.utils.RankingVector;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.core.Coverage;
-import gr.cite.femme.client.FemmeClientException;
-import gr.cite.femme.client.FemmeDatastoreException;
 import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
 import gr.cite.scarabaues.utils.xml.exceptions.XMLConversionException;
 import gr.cite.scarabaues.utils.xml.exceptions.XPathEvaluationException;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.xml.xpath.XPathFactoryConfigurationException;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+//import gr.cite.earthserver.wcps.grammar.XWCPSParser.MetadataClauseContext;
 
 public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
@@ -157,7 +121,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
                 return wcpsQuery;
             } else {
                 /*
-				 * evaluate wcps scalar expressions, ie for c in (AvgLandTemp)
+                 * evaluate wcps scalar expressions, ie for c in (AvgLandTemp)
 				 * return <a attr=min(c[Lat(53.08), Long(8.80),
 				 * ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>
 				 */
@@ -224,14 +188,18 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
     @Override
     public Query visitLetClause(LetClauseContext ctx) {
-        Query letClause = super.visitLetClause(ctx);
+        Query letClauseQuery = this.visit(ctx.letClauseExpression());
 
+        Set<String> variables = scopes.peek().getVariables();
         String variable = ctx.identifier().getText();
-        String value = letClause.serializeValue();
 
-        scopes.peek().setVariable(variable, value);
+        scopes.peek().setVariable(variable, letClauseQuery);
 
-        return letClause;
+//        String value = letClause.serializeValue();
+//
+//        scopes.peek().setVariable(variable, value);
+
+        return letClauseQuery;
     }
 
     @Override
@@ -435,13 +403,21 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
     @Override
     public Query visitIdentifier(IdentifierContext ctx) {
 
-        String value = scopes.peek().getVariableValue(ctx.getText());
+        Set<String> variables = scopes.peek().getVariables();
 
-        Query identifier = super.visitIdentifier(ctx);
+        Query identifier = null;
 
-        if (value != null) {
-            logger.info("variable " + ctx.getText() + " was already evaluated: " + ctx.getText() + " = " + value);
-            identifier.setValue(value);
+        if (variables.contains(ctx.getText())) {
+            identifier = scopes.peek().getVariableValue(ctx.getText());
+        } else {
+            //Query value = scopes.peek().getVariableValue(ctx.getText());
+            identifier = super.visitIdentifier(ctx);
+
+//            if (value != null) {
+//                logger.info("variable " + ctx.getText() + " was already evaluated: " + ctx.getText() + " = " + value);
+//                //identifier.setValue(value);
+//                identifier = value;
+//            }
         }
 
         return identifier;
