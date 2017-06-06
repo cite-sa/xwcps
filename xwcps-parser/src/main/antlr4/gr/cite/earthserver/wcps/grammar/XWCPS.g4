@@ -8,11 +8,11 @@ xwcps : (letClause)* wcpsQuery
 	
 xpath: main;
 
-orderByClause: ORDERBY xpathClause (ASC|DESC)?; 
+orderByClause: ORDERBY (identifier | xpathClause) (ASC|DESC)?;
 
-letClause: LET identifier ':=' letClauseExpression; 
+letClause: LET identifier ':=' letClauseExpression SEMICOLON;
 
-letClauseExpression : arithmeticExpression 
+letClauseExpression : arithmeticExpression
 					| processingExpression // TODO can I remove this from here?
 					;
 
@@ -32,6 +32,7 @@ xmlPayload:
 arithmeticExpression :  
 				  arithmeticExpression booleanOperator arithmeticExpression
 				| arithmeticExpression coverageArithmeticOperator arithmeticExpression
+				| coverageExpression coverageArithmeticOperator coverageExpression
 				| arithmeticExpression numericalComparissonOperator arithmeticExpression
 				| LEFT_PARANTHESIS arithmeticExpression RIGHT_PARANTHESIS 
 				| xpathClause
@@ -40,7 +41,7 @@ arithmeticExpression :
 
 xmlClauseWithQuate: xmlClause (quated)?;
 
-openXmlElement: xmlElement GREATER_THAN; 
+openXmlElement: xmlElement GREATER_THAN;
 
 openXmlWithClose: xmlElement GREATER_THAN_SLASH;
 
@@ -61,6 +62,7 @@ closeXmlElement: LOWER_THAN_SLASH qName GREATER_THAN;
  */
 xpathClause: metadataExpression (xpath)?
 			| scalarExpression (xpath)?
+			//| metadataClause (xpath)?
 			| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
 			
 wrapResultClause: WRAP_RESULT LEFT_PARANTHESIS
@@ -86,8 +88,8 @@ whereClause: WHERE (booleanScalarExpression | booleanXpathClause );
 booleanXpathClause : xpathClause;
 
 // on return
-processingExpression: 
- 					xmlClause
+processingExpression: identifier
+                    | xmlClause
 					| xpathClause
 					| wrapResultClause
                     | encodedCoverageExpression

@@ -53,7 +53,9 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathForClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
+import gr.cite.earthserver.wcps.grammar.XWCPSParser.*;
 import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
+import gr.cite.earthserver.wcps.parser.evaluation.ForClauseInfo;
 import gr.cite.earthserver.wcps.parser.evaluation.ForClauseInfo.ForClauseType;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.Scope;
@@ -66,6 +68,23 @@ import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.femme.client.FemmeClientException;
 import gr.cite.femme.client.FemmeException;
+import gr.cite.scarabaeus.utils.xml.XMLConverter;
+import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
+import gr.cite.scarabaues.utils.xml.exceptions.XMLConversionException;
+import gr.cite.scarabaues.utils.xml.exceptions.XPathEvaluationException;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.xml.xpath.XPathFactoryConfigurationException;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+//import gr.cite.earthserver.wcps.grammar.XWCPSParser.MetadataClauseContext;
 
 public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
@@ -98,8 +117,17 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
     public Query visitOrderByClause(OrderByClauseContext ctx) {
         OrderDirection direction = ctx.ASC() != null ? OrderDirection.Ascending : ctx.DESC() == null ? OrderDirection.Ascending : OrderDirection.Descending;
 
+        Query rankingClause = null;
+        if (ctx.xpathClause() != null) {
+            rankingClause =  visit(ctx.xpathClause());
+        }
+        else  if (ctx.identifier() != null) {
+            rankingClause =  visit(ctx.identifier());
+        }
+
         List<RankDefinition> rankings = new ArrayList<>();
-        RankDefinition ranking = new RankDefinition(ctx.xpathClause(), direction);
+        RankDefinition ranking = new RankDefinition(direction);
+        ranking.getRankingQueries().add(rankingClause);
         rankings.add(ranking);
 
         List<Coverage> ordered = this.sort(rankings);
@@ -157,7 +185,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
                 return wcpsQuery;
             } else {
                 /*
-				 * evaluate wcps scalar expressions, ie for c in (AvgLandTemp)
+                 * evaluate wcps scalar expressions, ie for c in (AvgLandTemp)
 				 * return <a attr=min(c[Lat(53.08), Long(8.80),
 				 * ansi(\"2014-01\":\"2014-12\")]) > describeCoverage(c) </a>
 				 */
@@ -224,14 +252,40 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
     @Override
     public Query visitLetClause(LetClauseContext ctx) {
-        Query letClause = super.visitLetClause(ctx);
+        Query letClauseQuery = this.visit(ctx.letClauseExpression());
 
+        Set<String> variables = scopes.peek().getVariables();
         String variable = ctx.identifier().getText();
-        String value = letClause.serializeValue();
 
-        scopes.peek().setVariable(variable, value);
+        scopes.peek().setVariable(variable, letClauseQuery);
 
-        return letClause;
+//        String value = letClause.serializeValue();
+//
+//        scopes.peek().setVariable(variable, value);
+
+        return letClauseQuery;
+    }
+
+//    public Query visitLetClauseExpression(LetClauseExpressionContext ctx) {
+//        if (ctx.processingExpression() != null) return this.visit(ctx.processingExpression());
+//        return this.visit(ctx.arithmeticExpression());
+//    }
+
+    public Query visitArithmeticExpression(ArithmeticExpressionContext ctx) {
+        if (ctx.coverageExpression() != null) {
+            if (ctx.coverageArithmeticOperator() != null) {
+                Query leftArithmeticExpression = this.visit(ctx.coverageExpression(0));
+                Query rightArithmeticExpression = this.visit(ctx.coverageExpression(1));
+
+                if (leftArithmeticExpression.getCoverageValueMap().size() > 0 && rightArithmeticExpression.getCoverageValueMap().size() > 0) {
+                    if (ctx.coverageArithmeticOperator().PLUS() != null) {
+
+                    }
+                }
+            }
+        }
+
+        return super.visitArithmeticExpression(ctx);
     }
 
     @Override
@@ -435,13 +489,21 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
     @Override
     public Query visitIdentifier(IdentifierContext ctx) {
 
-        String value = scopes.peek().getVariableValue(ctx.getText());
+        Set<String> variables = scopes.peek().getVariables();
 
-        Query identifier = super.visitIdentifier(ctx);
+        Query identifier = null;
 
-        if (value != null) {
-            logger.info("variable " + ctx.getText() + " was already evaluated: " + ctx.getText() + " = " + value);
-            identifier.setValue(value);
+        if (variables.contains(ctx.getText())) {
+            identifier = scopes.peek().getVariableValue(ctx.getText());
+        } else {
+            //Query value = scopes.peek().getVariableValue(ctx.getText());
+            identifier = super.visitIdentifier(ctx);
+
+//            if (value != null) {
+//                logger.info("variable " + ctx.getText() + " was already evaluated: " + ctx.getText() + " = " + value);
+//                //identifier.setValue(value);
+//                identifier = value;
+//            }
         }
 
         return identifier;
@@ -541,46 +603,6 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
         return result;
     }
-
-    // @Override
-    // public Query visitMetadataClause(MetadataClauseContext ctx) {
-    // Query query = super.visitMetadataClause(ctx);
-    //
-    // String variable = ctx.coverageVariableName().getText();
-    // Map<Coverage, XwcpsReturnValue> metadataCoverages =
-    // variables.get(variable).stream().map(coverage -> {
-    // //TODO: Return all coverages, not just the first one
-    // //TODO: change it because we have already done the query to femme
-    // List<Coverage> coverages = new ArrayList<>();
-    // try {
-    // coverages =
-    // this.getWcsAdapter().getCoveragesByCoverageId(coverage.getCoverageId());
-    // } catch (Exception e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // String describeCoverage = "";
-    // XwcpsReturnValue result = new XwcpsReturnValue();
-    //
-    // if (coverages.size() > 0) {
-    // describeCoverage = coverages.get(0).getMetadata();
-    //
-    // result.setXwcpsValue("<coverage id='" + coverage.getCoverageId() + "'>"
-    // + describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
-    // "") + "</coverage>");
-    // }
-    //
-    // Entry<Coverage, XwcpsReturnValue> entry = new
-    // SimpleImmutableEntry<>(coverage, result);
-    //
-    // return entry;
-    // }).collect(Collectors.toMap(entry -> entry.getKey(), entry ->
-    // entry.getValue()));
-    //
-    // query.getCoverageValueMap().clear();
-    // query.getCoverageValueMap().putAll(metadataCoverages);
-    // return query.evaluated();
-    // }
 
     @Override
     public Query visitMetadataExpression(MetadataExpressionContext ctx) {
@@ -796,7 +818,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
         List<Coverage> coverages = new ArrayList<>();
         for (RankDefinition rankDefinition : rankingDefinitions) {
-            Query query = visit(rankDefinition.getXpathRankClause());
+            Query query = rankDefinition.getRankingQueries().get(0);
 
             List<Object> xpathValues = new ArrayList<>();
             for (Entry<Coverage, XwcpsReturnValue> entry : query.getCoverageValueMap().entrySet()) {
