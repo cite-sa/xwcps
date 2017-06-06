@@ -15,6 +15,10 @@ import java.util.stream.Collectors;
 
 import javax.xml.xpath.XPathFactoryConfigurationException;
 
+import gr.cite.commons.utils.xml.XMLConverter;
+import gr.cite.commons.utils.xml.XPathEvaluator;
+import gr.cite.commons.utils.xml.exceptions.XMLConversionException;
+import gr.cite.commons.utils.xml.exceptions.XPathEvaluationException;
 import gr.cite.earthserver.wcps.parser.evaluation.ForClauseInfo;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
@@ -61,11 +65,7 @@ import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.femme.client.FemmeClientException;
-import gr.cite.femme.client.FemmeDatastoreException;
-import gr.cite.scarabaeus.utils.xml.XMLConverter;
-import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
-import gr.cite.scarabaues.utils.xml.exceptions.XMLConversionException;
-import gr.cite.scarabaues.utils.xml.exceptions.XPathEvaluationException;
+import gr.cite.femme.client.FemmeException;
 
 public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 

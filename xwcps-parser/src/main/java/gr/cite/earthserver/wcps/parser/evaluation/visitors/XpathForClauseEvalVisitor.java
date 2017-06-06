@@ -2,6 +2,7 @@ package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.util.List;
 
+import gr.cite.femme.core.utils.Pair;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -27,9 +28,9 @@ import gr.cite.earthserver.wcs.adapter.request.WCSAdapterRequestBuilder;
 import gr.cite.earthserver.wcs.adapter.request.WCSAdapterServers;
 import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.femme.client.FemmeClientException;
-import gr.cite.femme.client.FemmeDatastoreException;
-import gr.cite.femme.model.Metadatum;
-import gr.cite.femme.utils.Pair;
+import gr.cite.femme.client.FemmeException;
+import gr.cite.femme.core.model.Metadatum;
+import gr.cite.femme.core.utils.Pair;
 
 public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> {
 	private static final Logger logger = LoggerFactory.getLogger(XpathForClauseEvalVisitor.class);
@@ -59,7 +60,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		List<Coverage> coverages = null;
 		try {
 			coverages = this.wcsAdapter.findCoverages(request.mapToQuery(), null, null);
-		} catch (FemmeDatastoreException | FemmeClientException e) {
+		} catch (FemmeException | FemmeClientException e) {
 			e.printStackTrace();
 			XpathForClauseEvalVisitor.logger.debug("query has fucked everything: " + e.getMessage());
 		}
@@ -249,7 +250,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		
 		switch (this.currentState) {
 		case COVERAGE: {
-			this.myCoverages.attribute(new Pair<String, String>(metadatum.getName(), metadatum.getValue()));
+			this.myCoverages.attribute(new Pair<>(metadatum.getName(), metadatum.getValue()));
 			break;
 		}
 		case SERVER: {

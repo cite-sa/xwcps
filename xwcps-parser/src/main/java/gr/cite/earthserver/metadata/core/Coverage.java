@@ -4,9 +4,9 @@ import gr.cite.earthserver.wcps.parser.utils.XWCPSReservedWords;
 //import gr.cite.femme.core.Collection;
 //import gr.cite.femme.core.DataElement;
 //import gr.cite.femme.core.Metadatum;
-import gr.cite.femme.model.Collection;
-import gr.cite.femme.model.DataElement;
-import gr.cite.femme.model.Metadatum;
+import gr.cite.femme.core.model.Collection;
+import gr.cite.femme.core.model.DataElement;
+import gr.cite.femme.core.model.Metadatum;
 
 public class Coverage extends DataElement {
 
