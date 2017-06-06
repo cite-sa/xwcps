@@ -31,8 +31,8 @@ import gr.cite.earthserver.wcps.parser.core.XwcpsQueryResult;
 //import gr.cite.earthserver.wcs.client.WCSRequestBuilder.ProcessCoverages;
 //import gr.cite.earthserver.wcs.client.WCSRequestException;
 //import gr.cite.earthserver.wcs.client.WCSResponse;
-import gr.cite.femme.model.DataElement;
-import gr.cite.femme.model.Metadatum;
+import gr.cite.femme.core.model.DataElement;
+import gr.cite.femme.core.model.Metadatum;
 
 public class XWCPSEvaluationMocks {
 	public static WCSRequestBuilder mockWCSRequestBuilder() {

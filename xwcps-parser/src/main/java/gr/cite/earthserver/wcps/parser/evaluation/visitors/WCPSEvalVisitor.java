@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import gr.cite.earthserver.wcps.parser.evaluation.ForClauseInfo;
+import gr.cite.femme.client.FemmeException;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +35,8 @@ import gr.cite.earthserver.wcs.core.WCSRequestBuilder;
 import gr.cite.earthserver.wcs.core.WCSRequestException;
 import gr.cite.earthserver.wcs.core.WCSResponse;
 import gr.cite.femme.client.FemmeClientException;
-import gr.cite.femme.client.FemmeDatastoreException;
-import gr.cite.femme.query.api.QueryOptionsFields;
+import gr.cite.femme.client.FemmeException;
+//import gr.cite.femme.query.api.QueryOptionsFields;
 
 public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
     private static final Logger logger = LoggerFactory.getLogger(WCPSEvalVisitor.class);
@@ -117,7 +118,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
                 Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
 
                 return entry;
-            } catch (FemmeDatastoreException | FemmeClientException e) {
+            } catch (FemmeException | FemmeClientException e) {
                 logger.error(e.getMessage(), e);
 
                 throw new ParseCancellationException(e);
@@ -292,7 +293,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
                         options.setInclude(set);
                         femmeCoverages.addAll(this.getWcsAdapter().findCoverages(null, options, xpath));*/
 
-                    } catch (FemmeDatastoreException | FemmeClientException e) {
+                    } catch (FemmeException | FemmeClientException e) {
                     }
 
                     for (Coverage coverage : femmeCoverages) {
@@ -304,7 +305,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
                         femmeCoverages.addAll(this.getWcsAdapter().getCoveragesInServer(
                                 new ArrayList<>(Arrays.asList(forClauseInfo.getEndpoint())), null, null,
                                 xpath));
-                    } catch (FemmeDatastoreException | FemmeClientException e) {
+                    } catch (FemmeException | FemmeClientException e) {
                         e.printStackTrace();
                     }
 
@@ -315,7 +316,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
                 case SPECIFIC_ID:
                     try {
                         femmeCoverages = this.getWcsAdapter().getCoveragesByCoverageId(forClauseInfo.getCoverageId());
-                    } catch (FemmeDatastoreException | FemmeClientException e) {
+                    } catch (FemmeException | FemmeClientException e) {
                         e.printStackTrace();
                     }
 
@@ -328,7 +329,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
                     try {
                         coverage = this.getWcsAdapter().getCoverageByCoverageIdInServer(forClauseInfo.getEndpoint(),
                                 forClauseInfo.getCoverageId());
-                    } catch (FemmeDatastoreException | FemmeClientException e) {
+                    } catch (FemmeException | FemmeClientException e) {
                         e.printStackTrace();
                     }
                     if (coverage != null) {

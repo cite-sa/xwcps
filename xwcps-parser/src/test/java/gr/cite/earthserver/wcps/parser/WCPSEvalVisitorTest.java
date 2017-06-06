@@ -19,8 +19,6 @@ import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
 import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.adapter.WCSAdapter;
 import gr.cite.earthserver.wcs.core.Coverage;
-import gr.cite.scarabaeus.utils.xml.XMLConverter;
-import gr.cite.scarabaues.utils.xml.exceptions.XMLConversionException;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 public class WCPSEvalVisitorTest {
