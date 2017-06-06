@@ -137,10 +137,19 @@ public class WCPSEvalVisitorTest {
 
 		//"for $c in (CCI_V2_monthly_chlor_a@PML) return $c::";
 
-		"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) " +
-		"let test1 := $c:://wcs:CoverageId/text(); " +
-		"orderby test1 desc " +
-		"return test1";
+//		"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) " +
+//		"let test1 := $c:://wcs:CoverageId/text(); " +
+//		"orderby test1 desc " +
+//		"return test1";
+
+		"for $c in (CCI_V2_monthly_chlor_a@PML) " +
+		"let $temp1:=$c:://wcs:CoverageId/text(); " +
+		"let $temp2:=$c:://wcs:CoverageId/text(); " +
+		"let $tempStatic:=1; " +
+		"let $temp4:=$temp1 + $tempStatic; " +
+
+		"let $temp3:=$temp1 + $temp2; " +
+		"return $c:://wcs:CoverageId/text()";
 		
 		System.out.println(query);
 

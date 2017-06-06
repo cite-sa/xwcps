@@ -32,6 +32,7 @@ xmlPayload:
 arithmeticExpression :  
 				  arithmeticExpression booleanOperator arithmeticExpression
 				| arithmeticExpression coverageArithmeticOperator arithmeticExpression
+				| coverageExpression coverageArithmeticOperator coverageExpression
 				| arithmeticExpression numericalComparissonOperator arithmeticExpression
 				| LEFT_PARANTHESIS arithmeticExpression RIGHT_PARANTHESIS 
 				| xpathClause
@@ -40,7 +41,7 @@ arithmeticExpression :
 
 xmlClauseWithQuate: xmlClause (quated)?;
 
-openXmlElement: xmlElement GREATER_THAN; 
+openXmlElement: xmlElement GREATER_THAN;
 
 openXmlWithClose: xmlElement GREATER_THAN_SLASH;
 

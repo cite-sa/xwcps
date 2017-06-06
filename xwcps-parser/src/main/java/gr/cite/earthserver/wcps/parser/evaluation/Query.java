@@ -16,6 +16,9 @@ import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
 import gr.cite.earthserver.wcs.core.Coverage;
 
 public class Query extends XwcpsQueryResult {
+
+	//region Private Members
+
 	private String query;
 
 	private List<Query> splittedQuery = new ArrayList<>();
@@ -31,12 +34,13 @@ public class Query extends XwcpsQueryResult {
 	private List<ForClauseInfo> forClauseInfo;
 	
 	private String xpath;
+
 	private String variableName;
-	
-	public Query() {
-		setErrors(new ArrayList<>());
-	}
-	
+
+	//endregion
+
+	//region Getters - Setters
+
 	public String getXpath() {
 		return xpath;
 	}
@@ -54,22 +58,63 @@ public class Query extends XwcpsQueryResult {
 		return query;
 	}
 
-	public Query appendQuery(String query) {
-		this.query += query;
+	public List<Query> getSplittedQuery() {
+		return splittedQuery;
+	}
+
+	public Query setSplittedQuery(List<Query> splittedQuery) {
+		this.splittedQuery = splittedQuery;
 		return this;
+	}
+
+	public Map<Coverage, XwcpsReturnValue> getCoverageValueMap() {
+		if (this.coverageValueMap == null)
+			this.coverageValueMap = new HashMap<Coverage, XwcpsReturnValue>();
+		return this.coverageValueMap;
+	}
+
+	public List<Coverage> getOrderedCoverages() {
+		if (this.orderedCoverages == null)
+			this.orderedCoverages = new ArrayList<Coverage>();
+		return this.orderedCoverages;
+	}
+
+	public List<ForClauseInfo> getForClauseInfo() {
+		if (this.forClauseInfo == null)
+			this.forClauseInfo = new ArrayList<ForClauseInfo>();
+		return this.forClauseInfo;
+	}
+
+	public String getVariableName() {
+		return variableName;
+	}
+
+	public void setVariableName(String variableName) {
+		this.variableName = variableName;
+	}
+
+	public void setEvaluated(boolean evaluated) {
+		this.evaluated = evaluated;
 	}
 
 	public boolean isEvaluated() {
 		return this.evaluated;
 	}
 
-	public Query evaluated() {
-		this.setEvaluated(true);
+	//endregion
+
+	public Query() {
+		setErrors(new ArrayList<>());
+	}
+
+	public Query appendQuery(String query) {
+		this.query += query;
 		return this;
 	}
 
-	public void setEvaluated(boolean evaluated) {
-		this.evaluated = evaluated;
+	public Query evaluated() {
+		this.setEvaluated(true);
+		return this;
 	}
 
 	public Query setValue(String value) {
@@ -102,15 +147,6 @@ public class Query extends XwcpsQueryResult {
 
 	public boolean hasError() {
 		return getErrors().size() > 0;
-	}
-
-	public List<Query> getSplittedQuery() {
-		return splittedQuery;
-	}
-
-	public Query setSplittedQuery(List<Query> splittedQuery) {
-		this.splittedQuery = splittedQuery;
-		return this;
 	}
 
 	public Query aggregate(Query nextResult, boolean overrideValue) {
@@ -373,11 +409,6 @@ public class Query extends XwcpsQueryResult {
 		return aggregate(nextResult, false);
 	}
 
-	@Override
-	public String toString() {
-		return this.query;
-	}
-
 	public Query prependQuery(String prependedQuery) {
 		this.query = prependedQuery + this.query;
 		return this;
@@ -392,30 +423,9 @@ public class Query extends XwcpsQueryResult {
 		return this.isSimpleWCPS;
 	}
 
-	public Map<Coverage, XwcpsReturnValue> getCoverageValueMap() {
-		if (this.coverageValueMap == null)
-			this.coverageValueMap = new HashMap<Coverage, XwcpsReturnValue>();
-		return this.coverageValueMap;
-	}
-	
-	public List<Coverage> getOrderedCoverages() {
-		if (this.orderedCoverages == null)
-			this.orderedCoverages = new ArrayList<Coverage>();
-		return this.orderedCoverages;
-	}
-
-	public List<ForClauseInfo> getForClauseInfo() {
-		if (this.forClauseInfo == null)
-			this.forClauseInfo = new ArrayList<ForClauseInfo>();
-		return this.forClauseInfo;
-	}
-
-	public String getVariableName() {
-		return variableName;
-	}
-
-	public void setVariableName(String variableName) {
-		this.variableName = variableName;
+	@Override
+	public String toString() {
+		return this.query;
 	}
 
 	// public Query setCoverageValueMap(Map<Coverage, XwcpsReturnValue>

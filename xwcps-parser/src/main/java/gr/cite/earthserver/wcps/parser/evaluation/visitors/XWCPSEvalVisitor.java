@@ -211,6 +211,28 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
         return letClauseQuery;
     }
 
+//    public Query visitLetClauseExpression(LetClauseExpressionContext ctx) {
+//        if (ctx.processingExpression() != null) return this.visit(ctx.processingExpression());
+//        return this.visit(ctx.arithmeticExpression());
+//    }
+
+    public Query visitArithmeticExpression(ArithmeticExpressionContext ctx) {
+        if (ctx.coverageExpression() != null) {
+            if (ctx.coverageArithmeticOperator() != null) {
+                Query leftArithmeticExpression = this.visit(ctx.coverageExpression(0));
+                Query rightArithmeticExpression = this.visit(ctx.coverageExpression(1));
+
+                if (leftArithmeticExpression.getCoverageValueMap().size() > 0 && rightArithmeticExpression.getCoverageValueMap().size() > 0) {
+                    if (ctx.coverageArithmeticOperator().PLUS() != null) {
+
+                    }
+                }
+            }
+        }
+
+        return super.visitArithmeticExpression(ctx);
+    }
+
     @Override
     public Query visitXmlElement(XmlElementContext ctx) {
         Query query = visit(ctx.LOWER_THAN()).setValue(ctx.LOWER_THAN().getText());
@@ -526,46 +548,6 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
         return result;
     }
-
-    // @Override
-    // public Query visitMetadataClause(MetadataClauseContext ctx) {
-    // Query query = super.visitMetadataClause(ctx);
-    //
-    // String variable = ctx.coverageVariableName().getText();
-    // Map<Coverage, XwcpsReturnValue> metadataCoverages =
-    // variables.get(variable).stream().map(coverage -> {
-    // //TODO: Return all coverages, not just the first one
-    // //TODO: change it because we have already done the query to femme
-    // List<Coverage> coverages = new ArrayList<>();
-    // try {
-    // coverages =
-    // this.getWcsAdapter().getCoveragesByCoverageId(coverage.getCoverageId());
-    // } catch (Exception e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // String describeCoverage = "";
-    // XwcpsReturnValue result = new XwcpsReturnValue();
-    //
-    // if (coverages.size() > 0) {
-    // describeCoverage = coverages.get(0).getMetadata();
-    //
-    // result.setXwcpsValue("<coverage id='" + coverage.getCoverageId() + "'>"
-    // + describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
-    // "") + "</coverage>");
-    // }
-    //
-    // Entry<Coverage, XwcpsReturnValue> entry = new
-    // SimpleImmutableEntry<>(coverage, result);
-    //
-    // return entry;
-    // }).collect(Collectors.toMap(entry -> entry.getKey(), entry ->
-    // entry.getValue()));
-    //
-    // query.getCoverageValueMap().clear();
-    // query.getCoverageValueMap().putAll(metadataCoverages);
-    // return query.evaluated();
-    // }
 
     @Override
     public Query visitMetadataExpression(MetadataExpressionContext ctx) {
