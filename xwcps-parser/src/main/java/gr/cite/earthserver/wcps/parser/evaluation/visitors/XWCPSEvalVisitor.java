@@ -68,11 +68,6 @@ import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.femme.client.FemmeClientException;
 import gr.cite.femme.client.FemmeException;
-import gr.cite.scarabaeus.utils.xml.XMLConverter;
-import gr.cite.scarabaeus.utils.xml.XPathEvaluator;
-import gr.cite.scarabaues.utils.xml.exceptions.XMLConversionException;
-import gr.cite.scarabaues.utils.xml.exceptions.XPathEvaluationException;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
