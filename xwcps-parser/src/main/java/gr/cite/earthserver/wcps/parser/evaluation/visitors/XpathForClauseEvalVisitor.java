@@ -2,7 +2,7 @@ package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.util.List;
 
-import gr.cite.femme.core.query.api.QueryOptionsMessenger;
+import gr.cite.femme.core.dto.QueryOptionsMessenger;
 import gr.cite.femme.core.utils.Pair;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
