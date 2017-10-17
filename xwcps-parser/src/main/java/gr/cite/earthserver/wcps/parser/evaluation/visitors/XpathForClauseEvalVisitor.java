@@ -2,6 +2,7 @@ package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.util.List;
 
+import gr.cite.femme.core.query.api.QueryOptionsMessenger;
 import gr.cite.femme.core.utils.Pair;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -59,7 +60,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		
 		List<Coverage> coverages = null;
 		try {
-			coverages = this.wcsAdapter.findCoverages(request.mapToQuery(), null, null);
+			coverages = this.wcsAdapter.findCoverages(request.mapToQuery(), QueryOptionsMessenger.builder().include("id").build(), null);
 		} catch (FemmeException | FemmeClientException e) {
 			e.printStackTrace();
 			XpathForClauseEvalVisitor.logger.debug("query has fucked everything: " + e.getMessage());

@@ -236,8 +236,9 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
             }
 
             try {
-                return evaluateXpath(wcpsQuery, xpathQuery);
-            } catch (XPathFactoryConfigurationException e) {
+                return evaluateXpath(wcpsQuery, xpathQuery, getWcsAdapter());
+            //} catch (XPathFactoryConfigurationException e) {
+            } catch (XPathFactoryConfigurationException | FemmeException e) {
                 logger.error(e.getMessage(), e);
 
                 throw new ParseCancellationException(e);
@@ -748,11 +749,15 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
         return query;
     }
 
-    private static Query evaluateXpath(Query wcpsQuery, Query xpathQuery) throws XPathFactoryConfigurationException {
+    private static Query evaluateXpath(Query wcpsQuery, Query xpathQuery, WCSAdapterAPI wcsAdapter) throws XPathFactoryConfigurationException, FemmeException {
         if (!wcpsQuery.getCoverageValueMap().isEmpty()) {
             Map<Coverage, XwcpsReturnValue> results = new HashMap<>();
             for (Entry<Coverage, XwcpsReturnValue> entry : wcpsQuery.getCoverageValueMap().entrySet()) {
-                String xPathResult = XWCPSEvalVisitor.evaluateXpath(entry.getValue().getXwcpsValue(), xpathQuery.getQuery());
+                //String xPathResult = XWCPSEvalVisitor.evaluateXpath(entry.getValue().getXwcpsValue(), xpathQuery.getQuery());
+                // TODO Return XPath in FeMME
+                Coverage coverage = wcsAdapter.getCoverageById(entry.getKey().getId(), xpathQuery.getQuery());
+                String xPathResult = coverage != null && coverage.getMetadata() != null ? coverage.getMetadata() : "";
+
                 if (!"".equals(xPathResult)) {
 
                     XwcpsReturnValue xwcpsReturnValue = new XwcpsReturnValue();
