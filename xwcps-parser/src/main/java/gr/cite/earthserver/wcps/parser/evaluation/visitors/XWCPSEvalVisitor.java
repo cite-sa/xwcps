@@ -1,7 +1,6 @@
 package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +54,6 @@ import gr.cite.earthserver.wcps.grammar.XWCPSParser.XpathForClauseContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.XwcpsContext;
 import gr.cite.earthserver.wcps.grammar.XWCPSParser.*;
 import gr.cite.earthserver.wcps.parser.core.XwcpsReturnValue;
-import gr.cite.earthserver.wcps.parser.evaluation.ForClauseInfo;
 import gr.cite.earthserver.wcps.parser.evaluation.ForClauseInfo.ForClauseType;
 import gr.cite.earthserver.wcps.parser.evaluation.Query;
 import gr.cite.earthserver.wcps.parser.evaluation.Scope;
@@ -66,27 +64,16 @@ import gr.cite.earthserver.wcps.parser.utils.RankingVector;
 import gr.cite.earthserver.wcps.parser.utils.XWCPSEvalUtils;
 import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.core.Coverage;
-import gr.cite.femme.client.FemmeClientException;
 import gr.cite.femme.client.FemmeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.xml.xpath.XPathFactoryConfigurationException;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 //import gr.cite.earthserver.wcps.grammar.XWCPSParser.MetadataClauseContext;
 
 public class XWCPSEvalVisitor extends WCPSEvalVisitor {
-
     private static final Logger logger = LoggerFactory.getLogger(XWCPSEvalVisitor.class);
 
     private String forClauseDefaultXpath = null;
-
     private Stack<Scope> scopes = new Stack<>();
 
     public XWCPSEvalVisitor(WCSAdapterAPI wcsAdapter) {
@@ -103,9 +90,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
     @Override
     public Query visitXpath(XpathContext ctx) {
-        Query query = super.visitXpath(ctx);
-
-        return query;
+        return super.visitXpath(ctx);
     }
 
     @Override
@@ -487,7 +472,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
         Set<String> variables = scopes.peek().getVariables();
 
-        Query identifier = null;
+        Query identifier;
 
         if (variables.contains(ctx.getText())) {
             identifier = scopes.peek().getVariableValue(ctx.getText());
@@ -522,8 +507,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 //
 //		return xpathQuery;
 
-        Query xpathQuery = visit(ctx.xpathClause().xpath());
-        return xpathQuery;
+        return visit(ctx.xpathClause().xpath());
     }
 
     @Override
@@ -570,7 +554,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
     public Query visitMixedClause(MixedClauseContext ctx) {
         Query encodedCoverageExpressionQuery = visit(ctx.encodedCoverageExpression());
 
-        Query metadataQuery = null;
+        Query metadataQuery;
         if (ctx.xmlClause() != null) {
             metadataQuery = visit(ctx.xmlClause());
         } else {
@@ -627,10 +611,8 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
             result.setXwcpsValue("<coverage id='" + coverage.getCoverageId() + "'>"
                     + describeCoverage.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "") + "</coverage>");
 
-            Entry<Coverage, XwcpsReturnValue> entry = new SimpleImmutableEntry<>(coverage, result);
-
-            return entry;
-        }).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+            return new SimpleImmutableEntry<>(coverage, result);
+        }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
         query.getCoverageValueMap().clear();
         query.getCoverageValueMap().putAll(metadataCoverages);
@@ -660,7 +642,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
         // this.getWcsAdapter().getCoverageByCoverageIdInServer(endpoint,
         // coverageId);
         // } catch (FemmeDatastoreException | FemmeClientException e) {
-        // e.printStackTrace();
+        // logger.error(e.getMessage(), e);;
         // }
         // if (coverage == null) {
         // coverage = new Coverage();
@@ -798,7 +780,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
         try {
             xPathEvaluator = new XPathEvaluator(XMLConverter.stringToNode(node, true), true, false);
         } catch (XMLConversionException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             XWCPSEvalVisitor.logger.info("XPathEvaluator error with message " + e.getMessage());
         }
 
@@ -806,7 +788,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
         try {
             xpathResults = xPathEvaluator.evaluate(xpath);
         } catch (XPathEvaluationException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             XWCPSEvalVisitor.logger.info("XPathEvaluationException error with message " + e.getMessage());
         }
 
@@ -814,7 +796,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
     }
 
     private List<Coverage> sort(List<RankDefinition> rankingDefinitions) {
-        List<List<Object>> rankValues = new ArrayList<List<Object>>();
+        List<List<Object>> rankValues = new ArrayList<>();
 
         List<Coverage> coverages = new ArrayList<>();
         for (RankDefinition rankDefinition : rankingDefinitions) {
@@ -832,7 +814,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
             coverages.addAll(query.getCoverageValueMap().keySet());
         }
 
-        List<RankingVector> vectors = new ArrayList<RankingVector>();
+        List<RankingVector> vectors = new ArrayList<>();
         for (int i = 0; i < coverages.size(); i += 1) {
             RankingVector v = new RankingVector(coverages.get(i), rankingDefinitions);
             for (int z = 0; z < rankingDefinitions.size(); z += 1) {
@@ -843,8 +825,6 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
         Collections.sort(vectors);
 
-        List<Coverage> sorted = vectors.stream().map(x -> x.getItem()).collect(Collectors.toList());
-
-        return sorted;
+        return vectors.stream().map(RankingVector::getItem).collect(Collectors.toList());
     }
 }

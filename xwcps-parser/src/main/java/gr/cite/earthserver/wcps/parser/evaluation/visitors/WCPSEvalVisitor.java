@@ -1,14 +1,8 @@
 package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
+import java.util.*;
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -308,8 +302,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
                 case ALL_COVERAGES_IN_SERVER:
                     try {
                         femmeCoverages.addAll(this.getWcsAdapter().getCoveragesInServer(
-                                new ArrayList<>(Arrays.asList(forClauseInfo.getEndpoint())), null, null,
-                                xpath));
+                                Collections.singletonList(forClauseInfo.getEndpoint()), null, null, xpath));
                     } catch (FemmeException | FemmeClientException e) {
                         logger.error(e.getMessage(), e);
                     }

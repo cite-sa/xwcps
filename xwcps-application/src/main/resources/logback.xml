@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+
+        <!--<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                        <Pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %message%n</Pattern>
+                </encoder>
+        </appender>
+        <logger name="gr.cite.earthserver.wcps.parser.application" level="INFO" additivity="false">
+                <appender-ref ref="STDOUT" />
+        </logger>
+        <root level="INFO">
+                <appender-ref ref="STDOUT" />
+        </root>-->
+
+
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
                 <file>${CATALINA_HOME}/logs/xwcps.log</file>
                 <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -11,23 +25,15 @@
                         </triggeringPolicy>
                         <maxHistory>12</maxHistory>
                 </rollingPolicy>
-
                 <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
                         <Pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %message%n</Pattern>
                 </encoder>
         </appender>
-        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-                        <Pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %message%n</Pattern>
-                </encoder>
-        </appender>
-
         <logger name="gr.cite.earthserver.wcps.parser.application" level="INFO" additivity="false">
-                <!--<appender-ref ref="STDOUT" />-->
                  <appender-ref ref="FILE" />
         </logger>
         <root level="INFO">
-                <!--<appender-ref ref="STDOUT" />-->
                  <appender-ref ref="FILE" />
         </root>
+
 </configuration>

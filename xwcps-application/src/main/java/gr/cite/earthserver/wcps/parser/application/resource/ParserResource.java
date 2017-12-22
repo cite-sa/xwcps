@@ -18,6 +18,8 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.media.multipart.BodyPart;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.MultiPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import gr.cite.earthserver.wcps.parser.XWCPSQueryParser;
@@ -28,6 +30,7 @@ import gr.cite.earthserver.wcs.core.Coverage;
 @Path("parser")
 @Produces(MediaType.APPLICATION_JSON)
 public class ParserResource {
+	private static  final Logger logger = LoggerFactory.getLogger(ParserResource.class);
 
 	private XWCPSQueryParser xwcpsQueryParser;
 
@@ -38,7 +41,9 @@ public class ParserResource {
 
 	@GET
 	@Path("ping")
+	@Produces(MediaType.TEXT_PLAIN)
 	public Response ping() {
+		logger.info("ping-pong");
 		return Response.ok("pong").build();
 	}
 	
@@ -46,15 +51,12 @@ public class ParserResource {
 	@Path("queryXwcps")
 	@Produces("multipart/mixed")
 	public Response query(@QueryParam("q") String query) {
-		Query result = xwcpsQueryParser.parse(query);
-		
-		
 		MultiPart multiPart = null;
+		Query result = xwcpsQueryParser.parse(query);
 		try {
 			multiPart = this.generateMultiPartResponse(result);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		return Response.ok(multiPart).build();
 
@@ -64,10 +66,9 @@ public class ParserResource {
 	@Path("query")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response queryJson(@QueryParam("q") String query) {
-		Query result = xwcpsQueryParser.parse(query);
-		
 		List<Result> results = new ArrayList<>();
-		
+		Query result = xwcpsQueryParser.parse(query);
+
 		for (Coverage orderedCoverage : result.getOrderedCoverages()) {
 			Result newResult = new Result();
 			
@@ -161,7 +162,7 @@ public class ParserResource {
 		try {
 			multiPart.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		
 		return multiPart;

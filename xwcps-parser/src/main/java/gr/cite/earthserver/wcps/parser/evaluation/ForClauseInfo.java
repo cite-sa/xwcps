@@ -7,7 +7,7 @@ public class ForClauseInfo {
         ALL_COVERAGES_IN_SERVER,
         ALL_COVERAGES,
         SPECIFIC_ID
-    };
+    }
 
     private ForClauseType forType;
     private String endpoint;
@@ -22,7 +22,7 @@ public class ForClauseInfo {
     }
 
     public String getEndpoint() {
-        return endpoint;
+        return endpoint.toLowerCase();
     }
 
     public void setEndpoint(String endpoint) {
