@@ -118,7 +118,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 
                 throw new ParseCancellationException(e);
             }
-        }).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+        }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
         query.getCoverageValueMap().clear();
         query.getCoverageValueMap().putAll(describeCoverages);
@@ -197,7 +197,7 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 
                 Map<Coverage, XwcpsReturnValue> resultByCoverage = null;
                 try {
-                    resultByCoverage = new HashMap<Coverage, XwcpsReturnValue>();
+                    resultByCoverage = new HashMap<>();
 
                     for (Entry<Coverage, XwcpsReturnValue> coverageEntry : forWhereClauseQuery.getCoverageValueMap()
                             .entrySet()) {
@@ -208,15 +208,15 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
 
                         WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder()
                                 .endpoint(coverageEntry.getKey().getServers().get(0).getEndpoint());
-                        WCSResponse wcsResponce = null;
+                        WCSResponse wcsResponse = null;
                         try {
-                            wcsResponce = wcsRequestBuilder.processCoverages().query(rewrittenQuery).build().get();
+                            wcsResponse = wcsRequestBuilder.processCoverages().query(rewrittenQuery).build().get();
                         } catch (WCSRequestException e) {
                             logger.error(e.getMessage(), e);
                         }
 
-                        encodedResult.setWcpsValue(wcsResponce.getResponse());
-                        encodedResult.setWcpsMediaType(wcsResponce.getContentType());
+                        encodedResult.setWcpsValue(wcsResponse.getResponse());
+                        encodedResult.setWcpsMediaType(wcsResponse.getContentType());
                         encodedResult.setSubQuery(rewrittenQuery);
 
                         resultByCoverage.put(coverageEntry.getKey(), encodedResult);

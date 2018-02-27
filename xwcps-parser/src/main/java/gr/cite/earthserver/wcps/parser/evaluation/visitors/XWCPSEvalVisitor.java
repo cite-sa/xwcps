@@ -156,7 +156,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
             wcpsQuery = visit(ctx.metadataExpression());
         }
 
-        // if there is no xquery in the query
+        // if there is no xpath in the query
         if (ctx.xpath() == null && forClauseDefaultXpath == null) {
 
             if (ctx.scalarExpression() != null && ctx.scalarExpression().getComponentExpression() != null) {
@@ -330,7 +330,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
     @Override
     public Query visitQuated(QuatedContext ctx) {
-        return super.visitQuated(ctx).setValue(XWCPSEvalUtils.removeQuates(ctx.getText()));
+        return super.visitQuated(ctx).setValue(XWCPSEvalUtils.removeQuotes(ctx.getText()));
     }
 
     @Override

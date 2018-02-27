@@ -243,7 +243,7 @@ public class Query extends XwcpsQueryResult {
 			// splittedQuery.add(query + " " + splitted);
 			// }
 			//
-			// FIXME the afforementioned is the correct implementation,
+			// FIXME the aforementioned is the correct implementation,
 			// the following is temporal
 			this.splittedQuery = returnResult.getSplittedQuery();
 		}
@@ -259,8 +259,7 @@ public class Query extends XwcpsQueryResult {
 			this.getCoverageValueMap().clear();
 		} else {
 			for (Entry<Coverage, XwcpsReturnValue> coverageEntry : returnResult.getCoverageValueMap().entrySet()) {
-				if (coverageEntry.getValue() == null)
-					continue;
+				if (coverageEntry.getValue() == null) continue;
 
 				if (this.getCoverageValueMap().containsKey(coverageEntry.getKey())) {
 					XwcpsReturnValue currentValue = this.getCoverageValueMap().get(coverageEntry.getKey());
@@ -390,14 +389,7 @@ public class Query extends XwcpsQueryResult {
 
 	public String serializeValue() {
 		if (!this.getCoverageValueMap().isEmpty()) {
-			return this.getCoverageValueMap().values().stream().filter(
-
-					v -> v.getXwcpsValue() != null)
-					.map(
-
-							x -> x.getXwcpsValue())
-					.collect(Collectors.joining());
-
+			return this.getCoverageValueMap().values().stream().filter(v -> v.getXwcpsValue() != null).map(XwcpsReturnValue::getXwcpsValue).collect(Collectors.joining());
 		} else if (this.aggregatedValue != null) {
 			return this.aggregatedValue;
 		} else {
