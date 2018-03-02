@@ -1,7 +1,3 @@
-/**
- * Created by ikavvouras on 11/4/2016.
- */
-
 var parserApp = angular.module('xWCPSParserApp', ['ngResource', 'hljs']);
 
 parserApp.config(function (hljsServiceProvider) {
@@ -52,7 +48,7 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 		$scope.response.result = undefined;
 		$scope.response.error = undefined;
 
-		$http.get("http://localhost:8083/xwcps-application/parser/query", {
+		$http.get("http://localhost:8083/xwcps/parser/query", {
 			params: {
 				q: $scope.queries.default.query
 				//callback: "JSON_CALLBACK"

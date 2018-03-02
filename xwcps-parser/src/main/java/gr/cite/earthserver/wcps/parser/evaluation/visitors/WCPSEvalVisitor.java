@@ -199,15 +199,13 @@ public abstract class WCPSEvalVisitor extends XWCPSParseTreeVisitor {
                 try {
                     resultByCoverage = new HashMap<>();
 
-                    for (Entry<Coverage, XwcpsReturnValue> coverageEntry : forWhereClauseQuery.getCoverageValueMap()
-                            .entrySet()) {
+                    for (Entry<Coverage, XwcpsReturnValue> coverageEntry : forWhereClauseQuery.getCoverageValueMap().entrySet()) {
                         XwcpsReturnValue encodedResult = new XwcpsReturnValue();
 
                         // if (coverageEntry.getKey().getServers().size() == 0)
                         // continue;
 
-                        WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder()
-                                .endpoint(coverageEntry.getKey().getServers().get(0).getEndpoint());
+                        WCSRequestBuilder wcsRequestBuilder = new WCSRequestBuilder().endpoint(coverageEntry.getKey().getServers().get(0).getEndpoint());
                         WCSResponse wcsResponse = null;
                         try {
                             wcsResponse = wcsRequestBuilder.processCoverages().query(rewrittenQuery).build().get();

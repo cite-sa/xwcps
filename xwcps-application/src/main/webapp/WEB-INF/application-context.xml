@@ -9,7 +9,7 @@
 		http://www.springframework.org/schema/context
 		http://www.springframework.org/schema/context/spring-context.xsd">
    
-   <context:property-placeholder location="/WEB-INF/xwcps.properties.demo" />
+   <context:property-placeholder location="/WEB-INF/xwcps.properties.devel" />
    
    <bean id="wcsAdapter" class="gr.cite.earthserver.wcs.adapter.WCSAdapter">
 		<constructor-arg value="${gr.cite.earthserver.wcps.parser.adapter.host}" />
