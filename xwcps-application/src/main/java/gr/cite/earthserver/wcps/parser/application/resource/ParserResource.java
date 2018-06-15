@@ -51,14 +51,19 @@ public class ParserResource {
 	@Path("queryXwcps")
 	@Produces("multipart/mixed")
 	public Response query(@QueryParam("q") String query) {
-		MultiPart multiPart = null;
-		Query result = xwcpsQueryParser.parse(query);
 		try {
-			multiPart = this.generateMultiPartResponse(result);
-		} catch (IOException e) {
+			MultiPart multiPart = null;
+			Query result = xwcpsQueryParser.parse(query);
+			try {
+				multiPart = this.generateMultiPartResponse(result);
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+			}
+			return Response.ok(multiPart).build();
+		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
+			throw new WebApplicationException(e.getMessage(), e);
 		}
-		return Response.ok(multiPart).build();
 
 	}
 	
@@ -66,59 +71,64 @@ public class ParserResource {
 	@Path("query")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response queryJson(@QueryParam("q") String query) {
-		List<Result> results = new ArrayList<>();
-		Query result = xwcpsQueryParser.parse(query);
-
-		for (Coverage orderedCoverage : result.getOrderedCoverages()) {
-			Result newResult = new Result();
-			
-			newResult.setCoverageId(orderedCoverage.getCoverageId());
-			if (result.getCoverageValueMap().get(orderedCoverage).getWcpsValue() != null) {
-				newResult.setWcpsValue(result.getCoverageValueMap().get(orderedCoverage).getWcpsValue());
+		try {
+			List<Result> results = new ArrayList<>();
+			Query result = xwcpsQueryParser.parse(query);
+	
+			for (Coverage orderedCoverage : result.getOrderedCoverages()) {
+				Result newResult = new Result();
+				
+				newResult.setCoverageId(orderedCoverage.getCoverageId());
+				if (result.getCoverageValueMap().get(orderedCoverage).getWcpsValue() != null) {
+					newResult.setWcpsValue(result.getCoverageValueMap().get(orderedCoverage).getWcpsValue());
+				}
+				
+				if (result.getCoverageValueMap().get(orderedCoverage).getXwcpsValue() != null) {
+					newResult.setXwcpsValue(result.getCoverageValueMap().get(orderedCoverage).getXwcpsValue());
+				}
+				
+				results.add(newResult);
 			}
 			
-			if (result.getCoverageValueMap().get(orderedCoverage).getXwcpsValue() != null) {
-				newResult.setXwcpsValue(result.getCoverageValueMap().get(orderedCoverage).getXwcpsValue());
+			//Add all coverages that didn't take part to the ordering - maybe xpath didn't exist - at the end of the list
+			for (Coverage c : result.getCoverageValueMap().keySet()) {
+				if (result.getOrderedCoverages().contains(c)) continue;
+				
+				Result newResult = new Result();
+				
+				newResult.setCoverageId(c.getCoverageId());
+				if (result.getCoverageValueMap().get(c).getWcpsValue() != null) {
+					newResult.setWcpsValue(result.getCoverageValueMap().get(c).getWcpsValue());
+				}
+				
+				if (result.getCoverageValueMap().get(c).getXwcpsValue() != null) {
+					newResult.setXwcpsValue(result.getCoverageValueMap().get(c).getXwcpsValue());
+				}
+				
+				results.add(newResult);
 			}
 			
-			results.add(newResult);
+	//		for (Coverage c : result.getCoverageValueMap().keySet()) {
+	//			Result newResult = new Result();
+	//
+	//			newResult.setCoverageId(c.getCoverageId());
+	//			if (result.getCoverageValueMap().get(c).getWcpsValue() != null) {
+	//				newResult.setWcpsValue(result.getCoverageValueMap().get(c).getWcpsValue());
+	//			}
+	//
+	//			if (result.getCoverageValueMap().get(c).getXwcpsValue() != null) {
+	//				newResult.setXwcpsValue(result.getCoverageValueMap().get(c).getXwcpsValue());
+	//			}
+	//
+	//			results.add(newResult);
+	//		}
+			
+			return Response.ok(results).build();
+		
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			throw new WebApplicationException(e.getMessage(), e);
 		}
-		
-		//Add all coverages that didn't take part to the ordering - maybe xpath didn't exist - at the end of the list
-		for (Coverage c : result.getCoverageValueMap().keySet()) {
-			if (result.getOrderedCoverages().contains(c)) continue;
-			
-			Result newResult = new Result();
-			
-			newResult.setCoverageId(c.getCoverageId());
-			if (result.getCoverageValueMap().get(c).getWcpsValue() != null) {
-				newResult.setWcpsValue(result.getCoverageValueMap().get(c).getWcpsValue());
-			}
-			
-			if (result.getCoverageValueMap().get(c).getXwcpsValue() != null) {
-				newResult.setXwcpsValue(result.getCoverageValueMap().get(c).getXwcpsValue());
-			}
-			
-			results.add(newResult);
-		}
-		
-//		for (Coverage c : result.getCoverageValueMap().keySet()) {
-//			Result newResult = new Result();
-//			
-//			newResult.setCoverageId(c.getCoverageId());
-//			if (result.getCoverageValueMap().get(c).getWcpsValue() != null) {
-//				newResult.setWcpsValue(result.getCoverageValueMap().get(c).getWcpsValue());
-//			}
-//			
-//			if (result.getCoverageValueMap().get(c).getXwcpsValue() != null) {
-//				newResult.setXwcpsValue(result.getCoverageValueMap().get(c).getXwcpsValue());
-//			}
-//			
-//			results.add(newResult);
-//		}
-		
-		return Response.ok(results).build();
-		
 	}
 	
 	private MyMultipart generateMultiPartResponse(Query result) throws IOException{
