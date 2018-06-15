@@ -12,8 +12,9 @@ parserApp.directive("selectorClickHandler", function () {
 		link: function (scope, element, attrs) {
 
 			$(element).click(function () {
-				scope.queries.default.query = $(this).data("description");
+				//scope.queries.default.query = $(this).data("description");
 				scope.queries.default.description = $(this).find("a").attr("title");
+				editor.setValue($(this).data("description"));
 				scope.$apply();
 			});
 		}
@@ -37,7 +38,6 @@ parserApp.directive('resizeQueryForm', function ($window) {
 
 
 parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $http, $resource) {
-	// var QueryResponse = $resource("http://localhost:9292/parser/query");
 	$scope.loader = true;
 	$scope.response = {};
 	$scope.response.result = undefined;
@@ -48,10 +48,12 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 		$scope.response.result = undefined;
 		$scope.response.error = undefined;
 
-		$http.get("http://localhost:8083/xwcps/parser/query", {
+		// var url = "http://earthserver-devel.vhosts.cite.gr/xwcps-application/parser/query";
+		var url = "http://localhost:8084/xwcps/parser/query";
+
+		$http.get(url, {
 			params: {
-				q: $scope.queries.default.query
-				//callback: "JSON_CALLBACK"
+				q: editor.getValue()
 			},
 			headers: {
 				accept: "application/json"
@@ -134,44 +136,122 @@ parserApp.controller("xWCPSExecutorController", function ($scope, $timeout, $htt
 		}];*/
 	
 	$scope.queries.all = [
-	              		{
-	              			description: "Retrieve coverages, with solar longitude greater than 86.0122, " +
-	              			"and band combination of BD1435,BD1500_2 and BD1900_2 for ICE detection",
+				  		// {
+				  		// 	description: "Retrieve coverages, with solar longitude greater than 86.0122, " +
+				  		// 	"and band combination of BD1435,BD1500_2 and BD1900_2 for ICE detection",
 
-	              			query: "for $c in ( CCI_V2_monthly_rrs_670 ) return metadata($c)"
-	              		},
-	              		{
-	              			description: "List the coverage descriptions from http://access.planetserver.eu:8080/rasdaman/ows",
+				  		// 	query: "for $c in ( CCI_V2_monthly_rrs_670 ) return metadata($c)"
+				  		// },
+				  		// {
+				  		// 	description: "List the coverage descriptions from http://access.planetserver.eu:8080/rasdaman/ows",
 
-	              			query: " for $c in /server/coverage return metadata($c)"
-	              		},
-	              		{
-	              			description: "List the coverage descriptions from http://access.planetserver.eu:8080/rasdaman/ows," +
-	              			" where solar longitude greater than 86.0122 ",
+				  		// 	query: " for $c in /server/coverage return metadata($c)"
+				  		// },
+				  		// {
+				  		// 	description: "List the coverage descriptions from http://access.planetserver.eu:8080/rasdaman/ows," +
+				  		// 	" where solar longitude greater than 86.0122 ",
 
-	              			query: "for $c in /server[@endpoint='https://rsg.pml.ac.uk/rasdaman/ows']/coverage return metadata($c)"
-	              		},
-	              		{
-	              			description: "List the solar longitudes greater than 86.0122, wrapped by 'p' element",
+				  		// 	query: "for $c in /server[@endpoint='https://rsg.pml.ac.uk/rasdaman/ows']/coverage return metadata($c)"
+				  		// },
+				  		// {
+				  		// 	description: "List the solar longitudes greater than 86.0122, wrapped by 'p' element",
 
-	              			query: " for $c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage where metadata($c)//gml:cat_solar_longitude[text()<86.0122] return metadata($c)"
-	              		},
-	              		{
-	              			description: "An example of HTML-like result formatting",
+				  		// 	query: " for $c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage where metadata($c)//gml:cat_solar_longitude[text()<86.0122] return metadata($c)"
+				  		// },
+				  		// {
+				  		// 	description: "An example of HTML-like result formatting",
 
-	              			query: "for $c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage where metadata($c)//gml:cat_solar_longitude[text()<86.0122] return metadata($c)//gml:cat_solar_longitude"
-	              		},
-	              		{
-	              			description: "An example of HTML-like result formatting",
+				  		// 	query: "for $c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows']/coverage where metadata($c)//gml:cat_solar_longitude[text()<86.0122] return metadata($c)//gml:cat_solar_longitude"
+				  		// },
+				  		// {
+				  		// 	description: "An example of HTML-like result formatting",
 
-	              			query: "for data in (frt0000cc22_07_if165l_trr3) return mixed(encode( { red: (int)(255 / (max((data.band_233 != 65535) * data.band_233) - min(data.band_233))) * (data.band_233 - min(data.band_233)); green: (int)(255 / (max((data.band_13 != 65535) * data.band_13) - min(data.band_13))) * (data.band_13 - min(data.band_13)); blue: (int)(255 / (max((data.band_78 != 65535) * data.band_78) - min(data.band_78))) * (data.band_78 - min(data.band_78)) ; alpha: (data.band_100 != 65535) * 255}, \"png\", \"nodata=null\"), metadata(data))"
-	              		}];
+				  		// 	query: "for data in (frt0000cc22_07_if165l_trr3) return mixed(encode( { red: (int)(255 / (max((data.band_233 != 65535) * data.band_233) - min(data.band_233))) * (data.band_233 - min(data.band_233)); green: (int)(255 / (max((data.band_13 != 65535) * data.band_13) - min(data.band_13))) * (data.band_13 - min(data.band_13)); blue: (int)(255 / (max((data.band_78 != 65535) * data.band_78) - min(data.band_78))) * (data.band_78 - min(data.band_78)) ; alpha: (data.band_100 != 65535) * 255}, \"png\", \"nodata=null\"), metadata(data))"
+						//   }
+						{
+							description: "Filter MEEO by low and return high element's text",
+							query: "for $c in *@MEEO \n" +
+									"where $c:://GridEnvelope[low/text()='-15690 -53750 0'] \n" +
+									"return $c:://high"
+						},
+						{
+							description: "Filter PlanetServer by Envelope lowerCorner and return Envelope element",
+							query: "for $c in *@PS \n" +
+									"where $c:://Envelope[lowerCorner/text()='-9170.5952 -1309984.1507'] \n" +
+									"return $c:://Envelope"
+						},
+						{
+							description: "Retrieve coverages, with solar longitude greater than 86.0122, " +
+							"and band combination of BD1435,BD1500_2 and BD1900_2 for ICE detection",
+				
+							query: "for $c in mslp \n" +
+									"return $c::"
+						},
+						{
+							description: "Retrieve coverages, with solar longitude greater than 86.0122, " +
+							"and band combination of BD1435,BD1500_2 and BD1900_2 for ICE detection",
+				
+							query: "for $c in precipitation@ECMWF  \n" +
+									"return $c::"
+						},
+						{
+							description: "List the coverage descriptions from all WCS endpoints",
+				
+							query: "for $c in *@ECMWF \n" +
+									"return $c:://boundedBy/Envelope/@srsName"
+						},
+						{
+							description: "List the coverage descriptions from ECMWF",
+				
+							query: "for $c in *@ECMWF \n" +
+									"return $c::"
+						},
+						/*{
+							description: "List the solar longitudes greater than 86.0122, wrapped by 'p' element",
+				
+							query: "for $c in *@ECMWF \n" +
+									"where $c::/*//*[local-name()='lowerCorner'][text()='-90.25 -180.25 138061.875'] \n" +
+									"return $c::"
+						},*/
+						{
+							description: "List the lowerCorner elements of all ECMWF coverages",
+				
+							query: "for $c in *@ECMWF \n" +
+									"return $c:://lowerCorner"
+						},
+						{
+							description: "Filter by RectifiedGrid dimension = 3 and return the Point elements",
+							query: "for $c in *@ECMWF \n" +
+									"where $c:://RectifiedGrid[@dimension=3] \n" +
+									"return $c:://Point"
+						},
+					{
+							description: "An example of HTML-like result formatting",
+							query: "for $c in CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF, L8_B10_32631_30@MEEO \n" +
+						   "return <div>$c:://boundedBy</div>"
+						},
+					{
+						description: "Order by coverage id ascending query",
+						query: "for $c in *@ECMWF \n" + 
+							   "orderby $c:://wcs:CoverageId/text() asc \n" +
+							   "return $c:://wcs:CoverageId"
+					},
+					{
+							description: "Mixed query",
+							query:  "for $c in CCI_V2_monthly_chlor_a \n" +
+							"return mixed(encode ($c[ansi(\"2001-07-31T23:59:00\")] * 1000 , \"png\"), $c::)"
+						}
+						/*{
+							description: "An example of HTML-like result formatting",
+				
+							query: "for data in frt00004a4b_07_if163l_trr3 \n" +
+							"return mixed(encode( { red: (int)((255 / (max((data.band_233 != 65535) * data.band_233) - min(data.band_233))) * (data.band_233 - min(data.band_233))); green: (int)((255 / (max((data.band_13 != 65535) * data.band_13) - min(data.band_13))) * (data.band_13 - min(data.band_13))); blue: (int)((255 / (max((data.band_78 != 65535) * data.band_78) - min(data.band_78))) * (data.band_78 - min(data.band_78))) ; alpha: (data.band_100 != 65535) * 255}, \"png\", \"nodata=null\"), metadata(data))"
+							//query: "for data in (frt0000cc22_07_if165l_trr3) return mixed(encode( { red: (int)(255 / (max((data.band_233 != 65535) * data.band_233) - min(data.band_233))) * (data.band_233 - min(data.band_233)); green: (int)(255 / (max((data.band_13 != 65535) * data.band_13) - min(data.band_13))) * (data.band_13 - min(data.band_13)); blue: (int)(255 / (max((data.band_78 != 65535) * data.band_78) - min(data.band_78))) * (data.band_78 - min(data.band_78)) ; alpha: (data.band_100 != 65535) * 255}, \"png\", \"nodata=null\"), metadata(data))"
+						}*/
+					];
 
 	$scope.queries.default = {};
 	$scope.queries.default.query = $scope.queries.all[0].query;
 	$scope.queries.default.description = $scope.queries.all[0].description;
 
 });
-
-
-

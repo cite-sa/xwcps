@@ -419,8 +419,7 @@ public class XWCPSEvalVisitor extends WCPSEvalVisitor {
 
     @Override
     public Query visitProcessingExpression(ProcessingExpressionContext ctx) {
-        if (ctx.encodedCoverageExpression() != null || ctx.wrapResultClause() != null
-                || ctx.getParent() instanceof WrapResultClauseContext) {
+        if (ctx.encodedCoverageExpression() != null || ctx.wrapResultClause() != null || ctx.getParent() instanceof WrapResultClauseContext) {
             return super.visitProcessingExpression(ctx);
         }
 
