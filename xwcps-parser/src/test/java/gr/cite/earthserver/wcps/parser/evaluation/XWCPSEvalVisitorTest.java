@@ -16,7 +16,6 @@ import org.junit.Test;
 import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
 import gr.cite.earthserver.wcs.core.WCSRequestBuilder;
 //import gr.cite.femme.query.criteria.CriteriaQuery;
-import gr.cite.scarabaeus.utils.xml.XMLConverter;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 public class XWCPSEvalVisitorTest {

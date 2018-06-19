@@ -2,6 +2,8 @@ package gr.cite.earthserver.wcps.parser.evaluation.visitors;
 
 import java.util.List;
 
+import gr.cite.femme.core.dto.QueryOptionsMessenger;
+import gr.cite.femme.core.utils.Pair;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -27,9 +29,8 @@ import gr.cite.earthserver.wcs.adapter.request.WCSAdapterRequestBuilder;
 import gr.cite.earthserver.wcs.adapter.request.WCSAdapterServers;
 import gr.cite.earthserver.wcs.core.Coverage;
 import gr.cite.femme.client.FemmeClientException;
-import gr.cite.femme.client.FemmeDatastoreException;
-import gr.cite.femme.model.Metadatum;
-import gr.cite.femme.utils.Pair;
+import gr.cite.femme.client.FemmeException;
+import gr.cite.femme.core.model.Metadatum;
 
 public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> {
 	private static final Logger logger = LoggerFactory.getLogger(XpathForClauseEvalVisitor.class);
@@ -43,7 +44,7 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 	private WCSAdapterAPI wcsAdapter;
 
 	private static enum State {
-		SERVER, COVERAGE;
+		SERVER, COVERAGE
 	}
 
 	private State currentState = XpathForClauseEvalVisitor.State.SERVER;
@@ -58,10 +59,10 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		
 		List<Coverage> coverages = null;
 		try {
-			coverages = this.wcsAdapter.findCoverages(request.mapToQuery(), null, null);
-		} catch (FemmeDatastoreException | FemmeClientException e) {
-			e.printStackTrace();
-			XpathForClauseEvalVisitor.logger.debug("query has fucked everything: " + e.getMessage());
+			coverages = this.wcsAdapter.findCoverages(request.mapToQuery(), QueryOptionsMessenger.builder().include("id").build(), null);
+		} catch (FemmeException | FemmeClientException e) {
+			logger.error(e.getMessage(), e);
+			logger.debug("query has fucked everything: " + e.getMessage());
 		}
 
 		return new XpathForClause().setCoverages(coverages);
@@ -115,16 +116,16 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 		}
 
 		switch (this.currentState) {
-		case COVERAGE: {
-			this.myCoverages.or();
-			break;
-		}
-		case SERVER: {
-			this.myServers.or();
-			break;
-		}
-		default:
-			break;
+			case COVERAGE: {
+				this.myCoverages.or();
+				break;
+			}
+			case SERVER: {
+				this.myServers.or();
+				break;
+			}
+			default:
+				break;
 		}
 
 		if (ctx.andExpr().size() > 1) {
@@ -245,19 +246,19 @@ public class XpathForClauseEvalVisitor extends XWCPSBaseVisitor<XpathForClause> 
 
 		Metadatum metadatum = new Metadatum();
 		metadatum.setName(key.replaceAll("@", ""));
-		metadatum.setValue(XWCPSEvalUtils.removeQuates(value));
+		metadatum.setValue(XWCPSEvalUtils.removeQuotes(value));
 		
 		switch (this.currentState) {
-		case COVERAGE: {
-			this.myCoverages.attribute(new Pair<String, String>(metadatum.getName(), metadatum.getValue()));
-			break;
-		}
-		case SERVER: {
-			this.myServers.attribute(new Pair<String, String>(metadatum.getName(), metadatum.getValue()));
-			break;
-		}
-		default:
-			break;
+			case COVERAGE: {
+				this.myCoverages.attribute(new Pair<>(metadatum.getName(), metadatum.getValue()));
+				break;
+			}
+			case SERVER: {
+				this.myServers.attribute(new Pair<>(metadatum.getName(), metadatum.getValue()));
+				break;
+			}
+			default:
+				break;
 		}
 
 		// FIXME

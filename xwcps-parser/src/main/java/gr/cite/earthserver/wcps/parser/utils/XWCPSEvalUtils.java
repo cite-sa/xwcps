@@ -26,7 +26,7 @@ public class XWCPSEvalUtils {
 		return ctx.xmlElement().qName().getText();
 	}
 
-	public static String removeQuates(String str) {
+	public static String removeQuotes(String str) {
 		return str.replaceAll("'|\"", "");
 	}
 

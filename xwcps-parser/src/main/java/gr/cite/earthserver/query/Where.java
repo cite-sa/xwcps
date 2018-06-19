@@ -1,7 +1,7 @@
 package gr.cite.earthserver.query;
 
 import gr.cite.earthserver.query.UnsupportedQueryOperationException;
-import gr.cite.femme.model.Metadatum;
+import gr.cite.femme.core.model.Metadatum;
 
 public interface Where<T> {
 

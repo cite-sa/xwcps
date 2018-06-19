@@ -19,8 +19,6 @@ import gr.cite.earthserver.wcps.parser.evaluation.visitors.XWCPSEvalVisitor;
 import gr.cite.earthserver.wcs.adapter.api.WCSAdapterAPI;
 import gr.cite.earthserver.wcs.adapter.WCSAdapter;
 import gr.cite.earthserver.wcs.core.Coverage;
-import gr.cite.scarabaeus.utils.xml.XMLConverter;
-import gr.cite.scarabaues.utils.xml.exceptions.XMLConversionException;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 public class WCPSEvalVisitorTest {
@@ -106,19 +104,51 @@ public class WCPSEvalVisitorTest {
 //		"for c in /server[@endpoint='http://access.planetserver.eu:8080/rasdaman/ows' or @endpoint='https://rsg.pml.ac.uk/rasdaman/ows']/coverage"
 //		+ " where metadata(c)//gml:cat_solar_longitude[text()<86.0122] "
 //		+ " return metadata(c)";
-		
-				
+
 
 		//New grammar queries
 				
 //		"for c in ( arsf_test_subset_bands_hmm ) return c::";
 //		"for c in ( arsf_test_subset_bands_hmm, CCI_V2_monthly_rrs_670 ) return c::";
 //		"for c in ( arsf_test_subset_bands_hmm ) return c:://wcs:CoverageId/text()";
-		"for c in ( * ) return c::";
+//		"for c in ( * ) return c::";
 //		"for c in ( arsf_test_subset_bands_hmm@\"https://rsg.pml.ac.uk/rasdaman/ows\" ) return c::";
 //		"for c in ( *@\"https://rsg.pml.ac.uk/rasdaman/ows\" ) return c::";
 //		"for c in ( * ) where c:://*[local-name()='RectifiedGrid'][@dimension=2] return c::";
-										
+				
+		//"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) return <div> $c:://*[local-name() = 'boundedBy'] </div>";
+		//"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) return $c:://*[local-name() = 'boundedBy']";
+			
+//		"for $c in CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF orderby $c:://wcs:CoverageId/text() asc return $c:://wcs:CoverageId/text()";
+
+//		"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) orderby $c:://*[local-name()='RectifiedGrid']/@dimension desc return $c::";
+
+//		"for $c in (CCI_V2_monthly_chlor_a@PML) " +
+//		"let test1:=$c::; " +
+//		"let test2:=$c:://wcs:CoverageId/text(); " +
+//		"let test3:=$c:://*[local-name() = 'boundedBy']; " +
+//		"return test1//wcs:CoverageId/text()";
+
+//		"for $c in CCI_V2_monthly_chlor_a " +
+//		"let test1:=$c; " +
+//		"return encode (test1[ansi(\"2001-07-31T23:59:00\")] * 1000 , \"png\")";
+
+		//"for $c in (CCI_V2_monthly_chlor_a@PML) return $c::";
+
+//		"for $c in (CCI_V2_monthly_chlor_a@PML, precipitation@ECMWF) " +
+//		"let test1 := $c:://wcs:CoverageId/text(); " +
+//		"orderby test1 desc " +
+//		"return test1";
+
+		"for $c in (CCI_V2_monthly_chlor_a@PML) " +
+		"let $temp1:=$c:://wcs:CoverageId/text(); " +
+		"let $temp2:=$c:://wcs:CoverageId/text(); " +
+		"let $tempStatic:=1; " +
+		"let $temp4:=$temp1 + $tempStatic; " +
+
+		"let $temp3:=$temp1 + $temp2; " +
+		"return $c:://wcs:CoverageId/text()";
+		
 		System.out.println(query);
 
 		CharStream stream = new ANTLRInputStream(query);
@@ -130,7 +160,8 @@ public class WCPSEvalVisitorTest {
 
 		printInfo(tokenStream, parser, tree);
 		
-		WCSAdapterAPI wcsAdapter = new WCSAdapter("http://localhost:8080/femme-application");
+		//WCSAdapterAPI wcsAdapter = new WCSAdapter("http://localhost:8080/femme-application");
+		WCSAdapterAPI wcsAdapter = new WCSAdapter("http://earthserver-devel.vhosts.cite.gr/femme-application/");
 		//WCSAdapterAPI wcsAdapter = new WCSAdapter("http://es-devel1.local.cite.gr:8080/femme-application-0.0.1-SNAPSHOT");
 		//WCSAdapterAPI wcsAdapter = new WCSAdapter("http://es-devel1.local.cite.gr:8080/femme-application-devel");
 

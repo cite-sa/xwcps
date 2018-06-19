@@ -12,13 +12,13 @@ The top level production rules of xWCPS, in terms of  EBNF, demonstrate the stru
 
 ```
 xwcps: (letClause)* wcpsQuery
-		| xpath; 
-		
+		| xpath;
+
 wcpsQuery: (forClauseList) (letClause)* (whereClause)? (returnClause) ;
 
 forClauseList: FOR (xwcpsforClause) (COMMA xwcpsforClause)*;
 
-letClause: LET identifier ':=' letClauseExpression; 
+letClause: LET identifier ':=' letClauseExpression;
 
 whereClause: WHERE (booleanScalarExpression | booleanXpathClause );
 
@@ -30,8 +30,8 @@ processingExpression: xmlClause
                     | encodedCoverageExpression
                     | mixedClause
                     ;
-```				
-					
+```
+
 ## xWCPS Grammar
 
 Each xWCPS FLWOR expression is defined along the following principles:
@@ -43,7 +43,7 @@ Each xWCPS FLWOR expression is defined along the following principles:
 * Every valid boolean/logical XPath or WCPS expression is a valid xWCPS where expression.
 * Results can be wrapped in custom xml, so as to address user needs for custom response-formatting, e.g. an HTML response.
 * xWCPS permits the creation of mixed results, containing both array data and metadata, through a function, namely mixed().
-* Metadata can be fetched through operator "::" applied in any variable. 
+* Metadata can be fetched through operator "::" applied in any variable.
 * xWCPS Queries must always have a “return” clause.
 * The Return statement of a query can contain textual results, structured XML results, WCPS encoded (i.e. png, tiff, csv) results, or combinations of binary and textual results into various formats.
 
@@ -66,21 +66,21 @@ forClauseList: FOR (xwcpsforClause) (COMMA xwcpsforClause)*;
 xwcpsforClause: forClause
 				| xpathForClause
 				;
-                
+
 forClause:  coverageVariableName IN
            (LEFT_PARANTHESIS)? (extendedIdentifier) (COMMA (extendedIdentifier))* (RIGHT_PARANTHESIS)?;
-           
+
 extendedIdentifier: identifier (AT) endpointIdentifier					#specificIdInServerLabel
 					| (MULTIPLICATION) (AT) endpointIdentifier			#allCoveragesInServerLabel
 					| (MULTIPLICATION)									#allCoveragesLabel
 					| identifier										#specificIdLabel
 					;
-            
+
 xpathForClause:  coverageVariableName IN xwcpsCoveragesClause;
 
 xwcpsCoveragesClause: xpath;
 
-```	
+```
 
 ###### Examples
 
@@ -98,7 +98,7 @@ xwcpsCoveragesClause: xpath;
 
 * Specific coverage in specific endpoint:
 
-        for $cov in (coverage1@endpoint1)		 
+        for $cov in (coverage1@endpoint1)
 
 
 #### The Where Clause
@@ -115,7 +115,7 @@ booleanXpathClause : xpathClause;
 xpathClause: metadataExpression (xpath)?
 			| scalarExpression (xpath)?
 			| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
-            
+
 metadataExpression: coverageVariableName DOUBLE_COLON;
 
 ```
@@ -124,10 +124,10 @@ metadataExpression: coverageVariableName DOUBLE_COLON;
 
 * WCPS like:
 
-        where avg($c.red) > 200) 
+        where avg($c.red) > 200)
 
 * Xpath:
-      
+
         $c:://*[local-name()='RectifiedGrid'][@dimension=2]
 
 
@@ -151,20 +151,20 @@ processingExpression: xmlClause
                     | encodedCoverageExpression
                     | mixedClause
                     ;
-                    
+
 xmlClause: openXmlElement xmlPayload closeXmlElement
-			| openXmlElement (quated)? (xmlClauseWithQuate)* closeXmlElement 
-            | (openXmlWithClose) + 
+			| openXmlElement (quated)? (xmlClauseWithQuate)* closeXmlElement
+            | (openXmlWithClose) +
             ;
-                
+
 xpathClause: metadataExpression (xpath)?
 			| scalarExpression (xpath)?
 			| functionName LEFT_PARANTHESIS scalarExpression xpath RIGHT_PARANTHESIS;
-            
+
 wrapResultClause: 	WRAP_RESULT LEFT_PARANTHESIS
 					processingExpression COMMA  openXmlElement ( wrapResultSubElement )*
 					RIGHT_PARANTHESIS;
-                    
+
 encodedCoverageExpression: ENCODE LEFT_PARANTHESIS
                            coverageExpression COMMA /* FORMAT_NAME */ STRING_LITERAL (COMMA STRING_LITERAL)*
                            RIGHT_PARANTHESIS;
@@ -202,7 +202,7 @@ Let clause is for variable assignment and re-use.
 
 Order By clause is for results' ordering.
 
-					   
+
 ## xWCPS XPath Examples
 
 In the context of xWCPS, XPath is mostly employed for the following use cases
@@ -216,11 +216,11 @@ In the context of xWCPS, XPath is mostly employed for the following use cases
 * Return the metadata of all available coverages of the service with alias name: ECMWF
 
 		for $c in *@ECMWF return $c::
-        
+
 * Filter coverages through an attribute:
 
-		for $c in * 
-		where $c:://*[local-name()='RectifiedGrid'][@dimension=2] 
+		for $c in *
+		where $c:://*[local-name()='RectifiedGrid'][@dimension=2]
 		return encode($c, "csv")
 
 * Returns both data and metadata of a specific coverage ID:
@@ -230,11 +230,19 @@ In the context of xWCPS, XPath is mostly employed for the following use cases
 
 * Return the coverage IDs of the PlanetService service which are 2D and of type RectifiedGrid:
 
-		for $c in *@PlanetServer 
-        where $c:://*[localname()='RectifiedGrid'][@dimension=2] 
+		for $c in *@PlanetServer
+        where $c:://*[localname()='RectifiedGrid'][@dimension=2]
         return $c:://*[local-name()='RectifiedGrid']
 
 * Retrieve specific metadata from coverages:
-	
-        for $cov in * 
+
+        for $cov in *
         return $c:://*[local-name()='lowerCorner']
+
+
+
+xwcps is the component offering xWCPS support for FeMME engine.
+It is packaged as WAR file, runs on Java 8 and Tomcat 8.
+
+The only configuration needed is FeMME's endpoint URL
+    gr.cite.earthserver.wcps.parser.adapter.host=http://es-devel1.local.cite.gr:8081/femme

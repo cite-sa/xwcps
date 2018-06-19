@@ -1,3 +1,4 @@
+/*
 package test.calculator;
 
 import org.antlr.v4.runtime.CharStream;
@@ -54,3 +55,4 @@ public class CalculatorTest {
 		return sum;
 	}
 }
+*/

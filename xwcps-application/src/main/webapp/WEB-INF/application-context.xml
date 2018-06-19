@@ -8,21 +8,21 @@
 		http://www.springframework.org/schema/tx/spring-tx.xsd
 		http://www.springframework.org/schema/context
 		http://www.springframework.org/schema/context/spring-context.xsd">
-   
-   <context:property-placeholder location="/WEB-INF/xwcps.properties" />
-   
+
+   <context:property-placeholder location="/WEB-INF/xwcps.properties.prod" />
+
    <bean id="wcsAdapter" class="gr.cite.earthserver.wcs.adapter.WCSAdapter">
 		<constructor-arg value="${gr.cite.earthserver.wcps.parser.adapter.host}" />
 	</bean>
-	
+
 	<bean id="xwcpsQueryParser" name="xwcpsQueryParser" class="gr.cite.earthserver.wcps.parser.XWCPSQueryParser">
 		<constructor-arg ref="wcsAdapter" />
 	</bean>
-   
+
    <bean id="parserResource" class="gr.cite.earthserver.wcps.parser.application.resource.ParserResource">
    		<constructor-arg ref="xwcpsQueryParser" />
    </bean>
-	
+
 	<context:annotation-config/>
 	<context:component-scan base-package="gr.cite.earthserver.wcps.parser.application"/>
 </beans>

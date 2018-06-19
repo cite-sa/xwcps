@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Scope {
-	private Map<String, String> variables = new HashMap<>();
+	private Map<String, Query> variables = new HashMap<>();
 
 	private List<Scope> scopes = new ArrayList<>();
 
@@ -29,10 +29,10 @@ public class Scope {
 		return this.variables.keySet();
 	}
 
-	public String getVariableValue(String variableName) {
+	public Query getVariableValue(String variableName) {
 		Scope scope = this;
 
-		String value = null;
+		Query value = null;
 
 		while ((scope != null) && ((value = scope.getLocalVariableValue(variableName)) == null)) {
 			scope = scope.getParentScope();
@@ -41,11 +41,11 @@ public class Scope {
 		return value;
 	}
 
-	private String getLocalVariableValue(String variableName) {
+	private Query getLocalVariableValue(String variableName) {
 		return this.variables.get(variableName);
 	}
 
-	public void setVariable(String variable, String value) {
+	public void setVariable(String variable, Query value) {
 		this.variables.put(variable, value);
 	}
 
